@@ -14,10 +14,10 @@ namespace nanoFramework.WebServer.Sample
 {
     public class Program
     {
-        private static string MySsid = "YOURSSID";
-        private static string MyPassword = "YourPASSWORD";
-        private static bool isConnected = false;
-        private static StorageFolder storage;
+        private static string MySsid = "ssid";
+        private static string MyPassword = "password";
+        private static bool _isConnected = false;
+        private static StorageFolder _storage;
 
         public static void Main()
         {
@@ -30,12 +30,14 @@ namespace nanoFramework.WebServer.Sample
                 Debug.WriteLine("Getting wifi adaptor");
 
                 wifi.AvailableNetworksChanged += WifiAvailableNetworksChanged;
+
+                int connectRetry = 0;
             rescan:
                 wifi.ScanAsync();
                 Debug.WriteLine("Scanning...");
 
                 var timeout = DateTime.UtcNow.AddSeconds(10);
-                while (!isConnected)
+                while (!_isConnected)
                 {
                     Thread.Sleep(100);
                     if (DateTime.UtcNow > timeout)
@@ -48,9 +50,20 @@ namespace nanoFramework.WebServer.Sample
 
                 Debug.WriteLine("Waiting for network up and IP address...");
 
-                NetworkHelpers.IpAddressAvailable.WaitOne();
+                //NetworkHelpers.IpAddressAvailable.WaitOne();
+                while(!NetworkHelpers.CheckIP())
+                {
+                    Thread.Sleep(500);
+                    connectRetry++;
+                    if(connectRetry == 5)
+                    {
+                        connectRetry = 0;
+                        goto rescan;
+                    }
+                }
 
-                storage = KnownFolders.RemovableDevices.GetFolders()[0];
+
+                _storage = KnownFolders.RemovableDevices.GetFolders()[0];
 
                 // Instantiate a new web server on port 80.
                 using (WebServer server = new WebServer(80, TimeSpan.FromSeconds(2)))
@@ -87,7 +100,7 @@ namespace nanoFramework.WebServer.Sample
                     if (result.ConnectionStatus == WiFiConnectionStatus.Success)
                     {
                         Debug.WriteLine($"Connected to Wifi network {net.Ssid}");
-                        isConnected = true;
+                        _isConnected = true;
                         break;
                     }
                     else
@@ -102,9 +115,9 @@ namespace nanoFramework.WebServer.Sample
         private static void ServerCommandReceived(object source, WebServer.WebServerEventArgs e)
         {
             try
-            {                
+            {
                 var url = e.RawURL;
-                Debug.WriteLine("Command received:" + e.RawURL);
+                Debug.WriteLine($"Command received: {e.RawURL}, Method: {e.Method}");
 
                 if (url.ToLower() == "sayhello")
                 {
@@ -120,18 +133,18 @@ namespace nanoFramework.WebServer.Sample
                         "<a href='/Text.txt'>Download the Text.txt file</a><br>" +
                         "Try this url with parameters: <a href='/param.htm?param1=42&second=24&NAme=Ellerbach'>/param.htm?param1=42&second=24&NAme=Ellerbach</a></body></html>");
                 }
-                else if(url.ToLower() == "useinternal")
+                else if (url.ToLower() == "useinternal")
                 {
                     // This tells the web server to use the internal storage and create a simple text file
-                    storage = KnownFolders.InternalDevices.GetFolders()[0];
-                    var testFile = storage.CreateFile("text.txt", CreationCollisionOption.ReplaceExisting);
+                    _storage = KnownFolders.InternalDevices.GetFolders()[0];
+                    var testFile = _storage.CreateFile("text.txt", CreationCollisionOption.ReplaceExisting);
                     FileIO.WriteText(testFile, "This is an example of file\r\nAnd this is the second line");
                     WebServer.OutPutStream(e.Response, "Created a test file text.txt on internal storage");
                 }
-                else if(url.ToLower().IndexOf("param.htm") == 0)
+                else if (url.ToLower().IndexOf("param.htm") == 0)
                 {
                     // Test with parameters
-                    var parameters = WebServer.decryptParam(url);
+                    var parameters = WebServer.DecryptParam(url);
                     string toOutput = "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nCache-Control: no-cache\r\nConnection: close\r\n\r\n<html><head>" +
                         "<title>Hi from nanoFramework Server</title></head><body>Here are the parameters of this URL: <br />";
                     foreach (var par in parameters)
@@ -141,13 +154,60 @@ namespace nanoFramework.WebServer.Sample
                     toOutput += "</body></html>";
                     WebServer.OutPutStream(e.Response, toOutput);
                 }
+                else if (url.ToLower().IndexOf("api/") == 0)
+                {
+                    string ret = $"HTTP/1.1 200 OK\r\nContent-Type: text/plain; charset=UTF-8\r\nCache-Control: no-cache\r\nConnection: close\r\n\r\n";
+                    ret += $"Your request type is: {e.Method}\r\n";
+                    ret += $"The request URL is: {e.RawURL}\r\n";
+                    var parameters = WebServer.DecryptParam(e.RawURL);
+                    if (parameters != null)
+                    {
+                        ret += "List of url parameters:\r\n";
+                        foreach (var param in parameters)
+                        {
+                            ret += $"  Parameter name: {param.Name}, value: {param.Value}\r\n";
+                        }
+                    }
+
+                    if (e.Headers != null)
+                    {
+                        ret += $"Number of headers: {e.Headers.Length}\r\n";
+                    }
+                    else
+                    {
+                        ret += "There is no header in this request\r\n";
+                    }
+
+                    foreach (var head in e.Headers)
+                    {
+                        ret += $"  Header name: {head.Name}, header value: {head.Value}\r\n";
+                    }
+
+                    ret = WebServer.OutPutStream(e.Response, ret);
+
+                    if (e.Content != null)
+                    {
+                        ret += $"Size of content: {e.Content.Length}\r\n";
+                        if (e.Content.Length > 0)
+                        {
+                            ret += $"Hex string representation:\r\n";
+                            for (int i = 0; i < e.Content.Length; i++)
+                            {
+                                ret += e.Content[i].ToString("X") + " ";
+                            }
+                        }
+                    }
+
+                    WebServer.OutPutStream(e.Response, ret);
+
+                }
                 else
                 {
                     // Very simple example serving a static file on an SD card
-                    var files = storage.GetFiles();                    
-                    foreach(var file in files)
+                    var files = _storage.GetFiles();
+                    foreach (var file in files)
                     {
-                        if( file.Name == url)
+                        if (file.Name == url)
                         {
                             WebServer.SendFileOverHTTP(e.Response, file);
                             return;

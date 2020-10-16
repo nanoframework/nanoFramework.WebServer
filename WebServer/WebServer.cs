@@ -3,7 +3,6 @@
 // See LICENSE file in the project root for full license information.
 //
 
-
 using System;
 using System.Diagnostics;
 using System.Net;
@@ -59,7 +58,7 @@ namespace nanoFramework.WebServer
         /// </summary>
         /// <param name="Parameters"></param>
         /// <returns></returns>
-        public static Param[] decryptParam(string Parameters)
+        public static Param[] DecryptParam(string Parameters)
         {
             Param[] retParams = null;
             int i = Parameters.IndexOf(ParamStart);
@@ -150,18 +149,61 @@ namespace nanoFramework.WebServer
         /// Delegate for the CommandReceived event.
         /// </summary>
         public delegate void GetRequestHandler(object obj, WebServerEventArgs e);
+
+        /// <summary>
+        /// Header class
+        /// </summary>
+        public class Header
+        {
+            public string Name { get; set; }
+
+            public string Value { get; set; }
+        }
+
+        /// <summary>
+        /// Web server event argument class
+        /// </summary>
         public class WebServerEventArgs
         {
-            public WebServerEventArgs(Socket mresponse, string mrawURL)
+            /// <summary>
+            /// Constructor for the event arguments
+            /// </summary>
+            /// <param name="mresponse"></param>
+            /// <param name="mrawURL"></param>
+            public WebServerEventArgs(Socket mresponse, string mrawURL, string method, Header[] headers, byte[] content)
             {
                 Response = mresponse;
                 RawURL = mrawURL;
+                Method = method;
+                Headers = headers;
+                Content = content;
             }
+
+            /// <summary>
+            /// The response class
+            /// </summary>
             public Socket Response { get; protected set; }
+
+            /// <summary>
+            /// The raw URL elements
+            /// </summary>
             public string RawURL { get; protected set; }
 
-        }
+            /// <summary>
+            /// The method used, GET/PUT/POST/DELETE/etc
+            /// </summary>
+            public string Method { get; protected set; }
 
+            /// <summary>
+            /// Http request headers
+            /// </summary>
+            public Header[] Headers { get; internal set; }
+
+            /// <summary>
+            /// Content in the request
+            /// </summary>
+            public byte[] Content { get; internal set; }
+        }
 
         /// <summary>
         /// CommandReceived event is triggered when a valid command (plus parameters) is received.
@@ -278,7 +320,7 @@ namespace nanoFramework.WebServer
                 string strResp = $"HTTP/1.1 200 OK\r\nContent-Type: {ContentType}; charset=UTF-8\r\nContent-Length: {fileLength}\r\nCache-Control: no-cache\r\nConnection: close\r\n\r\n";
                 OutPutStream(response, strResp);
                 // can be improved by building here the HTTP HEader string and return the length of the file
-                Debug.WriteLine("File length " + fileLength);
+                // Debug.WriteLine("File length " + fileLength);
                 // Now loops sending all the data.
 
                 byte[] buf = new byte[MaxSizeBuffer];
@@ -334,27 +376,62 @@ namespace nanoFramework.WebServer
                                 // Create buffer and receive raw bytes.
                                 byte[] bytes = new byte[connection.Available];
                                 int count = connection.Receive(bytes);
-                                //Debug.WriteLine("Request received from " + connection.RemoteEndPoint.ToString() + " at " + DateTime.Now.ToString("dd MMM yyyy HH:mm:ss"));
+                                // Debug.WriteLine("Request received from " + connection.RemoteEndPoint.ToString());
                                 //setup some time for send timeout as 10s.
                                 //necessary to avoid any problem when multiple requests are done the same time.
                                 connection.SendTimeout = (int)Timeout.TotalMilliseconds;
                                 // Convert to string, will include HTTP headers.
                                 string rawData = new string(Encoding.UTF8.GetChars(bytes));
-                                string mURI;
+                                // Debug.WriteLine(rawData);
+                                string mURI = string.Empty;
+                                string mMethod = string.Empty;
+                                Header[] headers = null;
+                                byte[] content = null;
 
                                 // Remove GET + Space
                                 // pull out uri and remove the first /
                                 if (rawData.Length > 5)
                                 {
+                                    int contentLength = 0;
                                     int uriStart = rawData.IndexOf(' ') + 2;
-                                    mURI = rawData.Substring(uriStart, rawData.IndexOf(' ', uriStart) - uriStart);
-                                }
-                                else
-                                {
-                                    mURI = string.Empty;
+                                    mMethod = rawData.Substring(0, uriStart - 1);
+                                    int httpInfo = rawData.IndexOf(' ', uriStart);
+                                    mURI = rawData.Substring(uriStart, httpInfo - uriStart);
+                                    int endHttpInfo = rawData.IndexOf('n', httpInfo + 1);
+                                    // TODO: capture HTTP/1.1, etc
+                                    int doubleCrNl = rawData.IndexOf("\r\n\r\n");
+                                    doubleCrNl = doubleCrNl > 0 ? doubleCrNl : rawData.Length - 1;
+                                    // Now find the headers
+                                    var split = rawData.Substring(endHttpInfo, doubleCrNl - endHttpInfo).Split('\r');
+                                    headers = new Header[split.Length];
+                                    int inc = 0;
+                                    foreach (var sp in split)
+                                    {
+                                        var spClean = sp.Trim('\n').Split(':');
+                                        var header = new Header() { Name = spClean[0], Value = spClean.Length > 1 ? spClean[1].TrimStart(' ') : string.Empty };
+                                        headers[inc++] = header;
+                                        if (header.Name == "Content-Length")
+                                        {
+                                            contentLength = Convert.ToInt32(header.Value);
+                                        }
+                                    }
+
+                                    if (rawData.Length - doubleCrNl + 4 < contentLength)
+                                    {
+                                        contentLength = rawData.Length - doubleCrNl + 4;
+                                    }
+
+                                    if (contentLength > 0)
+                                    {
+                                        content = new byte[contentLength];
+                                        for (int i = 0; i < contentLength; i++)
+                                        {
+                                            content[i] = bytes[doubleCrNl + 4 + i];
+                                        }
+                                    }
                                 }
 
-                                CommandReceived?.Invoke(this, new WebServerEventArgs(connection, mURI));
+                                CommandReceived?.Invoke(this, new WebServerEventArgs(connection, mURI, mMethod, headers, content));
                             }
                         }
                     }

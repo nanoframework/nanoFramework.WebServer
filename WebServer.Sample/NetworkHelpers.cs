@@ -73,7 +73,7 @@ namespace nanoFramework.Networking
             DateTimeAvailable.Set();
         }
 
-        private static void CheckIP()
+        public static bool CheckIP()
         {
             Debug.WriteLine("Checking for IP");
 
@@ -84,8 +84,11 @@ namespace nanoFramework.Networking
                 {
                     Debug.WriteLine($"We have and IP: {ni.IPv4Address}");
                     IpAddressAvailable.Set();
+                    return true;
                 }
             }
+
+            return false;
         }
 
         static void AddressChangedCallback(object sender, EventArgs e)

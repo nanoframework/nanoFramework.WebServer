@@ -6,6 +6,14 @@ This is a simple nanoFrmaework WebServer. Features:
 - Serve static files on any storage
 - Handle parameter in URL
 - Possible to have multiple WebServer running at the same time
+- supports GET/PUT and any other word
+- Supports any type of header
+- Supports content in POST
+
+Limitations:
+- Does not support any zip way
+- No URL decode implemented yet
+- No helper yet to build a proper HTML answer easilly
 
 ## Usage
 
@@ -88,5 +96,60 @@ foreach (var file in files)
 
 WebServer.OutPutStream(e.Response, $"HTTP/1.1 404");
 ```
+
+And also **REST API** is supported, here is a comprehensive example:
+
+```csharp
+if (url.ToLower().IndexOf("api/") == 0)
+{
+    string ret = $"HTTP/1.1 200 OK\r\nContent-Type: text/plain; charset=UTF-8\r\nCache-Control: no-cache\r\nConnection: close\r\n\r\n";
+    ret += $"Your request type is: {e.Method}\r\n";
+    ret += $"The request URL is: {e.RawURL}\r\n";
+    var parameters = WebServer.DecryptParam(e.RawURL);
+    if (parameters != null)
+    {
+        ret += "List of url parameters:\r\n";
+        foreach (var param in parameters)
+        {
+            ret += $"  Parameter name: {param.Name}, value: {param.Value}\r\n";
+        }
+    }
+
+    if (e.Headers != null)
+    {
+        ret += $"Number of headers: {e.Headers.Length}\r\n";
+    }
+    else
+    {
+        ret += "There is no header in this request\r\n";
+    }
+
+    foreach (var head in e.Headers)
+    {
+        ret += $"  Header name: {head.Name}, header value: {head.Value}\r\n";
+    }
+
+    ret = WebServer.OutPutStream(e.Response, ret);
+
+    if (e.Content != null)
+    {
+        ret += $"Size of content: {e.Content.Length}\r\n";
+        if (e.Content.Length > 0)
+        {
+            ret += $"Hex string representation:\r\n";
+            for (int i = 0; i < e.Content.Length; i++)
+            {
+                ret += e.Content[i].ToString("X") + " ";
+            }
+        }
+    }
+
+    WebServer.OutPutStream(e.Response, ret);
+}
+```
+
+This API example is basic but as you get the method, you can choose what to do.
+
+As you get the url, you can check for a specific controller called. And you have the parameters and the content payload!
 
 And more! Check the complete example for more about this WebServer!
