@@ -152,4 +152,8 @@ This API example is basic but as you get the method, you can choose what to do.
 
 As you get the url, you can check for a specific controller called. And you have the parameters and the content payload!
 
+Example of a result with call:
+
+![result](./doc/POSTcapture.jpg)
+
 And more! Check the complete example for more about this WebServer!
