@@ -397,7 +397,7 @@ namespace nanoFramework.WebServer
                                     mMethod = rawData.Substring(0, uriStart - 1);
                                     int httpInfo = rawData.IndexOf(' ', uriStart);
                                     mURI = rawData.Substring(uriStart, httpInfo - uriStart);
-                                    int endHttpInfo = rawData.IndexOf('\n', httpInfo + 1);
+                                    int endHttpInfo = rawData.IndexOf('\n', httpInfo);
                                     // TODO: capture HTTP/1.1, etc
                                     int doubleCrNl = rawData.IndexOf("\r\n\r\n");
                                     doubleCrNl = doubleCrNl > 0 ? doubleCrNl : rawData.Length - 1;
