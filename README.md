@@ -9,6 +9,7 @@ This is a simple nanoFrmaework WebServer. Features:
 - supports GET/PUT and any other word
 - Supports any type of header
 - Supports content in POST
+- Reflection for easy usage of controllers and notion of routes
 
 Limitations:
 - Does not support any zip way
@@ -17,7 +18,7 @@ Limitations:
 
 ## Usage
 
-You just need to specify a port and a timeout for the querries and add an event handler when a request is incoming.
+You just need to specify a port and a timeout for the querries and add an event handler when a request is incoming. With this first way, you will have an event raised every time you'll receive a request.
 
 ```csharp
 using (WebServer server = new WebServer(80, TimeSpan.FromSeconds(2)))
@@ -32,7 +33,47 @@ using (WebServer server = new WebServer(80, TimeSpan.FromSeconds(2)))
 }
 ```
 
-## Managing incoming querries
+You can as well pass a controller where you can use decoration for the routes and method supported.
+
+```csharp
+using (WebServer server = new WebServer(80, TimeSpan.FromSeconds(2), new Type[] { typeof(ControllerPerson), typeof(ControllerTest) }))
+{
+    // Start the server.
+    server.Start();
+
+    Thread.Sleep(Timeout.Infinite);
+}
+```
+
+In this case, you're passing 2 classes where you have public methods decorated which will be called everytime the route is found.
+
+With the previous example, a very simple and straight forward Test controller will look like that:
+
+```csharp
+public class ControllerTest
+{
+    [Route("test")]
+    [Method("GET")]
+    public void RoutePostTest(WebServerEventArgs e)
+    {
+        WebServer.OutputHttpCode(e.Response, HttpCode.OK);
+    }
+
+    [Route("test/any")]
+    public void RouteAnyTest(WebServerEventArgs e)
+    {
+        WebServer.OutputHttpCode(e.Response, HttpCode.OK);
+    }
+}
+```
+
+In this example, the `RoutePostTest` will be called everytime the called url will be `test`, the url can be with parameters and the method POST. Be aware that `Test` won't call the function, neither `test/`.
+
+The `RouteAnyTest`is called whenever the url is `test/any` whatever the method is.
+
+There is a more advance example with simple REST API to get a list of Person and add a Person. Check it in the [sample](./WebServer.Sample/ControllerPerson.cs).
+
+## Managing incoming querries thru events
 
 Very basic usage is the following:
 
@@ -49,7 +90,7 @@ private static void ServerCommandReceived(object source, WebServer.WebServerEven
     }
     else
     {
-        WebServer.OutPutStream(e.Response, $"HTTP/1.1 404");
+        WebServer.OutputHttpCode(e.Response, HttpCode.BadRequest);
     }
 }
 ```
@@ -94,7 +135,7 @@ foreach (var file in files)
     }
 }
 
-WebServer.OutPutStream(e.Response, $"HTTP/1.1 404");
+WebServer.OutputHttpCode(e.Response, HttpCode.NotFound);
 ```
 
 And also **REST API** is supported, here is a comprehensive example:

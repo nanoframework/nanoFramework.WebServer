@@ -4,6 +4,7 @@
 //
 
 using System;
+using System.Collections;
 using System.Diagnostics;
 using System.Net;
 using System.Net.NetworkInformation;
@@ -18,8 +19,6 @@ namespace nanoFramework.WebServer
 {
     public class WebServer : IDisposable
     {
-        #region Param
-
         /// <summary>
         /// URL parameter separation character
         /// </summary>
@@ -37,31 +36,44 @@ namespace nanoFramework.WebServer
 
         private const int MaxSizeBuffer = 1024;
 
-        /// <summary>
-        /// Represent an URL parameter Name=Value
-        /// </summary>
-        public class Param
-        {
-            /// <summary>
-            /// Name of the parameter
-            /// </summary>
-            public string Name { get; set; }
+        #region internal objects
 
-            /// <summary>
-            /// Valeu of the parameter
-            /// </summary>
-            public string Value { get; set; }
-        }
+        private bool _cancel = false;
+        private Thread _serverThread = null;
+        private ArrayList _callbackRoutes;
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// Gets or sets the port the server listens on.
+        /// </summary>
+        public int Port { get; protected set; }
+
+        /// <summary>
+        /// Read the timeout for a request to be send.
+        /// </summary>
+        public TimeSpan Timeout { get; protected set; } = TimeSpan.FromMilliseconds(10);
+
+        /// <summary>
+        /// Time to wait while using the socket and have the socket outputting the data
+        /// </summary>
+        public static TimeSpan TimeSleepSocketWork { get; set; } = TimeSpan.FromMilliseconds(10);
+
+        #endregion
+
+        #region Param
 
         /// <summary>
         /// Get an array of parameters from a URL
         /// </summary>
-        /// <param name="Parameters"></param>
+        /// <param name="parameter"></param>
         /// <returns></returns>
-        public static Param[] DecryptParam(string Parameters)
+        public static UrlParameter[] DecodeParam(string parameter)
         {
-            Param[] retParams = null;
-            int i = Parameters.IndexOf(ParamStart);
+            UrlParameter[] retParams = null;
+            int i = parameter.IndexOf(ParamStart);
             int j = i;
             int k;
 
@@ -69,27 +81,27 @@ namespace nanoFramework.WebServer
             {
                 //look at the number of = and ;
 
-                while ((i < Parameters.Length) || (i == -1))
+                while ((i < parameter.Length) || (i == -1))
                 {
-                    j = Parameters.IndexOf(ParamEqual, i);
+                    j = parameter.IndexOf(ParamEqual, i);
                     if (j > i)
                     {
                         //first param!
                         if (retParams == null)
                         {
-                            retParams = new Param[1];
-                            retParams[0] = new Param();
+                            retParams = new UrlParameter[1];
+                            retParams[0] = new UrlParameter();
                         }
                         else
                         {
-                            Param[] rettempParams = new Param[retParams.Length + 1];
+                            UrlParameter[] rettempParams = new UrlParameter[retParams.Length + 1];
                             retParams.CopyTo(rettempParams, 0);
-                            rettempParams[rettempParams.Length - 1] = new Param();
-                            retParams = new Param[rettempParams.Length];
+                            rettempParams[rettempParams.Length - 1] = new UrlParameter();
+                            retParams = new UrlParameter[rettempParams.Length];
                             rettempParams.CopyTo(retParams, 0);
                         }
-                        k = Parameters.IndexOf(ParamSeparator, j);
-                        retParams[retParams.Length - 1].Name = Parameters.Substring(i + 1, j - i - 1);
+                        k = parameter.IndexOf(ParamSeparator, j);
+                        retParams[retParams.Length - 1].Name = parameter.Substring(i + 1, j - i - 1);
                         // Nothing at the end
                         if (k == j)
                         {
@@ -98,17 +110,17 @@ namespace nanoFramework.WebServer
                         // Normal case
                         else if (k > j)
                         {
-                            retParams[retParams.Length - 1].Value = Parameters.Substring(j + 1, k - j - 1);
+                            retParams[retParams.Length - 1].Value = parameter.Substring(j + 1, k - j - 1);
                         }
                         // We're at the end
                         else
                         {
-                            retParams[retParams.Length - 1].Value = Parameters.Substring(j + 1, Parameters.Length - j - 1);
+                            retParams[retParams.Length - 1].Value = parameter.Substring(j + 1, parameter.Length - j - 1);
                         }
                         if (k > 0)
-                            i = Parameters.IndexOf(ParamSeparator, k);
+                            i = parameter.IndexOf(ParamSeparator, k);
                         else
-                            i = Parameters.Length;
+                            i = parameter.Length;
                     }
                     else
                         i = -1;
@@ -116,13 +128,6 @@ namespace nanoFramework.WebServer
             }
             return retParams;
         }
-
-        #endregion 
-
-        #region internal objects
-
-        private bool _cancel = false;
-        private Thread _serverThread = null;
 
         #endregion
 
@@ -133,8 +138,55 @@ namespace nanoFramework.WebServer
         /// </summary>
         /// <param name="port">Port number to listen on.</param>
         /// <param name="timeout">Timeout to listen and respond to a request in millisecond.</param>
-        public WebServer(int port, TimeSpan timeout)
+        public WebServer(int port, TimeSpan timeout) : this(port, timeout, null)
+        { }
+
+        public WebServer(int port, TimeSpan timeout, Type[] controllers)
         {
+            _callbackRoutes = new ArrayList();
+
+            if (controllers != null)
+            {
+                foreach (var controller in controllers)
+                {
+                    var functions = controller.GetMethods();
+                    foreach (var func in functions)
+                    {
+                        var attributes = func.GetCustomAttributes(true);
+                        CallbackRoutes callbackRoutes = null;
+                        foreach (var attrib in attributes)
+                        {
+                            if (typeof(RouteAttribute) == attrib.GetType())
+                            {
+                                callbackRoutes = new CallbackRoutes();
+                                callbackRoutes.Route = ((RouteAttribute)attrib).Route;
+                                break;
+                            }
+                        }
+                        if (callbackRoutes != null)
+                        {
+                            callbackRoutes.Callback = func;
+                            foreach (var attrib in attributes)
+                            {
+                                if (typeof(MethodAttribute) == attrib.GetType())
+                                {
+                                    callbackRoutes.Method = ((MethodAttribute)attrib).Method;
+                                    break;
+                                }
+                            }
+                            _callbackRoutes.Add(callbackRoutes);
+                        }
+                    }
+
+                }
+            }
+
+            foreach (var callback in _callbackRoutes)
+            {
+                var cb = (CallbackRoutes)callback;
+                Debug.WriteLine($"{cb.Callback.Name}, {cb.Route}, {cb.Method}");
+            }
+
             Timeout = timeout;
             Port = port;
             _serverThread = new Thread(StartServer);
@@ -149,61 +201,6 @@ namespace nanoFramework.WebServer
         /// Delegate for the CommandReceived event.
         /// </summary>
         public delegate void GetRequestHandler(object obj, WebServerEventArgs e);
-
-        /// <summary>
-        /// Header class
-        /// </summary>
-        public class Header
-        {
-            public string Name { get; set; }
-
-            public string Value { get; set; }
-        }
-
-        /// <summary>
-        /// Web server event argument class
-        /// </summary>
-        public class WebServerEventArgs
-        {
-            /// <summary>
-            /// Constructor for the event arguments
-            /// </summary>
-            /// <param name="mresponse"></param>
-            /// <param name="mrawURL"></param>
-            public WebServerEventArgs(Socket mresponse, string mrawURL, string method, Header[] headers, byte[] content)
-            {
-                Response = mresponse;
-                RawURL = mrawURL;
-                Method = method;
-                Headers = headers;
-                Content = content;
-            }
-
-            /// <summary>
-            /// The response class
-            /// </summary>
-            public Socket Response { get; protected set; }
-
-            /// <summary>
-            /// The raw URL elements
-            /// </summary>
-            public string RawURL { get; protected set; }
-
-            /// <summary>
-            /// The method used, GET/PUT/POST/DELETE/etc
-            /// </summary>
-            public string Method { get; protected set; }
-
-            /// <summary>
-            /// Http request headers
-            /// </summary>
-            public Header[] Headers { get; internal set; }
-
-            /// <summary>
-            /// Content in the request
-            /// </summary>
-            public byte[] Content { get; internal set; }
-        }
 
         /// <summary>
         /// CommandReceived event is triggered when a valid command (plus parameters) is received.
@@ -254,25 +251,98 @@ namespace nanoFramework.WebServer
         {
             _cancel = true;
             Thread.Sleep(100);
-            _serverThread.Suspend();
+            _serverThread.Abort();
             Debug.WriteLine("Stoped server in thread ");
         }
 
         /// <summary>
         /// Output a stream
         /// </summary>
-        public static string OutPutStream(Socket response, string strResponse)
+        /// <param name="response">the socket stream</param>
+        /// <param name="strResponse">the stream to output</param>
+        public static void OutPutStream(Socket response, string strResponse)
         {
             if (response == null)
             {
-                return null;
+                return;
             }
 
             byte[] messageBody = Encoding.UTF8.GetBytes(strResponse);
             response.Send(messageBody, 0, messageBody.Length, SocketFlags.None);
             //allow time to physically send the bits
             Thread.Sleep((int)TimeSleepSocketWork.TotalMilliseconds);
-            return string.Empty;
+        }
+
+        /// <summary>
+        /// Output an HTTP Code and close the connection
+        /// </summary>
+        /// <param name="response">the socket stream</param>
+        /// <param name="code">the http code</param>
+        public static void OutputHttpCode(Socket response, HttpCode code)
+        {
+            if (response == null)
+            {
+                return;
+            }
+
+
+            string strResponse = string.Empty;
+            switch (code)
+            {
+                case HttpCode.Continue:
+                    strResponse = $"HTTP/1.1 100 Continue\r\nConnection: Close\r\n\r\n";
+                    break;
+                case HttpCode.OK:
+                    strResponse = $"HTTP/1.1 200 OK\r\nConnection: Close\r\n\r\n";
+                    break;
+                case HttpCode.Created:
+                    strResponse = $"HTTP/1.1 201 Created\r\nConnection: Close\r\n\r\n";
+                    break;
+                case HttpCode.Accepted:
+                    strResponse = $"HTTP/1.1 202 Accepted\r\nConnection: Close\r\n\r\n";
+                    break;
+                case HttpCode.BadRequest:
+                    strResponse = $"HTTP/1.1 400 Bad Request\r\nConnection: Close\r\n\r\n";
+                    break;
+                case HttpCode.Unauthorized:
+                    strResponse = $"HTTP/1.1 401 Unauthorized\r\nConnection: Close\r\n\r\n";
+                    break;
+                case HttpCode.Forbidden:
+                    strResponse = $"HTTP/1.1 403 Forbidden\r\nConnection: Close\r\n\r\n";
+                    break;
+                case HttpCode.NotFound:
+                    strResponse = $"HTTP/1.1 404 Not Found\r\nConnection: Close\r\n\r\n";
+                    break;
+                case HttpCode.MethodNotAllowed:
+                    strResponse = $"HTTP/1.1 405 Method Not Allowed\r\nConnection: Close\r\n\r\n";
+                    break;
+                case HttpCode.NotAccepted:
+                    strResponse = $"HTTP/1.1 406 Not Accepted\r\nConnection: Close\r\n\r\n";
+                    break;
+                case HttpCode.RequestTimeout:
+                    strResponse = $"HTTP/1.1 408 Request Timeout\r\nConnection: Close\r\n\r\n";
+                    break;
+                case HttpCode.Conflict:
+                    strResponse = $"HTTP/1.1 409 Conflict\r\nConnection: Close\r\n\r\n";
+                    break;
+                case HttpCode.InternalServerError:
+                    strResponse = $"HTTP/1.1 500 Internal Server Error\r\nConnection: Close\r\n\r\n";
+                    break;
+                case HttpCode.NotImplemented:
+                    strResponse = $"HTTP/1.1 501 Not Implemented\r\nConnection: Close\r\n\r\n";
+                    break;
+                case HttpCode.ServiceUnavailable:
+                    strResponse = $"HTTP/1.1 503 Service Unavailable\r\nConnection: Close\r\n\r\n";
+                    break;
+                default:
+                    strResponse = $"HTTP/1.1 400 Bad Request\r\nConnection: Close\r\n\r\n";
+                    break;
+            }
+
+            byte[] messageBody = Encoding.UTF8.GetBytes(strResponse);
+            response.Send(messageBody, 0, messageBody.Length, SocketFlags.None);
+            //allow time to physically send the bits
+            Thread.Sleep((int)TimeSleepSocketWork.TotalMilliseconds);
         }
 
         /// <summary>
@@ -394,7 +464,7 @@ namespace nanoFramework.WebServer
                                 {
                                     int contentLength = 0;
                                     int uriStart = rawData.IndexOf(' ') + 2;
-                                    mMethod = rawData.Substring(0, uriStart - 1);
+                                    mMethod = rawData.Substring(0, uriStart - 2);
                                     int httpInfo = rawData.IndexOf(' ', uriStart);
                                     mURI = rawData.Substring(uriStart, httpInfo - uriStart);
                                     int endHttpInfo = rawData.IndexOf('\n', httpInfo);
@@ -431,7 +501,39 @@ namespace nanoFramework.WebServer
                                     }
                                 }
 
-                                CommandReceived?.Invoke(this, new WebServerEventArgs(connection, mURI, mMethod, headers, content));
+                                bool isRoute = false;
+
+                                foreach (var rt in _callbackRoutes)
+                                {
+                                    var route = (CallbackRoutes)rt;
+                                    var urlParam = mURI.IndexOf(ParamStart);
+                                    bool isFound = false;
+                                    if ((mURI.IndexOf(route.Route) == 0))
+                                    {
+                                        if (urlParam > 0)
+                                        {
+                                            if (urlParam == route.Route.Length)
+                                            {
+                                                isFound = true;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            isFound = true;
+                                        }
+
+                                        if (isFound && ((route.Method == string.Empty || (mMethod == route.Method))))
+                                        {
+                                            route.Callback.Invoke(null, new object[] { new WebServerEventArgs(connection, mURI, mMethod, headers, content) });
+                                            isRoute = true;
+                                        }
+                                    }
+                                }
+
+                                if (!isRoute)
+                                {
+                                    CommandReceived?.Invoke(this, new WebServerEventArgs(connection, mURI, mMethod, headers, content));
+                                }
                             }
                         }
                     }
@@ -479,25 +581,5 @@ namespace nanoFramework.WebServer
         }
 
         #endregion
-
-        #region Properties
-
-        /// <summary>
-        /// Gets or sets the port the server listens on.
-        /// </summary>
-        public int Port { get; protected set; }
-
-        /// <summary>
-        /// Read the timeout for a request to be send.
-        /// </summary>
-        public TimeSpan Timeout { get; protected set; } = TimeSpan.FromMilliseconds(10);
-
-        /// <summary>
-        /// Time to wait while using the socket and have the socket outputting the data
-        /// </summary>
-        public static TimeSpan TimeSleepSocketWork { get; set; } = TimeSpan.FromMilliseconds(10);
-        #endregion
-
-
     }
 }

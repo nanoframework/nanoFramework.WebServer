@@ -18,7 +18,14 @@
   </PropertyGroup>
   <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.props" Condition="Exists('$(NanoFrameworkProjectSystemPath)NFProjectSystem.props')" />
   <ItemGroup>
+    <Compile Include="CallbackRoutes.cs" />
+    <Compile Include="WebServerEventArgs.cs" />
+    <Compile Include="Header.cs" />
+    <Compile Include="HttpCode.cs" />
+    <Compile Include="MethodAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RouteAttribute.cs" />
+    <Compile Include="UrlParameter.cs" />
     <Compile Include="WebServer.cs" />
   </ItemGroup>
   <ItemGroup>

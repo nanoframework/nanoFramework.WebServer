@@ -9,6 +9,8 @@ using System.Diagnostics;
 using Windows.Devices.WiFi;
 using nanoFramework.Networking;
 using Windows.Storage;
+using System.Device.Gpio;
+using System.Text;
 
 namespace nanoFramework.WebServer.Sample
 {
@@ -18,6 +20,8 @@ namespace nanoFramework.WebServer.Sample
         private static string MyPassword = "password";
         private static bool _isConnected = false;
         private static StorageFolder _storage;
+        private static GpioController _controller;
+        private static string _securityKey = "MySecurityKey42";
 
         public static void Main()
         {
@@ -50,12 +54,11 @@ namespace nanoFramework.WebServer.Sample
 
                 Debug.WriteLine("Waiting for network up and IP address...");
 
-                //NetworkHelpers.IpAddressAvailable.WaitOne();
-                while(!NetworkHelpers.CheckIP())
+                while (!NetworkHelpers.CheckIP())
                 {
                     Thread.Sleep(500);
                     connectRetry++;
-                    if(connectRetry == 5)
+                    if (connectRetry == 5)
                     {
                         connectRetry = 0;
                         goto rescan;
@@ -64,9 +67,10 @@ namespace nanoFramework.WebServer.Sample
 
 
                 _storage = KnownFolders.RemovableDevices.GetFolders()[0];
+                _controller = new GpioController();
 
                 // Instantiate a new web server on port 80.
-                using (WebServer server = new WebServer(80, TimeSpan.FromSeconds(2)))
+                using (WebServer server = new WebServer(80, TimeSpan.FromSeconds(2), new Type[] { typeof(ControllerPerson), typeof(ControllerTest) }))
                 {
                     // Add a handler for commands that are received by the server.
                     server.CommandReceived += ServerCommandReceived;
@@ -112,7 +116,7 @@ namespace nanoFramework.WebServer.Sample
             }
         }
 
-        private static void ServerCommandReceived(object source, WebServer.WebServerEventArgs e)
+        private static void ServerCommandReceived(object source, WebServerEventArgs e)
         {
             try
             {
@@ -143,64 +147,124 @@ namespace nanoFramework.WebServer.Sample
                 }
                 else if (url.ToLower().IndexOf("param.htm") == 0)
                 {
-                    // Test with parameters
-                    var parameters = WebServer.DecryptParam(url);
-                    string toOutput = "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nCache-Control: no-cache\r\nConnection: close\r\n\r\n<html><head>" +
-                        "<title>Hi from nanoFramework Server</title></head><body>Here are the parameters of this URL: <br />";
-                    foreach (var par in parameters)
-                    {
-                        toOutput += $"Parameter name: {par.Name}, Value: {par.Value}<br />";
-                    }
-                    toOutput += "</body></html>";
-                    WebServer.OutPutStream(e.Response, toOutput);
+                    ParamHtml(e);
                 }
                 else if (url.ToLower().IndexOf("api/") == 0)
                 {
-                    string ret = $"HTTP/1.1 200 OK\r\nContent-Type: text/plain; charset=UTF-8\r\nCache-Control: no-cache\r\nConnection: close\r\n\r\n";
-                    ret += $"Your request type is: {e.Method}\r\n";
-                    ret += $"The request URL is: {e.RawURL}\r\n";
-                    var parameters = WebServer.DecryptParam(e.RawURL);
-                    if (parameters != null)
+                    // Check the routes and dispatch
+                    var routes = url.Split('/');
+                    if (routes.Length > 3)
                     {
-                        ret += "List of url parameters:\r\n";
-                        foreach (var param in parameters)
+                        // Check the security key
+                        if (!CheckAPiKey(e.Headers))
                         {
-                            ret += $"  Parameter name: {param.Name}, value: {param.Value}\r\n";
+                            WebServer.OutputHttpCode(e.Response, HttpCode.Forbidden);
+                            return;
                         }
-                    }
 
-                    if (e.Headers != null)
+                        var pinNumber = Convert.ToInt16(routes[2]);
+
+                        // Do we have gpio ?
+                        if (routes[1].ToLower() == "gpio")
+                        {
+                            if ((routes[3].ToLower() == "high") || (routes[3].ToLower() == "1"))
+                            {
+                                _controller.Write(pinNumber, PinValue.High);
+                            }
+                            else if ((routes[3].ToLower() == "low") || (routes[3].ToLower() == "0"))
+                            {
+                                _controller.Write(pinNumber, PinValue.Low);
+                            }
+                            else
+                            {
+                                WebServer.OutputHttpCode(e.Response, HttpCode.BadRequest);
+                                return;
+                            }
+                        }
+                        else if (routes[1].ToLower() == "open")
+                        {
+                            if (routes[3].ToLower() == "input")
+                            {
+                                if (!_controller.IsPinOpen(pinNumber))
+                                {
+                                    _controller.OpenPin(pinNumber);
+                                }
+
+                                _controller.SetPinMode(pinNumber, PinMode.Input);
+                            }
+                            else if (routes[3].ToLower() == "output")
+                            {
+                                if (!_controller.IsPinOpen(pinNumber))
+                                {
+                                    _controller.OpenPin(pinNumber);
+                                }
+
+                                _controller.SetPinMode(pinNumber, PinMode.Output);
+                            }
+                            else
+                            {
+                                WebServer.OutputHttpCode(e.Response, HttpCode.BadRequest);
+                                return;
+                            }
+                        }
+                        else if (routes[1].ToLower() == "close")
+                        {
+                            if (_controller.IsPinOpen(pinNumber))
+                            {
+                                _controller.ClosePin(pinNumber);
+                            }
+                        }
+                        else
+                        {
+                            WebServer.OutputHttpCode(e.Response, HttpCode.BadRequest);
+                            return;
+                        }
+
+                        WebServer.OutputHttpCode(e.Response, HttpCode.OK);
+                    }
+                    else if (routes.Length == 2)
                     {
-                        ret += $"Number of headers: {e.Headers.Length}\r\n";
+                        if (routes[1].ToLower() == "apikey")
+                        {
+                            // Check the security key
+                            if (!CheckAPiKey(e.Headers))
+                            {
+                                WebServer.OutputHttpCode(e.Response, HttpCode.Forbidden);
+                                return;
+                            }
+
+                            if (e.Method != "POST")
+                            {
+                                WebServer.OutputHttpCode(e.Response, HttpCode.BadRequest);
+                                return;
+                            }
+
+                            // Get the param from the body
+                            string rawData = new string(Encoding.UTF8.GetChars(e.Content));
+                            var parameters = rawData.Split('=');
+                            if (parameters.Length < 2)
+                            {
+                                WebServer.OutputHttpCode(e.Response, HttpCode.BadRequest);
+                                return;
+                            }
+
+                            if (parameters[0].ToLower() == "newkey")
+                            {
+                                _securityKey = parameters[1];
+                                WebServer.OutputHttpCode(e.Response, HttpCode.OK);
+                                return;
+                            }
+
+                            WebServer.OutputHttpCode(e.Response, HttpCode.BadRequest);
+                            return;
+                        }
                     }
                     else
                     {
-                        ret += "There is no header in this request\r\n";
+                        ApiDefault(e);
                     }
-
-                    foreach (var head in e.Headers)
-                    {
-                        ret += $"  Header name: {head.Name}, header value: {head.Value}\r\n";
-                    }
-
-                    ret = WebServer.OutPutStream(e.Response, ret);
-
-                    if (e.Content != null)
-                    {
-                        ret += $"Size of content: {e.Content.Length}\r\n";
-                        if (e.Content.Length > 0)
-                        {
-                            ret += $"Hex string representation:\r\n";
-                            for (int i = 0; i < e.Content.Length; i++)
-                            {
-                                ret += e.Content[i].ToString("X") + " ";
-                            }
-                        }
-                    }
-
-                    WebServer.OutPutStream(e.Response, ret);
-
                 }
+
                 else
                 {
                     // Very simple example serving a static file on an SD card
@@ -214,13 +278,92 @@ namespace nanoFramework.WebServer.Sample
                         }
                     }
 
-                    WebServer.OutPutStream(e.Response, $"HTTP/1.1 404");
+                    WebServer.OutputHttpCode(e.Response, HttpCode.NotFound);
                 }
             }
             catch (Exception)
             {
-                WebServer.OutPutStream(e.Response, "HTTP/1.1 500");
+                WebServer.OutputHttpCode(e.Response, HttpCode.InternalServerError);
             }
+        }
+
+        private static bool CheckAPiKey(Header[] headers)
+        {
+            foreach (var header in headers)
+            {
+                if (header.Name == "ApiKey")
+                {
+                    if (header.Value == _securityKey)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        private static void ParamHtml(WebServerEventArgs e)
+        {
+            var url = e.RawURL;
+            // Test with parameters
+            var parameters = WebServer.DecodeParam(url);
+            string toOutput = "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nCache-Control: no-cache\r\nConnection: close\r\n\r\n<html><head>" +
+                "<title>Hi from nanoFramework Server</title></head><body>Here are the parameters of this URL: <br />";
+            foreach (var par in parameters)
+            {
+                toOutput += $"Parameter name: {par.Name}, Value: {par.Value}<br />";
+            }
+            toOutput += "</body></html>";
+            WebServer.OutPutStream(e.Response, toOutput);
+        }
+
+        private static void ApiDefault(WebServerEventArgs e)
+        {
+            string ret = $"HTTP/1.1 200 OK\r\nContent-Type: text/plain; charset=UTF-8\r\nCache-Control: no-cache\r\nConnection: close\r\n\r\n";
+            ret += $"Your request type is: {e.Method}\r\n";
+            ret += $"The request URL is: {e.RawURL}\r\n";
+            var parameters = WebServer.DecodeParam(e.RawURL);
+            if (parameters != null)
+            {
+                ret += "List of url parameters:\r\n";
+                foreach (var param in parameters)
+                {
+                    ret += $"  Parameter name: {param.Name}, value: {param.Value}\r\n";
+                }
+            }
+
+            if (e.Headers != null)
+            {
+                ret += $"Number of headers: {e.Headers.Length}\r\n";
+            }
+            else
+            {
+                ret += "There is no header in this request\r\n";
+            }
+
+            foreach (var head in e.Headers)
+            {
+                ret += $"  Header name: {head.Name}, header value: {head.Value}\r\n";
+            }
+
+            WebServer.OutPutStream(e.Response, ret);
+            ret = string.Empty;
+
+            if (e.Content != null)
+            {
+                ret += $"Size of content: {e.Content.Length}\r\n";
+                if (e.Content.Length > 0)
+                {
+                    ret += $"Hex string representation:\r\n";
+                    for (int i = 0; i < e.Content.Length; i++)
+                    {
+                        ret += e.Content[i].ToString("X") + " ";
+                    }
+                }
+            }
+
+            WebServer.OutPutStream(e.Response, ret);
+
         }
     }
 }
