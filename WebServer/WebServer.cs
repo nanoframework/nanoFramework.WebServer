@@ -41,6 +41,7 @@ namespace nanoFramework.WebServer
         private bool _cancel = false;
         private Thread _serverThread = null;
         private ArrayList _callbackRoutes;
+        //private HttpListener listener;
 
         #endregion
 
@@ -433,107 +434,114 @@ namespace nanoFramework.WebServer
             {
                 //set a receive Timeout to avoid too long connection 
                 server.ReceiveTimeout = (int)Timeout.TotalMilliseconds * 10;
-                server.Bind(new IPEndPoint(IPAddress.Any, this.Port));
+                server.Bind(new IPEndPoint(IPAddress.Any, Port));
                 server.Listen(int.MaxValue);
                 while (!_cancel)
                 {
                     try
                     {
-                        using (Socket connection = server.Accept())
+                        Socket connection = server.Accept();
+
+                        if (connection.Poll(-1, SelectMode.SelectRead))
                         {
-                            if (connection.Poll(-1, SelectMode.SelectRead))
+                            // Create buffer and receive raw bytes.
+                            byte[] bytes = new byte[connection.Available];
+                            int count = connection.Receive(bytes);
+                            // Debug.WriteLine("Request received from " + connection.RemoteEndPoint.ToString());
+                            //setup some time for send timeout as 10s.
+                            //necessary to avoid any problem when multiple requests are done the same time.
+                            connection.SendTimeout = (int)Timeout.TotalMilliseconds;
+                            // Convert to string, will include HTTP headers.
+                            string rawData = new string(Encoding.UTF8.GetChars(bytes));
+                            // Debug.WriteLine(rawData);
+                            string mURI = string.Empty;
+                            string mMethod = string.Empty;
+                            Header[] headers = null;
+                            byte[] content = null;
+
+                            // Remove GET + Space
+                            // pull out uri and remove the first /
+                            if (rawData.Length > 5)
                             {
-                                // Create buffer and receive raw bytes.
-                                byte[] bytes = new byte[connection.Available];
-                                int count = connection.Receive(bytes);
-                                // Debug.WriteLine("Request received from " + connection.RemoteEndPoint.ToString());
-                                //setup some time for send timeout as 10s.
-                                //necessary to avoid any problem when multiple requests are done the same time.
-                                connection.SendTimeout = (int)Timeout.TotalMilliseconds;
-                                // Convert to string, will include HTTP headers.
-                                string rawData = new string(Encoding.UTF8.GetChars(bytes));
-                                // Debug.WriteLine(rawData);
-                                string mURI = string.Empty;
-                                string mMethod = string.Empty;
-                                Header[] headers = null;
-                                byte[] content = null;
-
-                                // Remove GET + Space
-                                // pull out uri and remove the first /
-                                if (rawData.Length > 5)
+                                int contentLength = 0;
+                                int uriStart = rawData.IndexOf(' ') + 2;
+                                mMethod = rawData.Substring(0, uriStart - 2);
+                                int httpInfo = rawData.IndexOf(' ', uriStart);
+                                mURI = rawData.Substring(uriStart, httpInfo - uriStart);
+                                int endHttpInfo = rawData.IndexOf('\n', httpInfo);
+                                // TODO: capture HTTP/1.1, etc
+                                int doubleCrNl = rawData.IndexOf("\r\n\r\n");
+                                doubleCrNl = doubleCrNl > 0 ? doubleCrNl : rawData.Length - 1;
+                                // Now find the headers
+                                var split = rawData.Substring(endHttpInfo, doubleCrNl - endHttpInfo).Split('\r');
+                                headers = new Header[split.Length];
+                                int inc = 0;
+                                foreach (var sp in split)
                                 {
-                                    int contentLength = 0;
-                                    int uriStart = rawData.IndexOf(' ') + 2;
-                                    mMethod = rawData.Substring(0, uriStart - 2);
-                                    int httpInfo = rawData.IndexOf(' ', uriStart);
-                                    mURI = rawData.Substring(uriStart, httpInfo - uriStart);
-                                    int endHttpInfo = rawData.IndexOf('\n', httpInfo);
-                                    // TODO: capture HTTP/1.1, etc
-                                    int doubleCrNl = rawData.IndexOf("\r\n\r\n");
-                                    doubleCrNl = doubleCrNl > 0 ? doubleCrNl : rawData.Length - 1;
-                                    // Now find the headers
-                                    var split = rawData.Substring(endHttpInfo, doubleCrNl - endHttpInfo).Split('\r');
-                                    headers = new Header[split.Length];
-                                    int inc = 0;
-                                    foreach (var sp in split)
+                                    var spClean = sp.Trim('\n').Split(':');
+                                    var header = new Header() { Name = spClean[0], Value = spClean.Length > 1 ? spClean[1].TrimStart(' ') : string.Empty };
+                                    headers[inc++] = header;
+                                    if (header.Name == "Content-Length")
                                     {
-                                        var spClean = sp.Trim('\n').Split(':');
-                                        var header = new Header() { Name = spClean[0], Value = spClean.Length > 1 ? spClean[1].TrimStart(' ') : string.Empty };
-                                        headers[inc++] = header;
-                                        if (header.Name == "Content-Length")
-                                        {
-                                            contentLength = Convert.ToInt32(header.Value);
-                                        }
-                                    }
-
-                                    if (rawData.Length - doubleCrNl + 4 < contentLength)
-                                    {
-                                        contentLength = rawData.Length - doubleCrNl + 4;
-                                    }
-
-                                    if (contentLength > 0)
-                                    {
-                                        content = new byte[contentLength];
-                                        for (int i = 0; i < contentLength; i++)
-                                        {
-                                            content[i] = bytes[doubleCrNl + 4 + i];
-                                        }
+                                        contentLength = Convert.ToInt32(header.Value);
                                     }
                                 }
 
-                                bool isRoute = false;
-
-                                foreach (var rt in _callbackRoutes)
+                                if (rawData.Length - doubleCrNl + 4 < contentLength)
                                 {
-                                    var route = (CallbackRoutes)rt;
-                                    var urlParam = mURI.IndexOf(ParamStart);
-                                    bool isFound = false;
-                                    if ((mURI.IndexOf(route.Route) == 0))
+                                    contentLength = rawData.Length - doubleCrNl + 4;
+                                }
+
+                                if (contentLength > 0)
+                                {
+                                    content = new byte[contentLength];
+                                    for (int i = 0; i < contentLength; i++)
                                     {
-                                        if (urlParam > 0)
-                                        {
-                                            if (urlParam == route.Route.Length)
-                                            {
-                                                isFound = true;
-                                            }
-                                        }
-                                        else
+                                        content[i] = bytes[doubleCrNl + 4 + i];
+                                    }
+                                }
+                            }
+
+                            bool isRoute = false;
+
+                            foreach (var rt in _callbackRoutes)
+                            {
+                                var route = (CallbackRoutes)rt;
+                                var urlParam = mURI.IndexOf(ParamStart);
+                                bool isFound = false;
+                                if ((mURI.IndexOf(route.Route) == 0))
+                                {
+                                    if (urlParam > 0)
+                                    {
+                                        if (urlParam == route.Route.Length)
                                         {
                                             isFound = true;
                                         }
+                                    }
+                                    else
+                                    {
+                                        isFound = true;
+                                    }
 
-                                        if (isFound && ((route.Method == string.Empty || (mMethod == route.Method))))
+                                    if (isFound && ((route.Method == string.Empty || (mMethod == route.Method))))
+                                    {
+                                        isRoute = true;
+                                        new Thread(() =>
                                         {
                                             route.Callback.Invoke(null, new object[] { new WebServerEventArgs(connection, mURI, mMethod, headers, content) });
-                                            isRoute = true;
-                                        }
+                                            connection.Close();
+                                        }).Start();
                                     }
                                 }
+                            }
 
-                                if (!isRoute)
+                            if (!isRoute)
+                            {
+                                new Thread(() =>
                                 {
                                     CommandReceived?.Invoke(this, new WebServerEventArgs(connection, mURI, mMethod, headers, content));
-                                }
+                                    connection.Close();
+                                }).Start();
                             }
                         }
                     }
