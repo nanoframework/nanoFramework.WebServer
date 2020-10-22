@@ -3,7 +3,6 @@
 // See LICENSE file in the project root for full license information.
 //
 
-using nanoserver.WebServer;
 using System;
 using System.Collections;
 using System.Diagnostics;

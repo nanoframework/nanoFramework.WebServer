@@ -1,6 +1,7 @@
-﻿using nanoFramework.WebServer;
-using System;
-using System.Text;
+﻿//
+// Copyright (c) 2020 Laurent Ellerbach and the project contributors
+// See LICENSE file in the project root for full license information.
+//
 
 namespace nanoFramework.WebServer.Sample
 {
