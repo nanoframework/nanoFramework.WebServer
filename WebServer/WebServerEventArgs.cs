@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
@@ -14,38 +15,14 @@ namespace nanoFramework.WebServer
         /// </summary>
         /// <param name="mresponse"></param>
         /// <param name="mrawURL"></param>
-        public WebServerEventArgs(Socket mresponse, string mrawURL, string method, Header[] headers, byte[] content)
+        public WebServerEventArgs(HttpListenerContext context)
         {
-            Response = mresponse;
-            RawURL = mrawURL;
-            Method = method;
-            Headers = headers;
-            Content = content;
+            Context = context;
         }
 
         /// <summary>
         /// The response class
         /// </summary>
-        public Socket Response { get; protected set; }
-
-        /// <summary>
-        /// The raw URL elements
-        /// </summary>
-        public string RawURL { get; protected set; }
-
-        /// <summary>
-        /// The method used, GET/PUT/POST/DELETE/etc
-        /// </summary>
-        public string Method { get; protected set; }
-
-        /// <summary>
-        /// Http request headers
-        /// </summary>
-        public Header[] Headers { get; internal set; }
-
-        /// <summary>
-        /// Content in the request
-        /// </summary>
-        public byte[] Content { get; internal set; }
+        public HttpListenerContext Context { get; protected set; }
     }
 }

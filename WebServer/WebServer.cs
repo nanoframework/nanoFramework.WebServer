@@ -3,12 +3,15 @@
 // See LICENSE file in the project root for full license information.
 //
 
+using nanoserver.WebServer;
 using System;
 using System.Collections;
 using System.Diagnostics;
 using System.Net;
 using System.Net.NetworkInformation;
+using System.Net.Security;
 using System.Net.Sockets;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using Windows.Storage;
@@ -41,7 +44,7 @@ namespace nanoFramework.WebServer
         private bool _cancel = false;
         private Thread _serverThread = null;
         private ArrayList _callbackRoutes;
-        //private HttpListener listener;
+        private HttpListener _listener;
 
         #endregion
 
@@ -53,14 +56,30 @@ namespace nanoFramework.WebServer
         public int Port { get; protected set; }
 
         /// <summary>
-        /// Read the timeout for a request to be send.
+        /// The type of Http protocol used, http or https
         /// </summary>
-        public TimeSpan Timeout { get; protected set; } = TimeSpan.FromMilliseconds(10);
+        public HttpProtocol Protocol { get; protected set; }
 
         /// <summary>
-        /// Time to wait while using the socket and have the socket outputting the data
+        /// The Https certificate to use
         /// </summary>
-        public static TimeSpan TimeSleepSocketWork { get; set; } = TimeSpan.FromMilliseconds(10);
+        public X509Certificate HttpsCert
+        {
+            get => _listener.HttpsCert;
+
+            set => _listener.HttpsCert = value;
+        }
+
+        /// <summary>
+        /// SSL protocols
+        /// </summary>
+        public SslProtocols SslProtocols
+        {
+            get => _listener.SslProtocols;
+
+            set => _listener.SslProtocols = value;
+        }
+
 
         #endregion
 
@@ -139,10 +158,10 @@ namespace nanoFramework.WebServer
         /// </summary>
         /// <param name="port">Port number to listen on.</param>
         /// <param name="timeout">Timeout to listen and respond to a request in millisecond.</param>
-        public WebServer(int port, TimeSpan timeout) : this(port, timeout, null)
+        public WebServer(int port, HttpProtocol protocol) : this(port, protocol, null)
         { }
 
-        public WebServer(int port, TimeSpan timeout, Type[] controllers)
+        public WebServer(int port, HttpProtocol protocol, Type[] controllers)
         {
             _callbackRoutes = new ArrayList();
 
@@ -188,9 +207,11 @@ namespace nanoFramework.WebServer
                 Debug.WriteLine($"{cb.Callback.Name}, {cb.Route}, {cb.Method}");
             }
 
-            Timeout = timeout;
+            Protocol = protocol;
             Port = port;
-            _serverThread = new Thread(StartServer);
+            string prefix = Protocol == HttpProtocol.Http ? "http" : "https";
+            _listener = new HttpListener(prefix, port);
+            _serverThread = new Thread(StartListener);
             Debug.WriteLine("Web server started on port " + port.ToString());
         }
 
@@ -261,7 +282,7 @@ namespace nanoFramework.WebServer
         /// </summary>
         /// <param name="response">the socket stream</param>
         /// <param name="strResponse">the stream to output</param>
-        public static void OutPutStream(Socket response, string strResponse)
+        public static void OutPutStream(HttpListenerResponse response, string strResponse)
         {
             if (response == null)
             {
@@ -269,9 +290,10 @@ namespace nanoFramework.WebServer
             }
 
             byte[] messageBody = Encoding.UTF8.GetBytes(strResponse);
-            response.Send(messageBody, 0, messageBody.Length, SocketFlags.None);
+            response.ContentLength64 = messageBody.Length;
+            response.OutputStream.Write(messageBody, 0, messageBody.Length);
             //allow time to physically send the bits
-            Thread.Sleep((int)TimeSleepSocketWork.TotalMilliseconds);
+            //Thread.Sleep((int)TimeSleepSocketWork.TotalMilliseconds);
         }
 
         /// <summary>
@@ -279,77 +301,78 @@ namespace nanoFramework.WebServer
         /// </summary>
         /// <param name="response">the socket stream</param>
         /// <param name="code">the http code</param>
-        public static void OutputHttpCode(Socket response, HttpCode code)
+        public static void OutputHttpCode(HttpListenerResponse response, HttpCode code)
         {
             if (response == null)
             {
                 return;
             }
 
+            response.StatusCode = (int)code;
+            response.OutputStream.Write(new byte[0], 0, 0);
+            //string strResponse = string.Empty;
+            //switch (code)
+            //{
+            //    case HttpCode.Continue:
+            //        strResponse = $"HTTP/1.1 100 Continue\r\nConnection: Close\r\n\r\n";
+            //        break;
+            //    case HttpCode.OK:
+            //        strResponse = $"HTTP/1.1 200 OK\r\nConnection: Close\r\n\r\n";
+            //        break;
+            //    case HttpCode.Created:
+            //        strResponse = $"HTTP/1.1 201 Created\r\nConnection: Close\r\n\r\n";
+            //        break;
+            //    case HttpCode.Accepted:
+            //        strResponse = $"HTTP/1.1 202 Accepted\r\nConnection: Close\r\n\r\n";
+            //        break;
+            //    case HttpCode.BadRequest:
+            //        strResponse = $"HTTP/1.1 400 Bad Request\r\nConnection: Close\r\n\r\n";
+            //        break;
+            //    case HttpCode.Unauthorized:
+            //        strResponse = $"HTTP/1.1 401 Unauthorized\r\nConnection: Close\r\n\r\n";
+            //        break;
+            //    case HttpCode.Forbidden:
+            //        strResponse = $"HTTP/1.1 403 Forbidden\r\nConnection: Close\r\n\r\n";
+            //        break;
+            //    case HttpCode.NotFound:
+            //        strResponse = $"HTTP/1.1 404 Not Found\r\nConnection: Close\r\n\r\n";
+            //        break;
+            //    case HttpCode.MethodNotAllowed:
+            //        strResponse = $"HTTP/1.1 405 Method Not Allowed\r\nConnection: Close\r\n\r\n";
+            //        break;
+            //    case HttpCode.NotAccepted:
+            //        strResponse = $"HTTP/1.1 406 Not Accepted\r\nConnection: Close\r\n\r\n";
+            //        break;
+            //    case HttpCode.RequestTimeout:
+            //        strResponse = $"HTTP/1.1 408 Request Timeout\r\nConnection: Close\r\n\r\n";
+            //        break;
+            //    case HttpCode.Conflict:
+            //        strResponse = $"HTTP/1.1 409 Conflict\r\nConnection: Close\r\n\r\n";
+            //        break;
+            //    case HttpCode.InternalServerError:
+            //        strResponse = $"HTTP/1.1 500 Internal Server Error\r\nConnection: Close\r\n\r\n";
+            //        break;
+            //    case HttpCode.NotImplemented:
+            //        strResponse = $"HTTP/1.1 501 Not Implemented\r\nConnection: Close\r\n\r\n";
+            //        break;
+            //    case HttpCode.ServiceUnavailable:
+            //        strResponse = $"HTTP/1.1 503 Service Unavailable\r\nConnection: Close\r\n\r\n";
+            //        break;
+            //    default:
+            //        strResponse = $"HTTP/1.1 400 Bad Request\r\nConnection: Close\r\n\r\n";
+            //        break;
+            //}
 
-            string strResponse = string.Empty;
-            switch (code)
-            {
-                case HttpCode.Continue:
-                    strResponse = $"HTTP/1.1 100 Continue\r\nConnection: Close\r\n\r\n";
-                    break;
-                case HttpCode.OK:
-                    strResponse = $"HTTP/1.1 200 OK\r\nConnection: Close\r\n\r\n";
-                    break;
-                case HttpCode.Created:
-                    strResponse = $"HTTP/1.1 201 Created\r\nConnection: Close\r\n\r\n";
-                    break;
-                case HttpCode.Accepted:
-                    strResponse = $"HTTP/1.1 202 Accepted\r\nConnection: Close\r\n\r\n";
-                    break;
-                case HttpCode.BadRequest:
-                    strResponse = $"HTTP/1.1 400 Bad Request\r\nConnection: Close\r\n\r\n";
-                    break;
-                case HttpCode.Unauthorized:
-                    strResponse = $"HTTP/1.1 401 Unauthorized\r\nConnection: Close\r\n\r\n";
-                    break;
-                case HttpCode.Forbidden:
-                    strResponse = $"HTTP/1.1 403 Forbidden\r\nConnection: Close\r\n\r\n";
-                    break;
-                case HttpCode.NotFound:
-                    strResponse = $"HTTP/1.1 404 Not Found\r\nConnection: Close\r\n\r\n";
-                    break;
-                case HttpCode.MethodNotAllowed:
-                    strResponse = $"HTTP/1.1 405 Method Not Allowed\r\nConnection: Close\r\n\r\n";
-                    break;
-                case HttpCode.NotAccepted:
-                    strResponse = $"HTTP/1.1 406 Not Accepted\r\nConnection: Close\r\n\r\n";
-                    break;
-                case HttpCode.RequestTimeout:
-                    strResponse = $"HTTP/1.1 408 Request Timeout\r\nConnection: Close\r\n\r\n";
-                    break;
-                case HttpCode.Conflict:
-                    strResponse = $"HTTP/1.1 409 Conflict\r\nConnection: Close\r\n\r\n";
-                    break;
-                case HttpCode.InternalServerError:
-                    strResponse = $"HTTP/1.1 500 Internal Server Error\r\nConnection: Close\r\n\r\n";
-                    break;
-                case HttpCode.NotImplemented:
-                    strResponse = $"HTTP/1.1 501 Not Implemented\r\nConnection: Close\r\n\r\n";
-                    break;
-                case HttpCode.ServiceUnavailable:
-                    strResponse = $"HTTP/1.1 503 Service Unavailable\r\nConnection: Close\r\n\r\n";
-                    break;
-                default:
-                    strResponse = $"HTTP/1.1 400 Bad Request\r\nConnection: Close\r\n\r\n";
-                    break;
-            }
-
-            byte[] messageBody = Encoding.UTF8.GetBytes(strResponse);
-            response.Send(messageBody, 0, messageBody.Length, SocketFlags.None);
-            //allow time to physically send the bits
-            Thread.Sleep((int)TimeSleepSocketWork.TotalMilliseconds);
+            //byte[] messageBody = Encoding.UTF8.GetBytes(strResponse);
+            //response.Send(messageBody, 0, messageBody.Length, SocketFlags.None);
+            ////allow time to physically send the bits
+            //Thread.Sleep((int)TimeSleepSocketWork.TotalMilliseconds);
         }
 
         /// <summary>
         /// Read the timeout for a request to be send.
         /// </summary>
-        public static void SendFileOverHTTP(Socket response, StorageFile strFilePath)
+        public static void SendFileOverHTTP(HttpListenerResponse response, StorageFile strFilePath)
         {
             string ContentType = "text/html";
             //determine the type of file for the http header
@@ -388,10 +411,8 @@ namespace nanoFramework.WebServer
                 IBuffer readBuffer = FileIO.ReadBuffer(strFilePath);
                 long fileLength = readBuffer.Length;
 
-                string strResp = $"HTTP/1.1 200 OK\r\nContent-Type: {ContentType}; charset=UTF-8\r\nContent-Length: {fileLength}\r\nCache-Control: no-cache\r\nConnection: close\r\n\r\n";
-                OutPutStream(response, strResp);
-                // can be improved by building here the HTTP HEader string and return the length of the file
-                // Debug.WriteLine("File length " + fileLength);
+                response.ContentType = ContentType;
+                response.ContentLength64 = fileLength;
                 // Now loops sending all the data.
 
                 byte[] buf = new byte[MaxSizeBuffer];
@@ -402,17 +423,12 @@ namespace nanoFramework.WebServer
                         // Determines amount of data left.
                         long bytesToRead = fileLength - bytesSent;
                         bytesToRead = bytesToRead < MaxSizeBuffer ? bytesToRead : MaxSizeBuffer;
-                        // This is not very elegant but there is now way to say we want to read part of the destination buffer
-                        if (bytesToRead < MaxSizeBuffer)
-                        {
-                            buf = new byte[bytesToRead];
-                        }
                         // Reads the data.
                         dataReader.ReadBytes(buf);
                         // Writes data to browser
-                        response.Send(buf, 0, (int)bytesToRead, SocketFlags.None);
+                        response.OutputStream.Write(buf, 0, (int)bytesToRead);
                         // allow some time to physically send the bits. Can be reduce to 10 or even less if not too much other code running in parallel
-                        Thread.Sleep((int)TimeSleepSocketWork.TotalMilliseconds);
+                        //Thread.Sleep((int)TimeSleepSocketWork.TotalMilliseconds);
                         // Updates bytes read.
                         bytesSent += bytesToRead;
                     }
@@ -425,132 +441,62 @@ namespace nanoFramework.WebServer
 
         }
 
-        /// <summary>
-        /// Starts the server.
-        /// </summary>
-        private void StartServer()
+        private void StartListener()
         {
-            using (Socket server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+            _listener.Start();
+            while (!_cancel)
             {
-                //set a receive Timeout to avoid too long connection 
-                server.ReceiveTimeout = (int)Timeout.TotalMilliseconds * 10;
-                server.Bind(new IPEndPoint(IPAddress.Any, Port));
-                server.Listen(int.MaxValue);
-                while (!_cancel)
+                HttpListenerContext context = _listener.GetContext();
+
+                bool isRoute = false;
+
+                foreach (var rt in _callbackRoutes)
                 {
-                    try
+                    var route = (CallbackRoutes)rt;
+                    var urlParam = context.Request.RawUrl.IndexOf(ParamStart);
+                    bool isFound = false;
+                    int incForSlash = route.Route.IndexOf('/') == 0 ? 0 : 1;
+                    if (context.Request.RawUrl.IndexOf(route.Route) == incForSlash)
                     {
-                        Socket connection = server.Accept();
-
-                        if (connection.Poll(-1, SelectMode.SelectRead))
+                        if (urlParam > 0)
                         {
-                            // Create buffer and receive raw bytes.
-                            byte[] bytes = new byte[connection.Available];
-                            int count = connection.Receive(bytes);
-                            // Debug.WriteLine("Request received from " + connection.RemoteEndPoint.ToString());
-                            //setup some time for send timeout as 10s.
-                            //necessary to avoid any problem when multiple requests are done the same time.
-                            connection.SendTimeout = (int)Timeout.TotalMilliseconds;
-                            // Convert to string, will include HTTP headers.
-                            string rawData = new string(Encoding.UTF8.GetChars(bytes));
-                            // Debug.WriteLine(rawData);
-                            string mURI = string.Empty;
-                            string mMethod = string.Empty;
-                            Header[] headers = null;
-                            byte[] content = null;
-
-                            // Remove GET + Space
-                            // pull out uri and remove the first /
-                            if (rawData.Length > 5)
+                            if (urlParam == route.Route.Length + incForSlash)
                             {
-                                int contentLength = 0;
-                                int uriStart = rawData.IndexOf(' ') + 2;
-                                mMethod = rawData.Substring(0, uriStart - 2);
-                                int httpInfo = rawData.IndexOf(' ', uriStart);
-                                mURI = rawData.Substring(uriStart, httpInfo - uriStart);
-                                int endHttpInfo = rawData.IndexOf('\n', httpInfo);
-                                // TODO: capture HTTP/1.1, etc
-                                int doubleCrNl = rawData.IndexOf("\r\n\r\n");
-                                doubleCrNl = doubleCrNl > 0 ? doubleCrNl : rawData.Length - 1;
-                                // Now find the headers
-                                var split = rawData.Substring(endHttpInfo, doubleCrNl - endHttpInfo).Split('\r');
-                                headers = new Header[split.Length];
-                                int inc = 0;
-                                foreach (var sp in split)
-                                {
-                                    var spClean = sp.Trim('\n').Split(':');
-                                    var header = new Header() { Name = spClean[0], Value = spClean.Length > 1 ? spClean[1].TrimStart(' ') : string.Empty };
-                                    headers[inc++] = header;
-                                    if (header.Name == "Content-Length")
-                                    {
-                                        contentLength = Convert.ToInt32(header.Value);
-                                    }
-                                }
-
-                                if (rawData.Length - doubleCrNl + 4 < contentLength)
-                                {
-                                    contentLength = rawData.Length - doubleCrNl + 4;
-                                }
-
-                                if (contentLength > 0)
-                                {
-                                    content = new byte[contentLength];
-                                    for (int i = 0; i < contentLength; i++)
-                                    {
-                                        content[i] = bytes[doubleCrNl + 4 + i];
-                                    }
-                                }
-                            }
-
-                            bool isRoute = false;
-
-                            foreach (var rt in _callbackRoutes)
-                            {
-                                var route = (CallbackRoutes)rt;
-                                var urlParam = mURI.IndexOf(ParamStart);
-                                bool isFound = false;
-                                if ((mURI.IndexOf(route.Route) == 0))
-                                {
-                                    if (urlParam > 0)
-                                    {
-                                        if (urlParam == route.Route.Length)
-                                        {
-                                            isFound = true;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        isFound = true;
-                                    }
-
-                                    if (isFound && ((route.Method == string.Empty || (mMethod == route.Method))))
-                                    {
-                                        isRoute = true;
-                                        new Thread(() =>
-                                        {
-                                            route.Callback.Invoke(null, new object[] { new WebServerEventArgs(connection, mURI, mMethod, headers, content) });
-                                            connection.Close();
-                                        }).Start();
-                                    }
-                                }
-                            }
-
-                            if (!isRoute)
-                            {
-                                new Thread(() =>
-                                {
-                                    CommandReceived?.Invoke(this, new WebServerEventArgs(connection, mURI, mMethod, headers, content));
-                                    connection.Close();
-                                }).Start();
+                                isFound = true;
                             }
                         }
-                    }
-                    catch (Exception e)
-                    {
-                        //this may be due to a bad IP address
-                        Debug.WriteLine(e.Message);
+                        else
+                        {
+                            isFound = true;
+                        }
+
+                        if (isFound && ((route.Method == string.Empty || (context.Request.HttpMethod == route.Method))))
+                        {
+                            isRoute = true;
+                            new Thread(() =>
+                            {
+                                route.Callback.Invoke(null, new object[] { new WebServerEventArgs(context) });
+                                context.Response.Close();
+                                context.Close();
+                            }).Start();
+                        }
                     }
                 }
+
+                if (!isRoute)
+                {
+                    new Thread(() =>
+                    {
+                        CommandReceived?.Invoke(this, new WebServerEventArgs(context));
+                        context.Response.Close();
+                        context.Close();
+                    }).Start();
+                }
+
+            }
+            if (_listener.IsListening)
+            {
+                _listener.Stop();
             }
         }
 

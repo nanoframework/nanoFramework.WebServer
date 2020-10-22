@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Net.Sockets;
 using System.Text;
+using System.Net;
 
 namespace nanoFramework.WebServer.Sample
 {
@@ -15,24 +16,29 @@ namespace nanoFramework.WebServer.Sample
     public class ControllerPerson
     {
         private static ArrayList _persons = new ArrayList();
+        private static object _lock = new object();
 
         [Route("Person")]
         [Method("GET")]
         public void Get(WebServerEventArgs e)
         {
             var ret = "[";
-            foreach (var person in _persons)
+            lock (_lock)
             {
-                var per = (Person)person;
-                ret += $"{{\"First\"=\"{per.First}\",\"Last\"=\"{per.Last}\"}},";
+                foreach (var person in _persons)
+                {
+                    var per = (Person)person;
+                    ret += $"{{\"First\"=\"{per.First}\",\"Last\"=\"{per.Last}\"}},";
+                }
             }
             if (ret.Length > 1)
             {
                 ret = ret.Substring(0, ret.Length - 1);
             }
             ret += "]";
-            WebServer.OutPutStream(e.Response, $"HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Length: {ret.Length}\r\nCache-Control: no-cache\r\nConnection: close\r\n\r\n");
-            WebServer.OutPutStream(e.Response, ret);
+            e.Context.Response.ContentType = "text/html";
+            e.Context.Response.ContentLength64 = ret.Length;
+            WebServer.OutPutStream(e.Context.Response, ret);
         }
 
         [Route("Person/Add")]
@@ -40,19 +46,21 @@ namespace nanoFramework.WebServer.Sample
         public void AddPost(WebServerEventArgs e)
         {
             // Get the param from the body
-            string rawData = new string(Encoding.UTF8.GetChars(e.Content));
+            byte[] buff = new byte[e.Context.Request.ContentLength64];
+            e.Context.Request.InputStream.Read(buff, 0, buff.Length);
+            string rawData = new string(Encoding.UTF8.GetChars(buff));
             rawData = $"?{rawData}";
-            AddPerson(e.Response, rawData);
+            AddPerson(e.Context.Response, rawData);
         }
 
         [Route("Person/Add")]
         [Method("GET")]
         public void AddGet(WebServerEventArgs e)
         {
-            AddPerson(e.Response, e.RawURL);
+            AddPerson(e.Context.Response, e.Context.Request.RawUrl);
         }
 
-        private void AddPerson(Socket socket, string url)
+        private void AddPerson(HttpListenerResponse response, string url)
         {
             var parameters = WebServer.DecodeParam(url);
             Person person = new Person();
@@ -69,12 +77,15 @@ namespace nanoFramework.WebServer.Sample
             }
             if ((person.Last != string.Empty) && (person.First != string.Empty))
             {
-                _persons.Add(person);
-                WebServer.OutputHttpCode(socket, HttpCode.Accepted);
+                lock (_lock)
+                {
+                    _persons.Add(person);
+                }
+                WebServer.OutputHttpCode(response, HttpCode.Accepted);
             }
             else
             {
-                WebServer.OutputHttpCode(socket, HttpCode.BadRequest);
+                WebServer.OutputHttpCode(response, HttpCode.BadRequest);
             }
         }
     }

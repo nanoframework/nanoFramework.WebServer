@@ -10,18 +10,19 @@ This is a simple nanoFrmaework WebServer. Features:
 - Supports any type of header
 - Supports content in POST
 - Reflection for easy usage of controllers and notion of routes
+- Helpers to return error code directly facilitating REST API
+- HTTPS support
 
 Limitations:
 - Does not support any zip way
-- No URL decode implemented yet
-- No helper yet to build a proper HTML answer easilly
+- No URL decode/encode implemented yet
 
 ## Usage
 
 You just need to specify a port and a timeout for the querries and add an event handler when a request is incoming. With this first way, you will have an event raised every time you'll receive a request.
 
 ```csharp
-using (WebServer server = new WebServer(80, TimeSpan.FromSeconds(2)))
+using (WebServer server = new WebServer(80, HttpProtocol.Http)
 {
     // Add a handler for commands that are received by the server.
     server.CommandReceived += ServerCommandReceived;
@@ -36,7 +37,7 @@ using (WebServer server = new WebServer(80, TimeSpan.FromSeconds(2)))
 You can as well pass a controller where you can use decoration for the routes and method supported.
 
 ```csharp
-using (WebServer server = new WebServer(80, TimeSpan.FromSeconds(2), new Type[] { typeof(ControllerPerson), typeof(ControllerTest) }))
+using (WebServer server = new WebServer(80, HttpProtocol.Http, new Type[] { typeof(ControllerPerson), typeof(ControllerTest) }))
 {
     // Start the server.
     server.Start();
@@ -56,13 +57,13 @@ public class ControllerTest
     [Method("GET")]
     public void RoutePostTest(WebServerEventArgs e)
     {
-        WebServer.OutputHttpCode(e.Response, HttpCode.OK);
+        WebServer.OutputHttpCode(e.Context.Response, HttpCode.OK);
     }
 
     [Route("test/any")]
     public void RouteAnyTest(WebServerEventArgs e)
     {
-        WebServer.OutputHttpCode(e.Response, HttpCode.OK);
+        WebServer.OutputHttpCode(e.Context.Response, HttpCode.OK);
     }
 }
 ```
@@ -78,19 +79,19 @@ There is a more advance example with simple REST API to get a list of Person and
 Very basic usage is the following:
 
 ```csharp
-private static void ServerCommandReceived(object source, WebServer.WebServerEventArgs e)
+private static void ServerCommandReceived(object source, WebServerEventArgs e)
 {
-    var url = e.RawURL;
-    Debug.WriteLine("Command received:" + e.RawURL);
+    var url = e.Context.Request.RawUrl;
+    Debug.WriteLine($"Command received: {url}, Method: {e.Context.Request.HttpMethod}");
 
-    if (url.ToLower() == "sayhello")
+    if (url.ToLower() == "/sayhello")
     {
         // This is simple raw text returned
-        WebServer.OutPutStream(e.Response, "It's working, url is empty, this is just raw text, /sayhello is just returning a raw text");
+        WebServer.OutPutStream(e.Context.Response, "It's working, url is empty, this is just raw text, /sayhello is just returning a raw text");
     }
     else
     {
-        WebServer.OutputHttpCode(e.Response, HttpCode.BadRequest);
+        WebServer.OutputHttpCode(e.Context.Response, HttpCode.NotFound);
     }
 }
 ```
@@ -98,7 +99,7 @@ private static void ServerCommandReceived(object source, WebServer.WebServerEven
 You can do more advance scenario like returning a full HTML page:
 
 ```csharp
-WebServer.OutPutStream(e.Response, "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nCache-Control: no-cache\r\nConnection: close\r\n\r\n<html><head>" +
+WebServer.OutPutStream(e.Context.Response, "<html><head>" +
     "<title>Hi from nanoFramework Server</title></head><body>You want me to say hello in a real HTML page!<br/><a href='/useinternal'>Generate an internal text.txt file</a><br />" +
     "<a href='/Text.txt'>Download the Text.txt file</a><br>" +
     "Try this url with parameters: <a href='/param.htm?param1=42&second=24&NAme=Ellerbach'>/param.htm?param1=42&second=24&NAme=Ellerbach</a></body></html>");
@@ -107,18 +108,18 @@ WebServer.OutPutStream(e.Response, "HTTP/1.1 200 OK\r\nContent-Type: text/html; 
 And can get parameters from a URL a an example from the previous link on the param.html page:
 
 ```csharp
-if (url.ToLower().IndexOf("param.htm") == 0)
+if (url.ToLower().IndexOf("/param.htm") == 0)
 {
     // Test with parameters
     var parameters = WebServer.decryptParam(url);
-    string toOutput = "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nCache-Control: no-cache\r\nConnection: close\r\n\r\n<html><head>" +
+    string toOutput = "<html><head>" +
         "<title>Hi from nanoFramework Server</title></head><body>Here are the parameters of this URL: <br />";
     foreach (var par in parameters)
     {
         toOutput += $"Parameter name: {par.Name}, Value: {par.Value}<br />";
     }
     toOutput += "</body></html>";
-    WebServer.OutPutStream(e.Response, toOutput);
+    WebServer.OutPutStream(e.Context.Response, toOutput);
 }
 ```
 
@@ -130,23 +131,22 @@ foreach (var file in files)
 {
     if (file.Name == url)
     {
-        WebServer.SendFileOverHTTP(e.Response, file);
+        WebServer.SendFileOverHTTP(e.Context.Response, file);
         return;
     }
 }
 
-WebServer.OutputHttpCode(e.Response, HttpCode.NotFound);
+WebServer.OutputHttpCode(e.Context.Response, HttpCode.NotFound);
 ```
 
 And also **REST API** is supported, here is a comprehensive example:
 
 ```csharp
-if (url.ToLower().IndexOf("api/") == 0)
+if (url.ToLower().IndexOf("/api/") == 0)
 {
-    string ret = $"HTTP/1.1 200 OK\r\nContent-Type: text/plain; charset=UTF-8\r\nCache-Control: no-cache\r\nConnection: close\r\n\r\n";
-    ret += $"Your request type is: {e.Method}\r\n";
-    ret += $"The request URL is: {e.RawURL}\r\n";
-    var parameters = WebServer.DecryptParam(e.RawURL);
+    string ret = $"Your request type is: {e.Context.Request.HttpMethod}\r\n";
+    ret += $"The request URL is: {e.Context.Request.RawUrl}\r\n";
+    var parameters = WebServer.DecodeParam(e.Context.Request.RawUrl);
     if (parameters != null)
     {
         ret += "List of url parameters:\r\n";
@@ -156,36 +156,42 @@ if (url.ToLower().IndexOf("api/") == 0)
         }
     }
 
-    if (e.Headers != null)
+    if (e.Context.Request.Headers != null)
     {
-        ret += $"Number of headers: {e.Headers.Length}\r\n";
+        ret += $"Number of headers: {e.Context.Request.Headers.Count}\r\n";
     }
     else
     {
         ret += "There is no header in this request\r\n";
     }
 
-    foreach (var head in e.Headers)
+    foreach (var head in e.Context.Request.Headers?.AllKeys)
     {
-        ret += $"  Header name: {head.Name}, header value: {head.Value}\r\n";
-    }
-
-    ret = WebServer.OutPutStream(e.Response, ret);
-
-    if (e.Content != null)
-    {
-        ret += $"Size of content: {e.Content.Length}\r\n";
-        if (e.Content.Length > 0)
+        ret += $"  Header name: {head}, Values:";
+        var vals = e.Context.Request.Headers.GetValues(head);
+        foreach (var val in vals)
         {
-            ret += $"Hex string representation:\r\n";
-            for (int i = 0; i < e.Content.Length; i++)
-            {
-                ret += e.Content[i].ToString("X") + " ";
-            }
+            ret += $"{val} ";
         }
+
+        ret += "\r\n";
     }
 
-    WebServer.OutPutStream(e.Response, ret);
+    if (e.Context.Request.ContentLength64 > 0)
+    {
+
+        ret += $"Size of content: {e.Context.Request.ContentLength64}\r\n";
+        byte[] buff = new byte[e.Context.Request.ContentLength64];
+        e.Context.Request.InputStream.Read(buff, 0, buff.Length);
+        ret += $"Hex string representation:\r\n";
+        for (int i = 0; i < buff.Length; i++)
+        {
+            ret += buff[i].ToString("X") + " ";
+        }
+
+    }
+
+    WebServer.OutPutStream(e.Context.Response, ret);
 }
 ```
 
@@ -198,3 +204,43 @@ Example of a result with call:
 ![result](./doc/POSTcapture.jpg)
 
 And more! Check the complete example for more about this WebServer!
+
+## Using HTTPS
+
+You will need to generate a certificate and keys:
+
+```csharp
+X509Certificate _myWebServerCertificate509 = new X509Certificate2(_myWebServerCrt, _myWebServerPrivateKey, "1234");
+
+// X509 RSA key PEM format 2048 bytes
+        // generate with openssl:
+        // > openssl req -newkey rsa:2048 -nodes -keyout selfcert.key -x509 -days 365 -out selfcert.crt
+        // and paste selfcert.crt content below:
+        private const string _myWebServerCrt =
+@"-----BEGIN CERTIFICATE-----
+MORETEXT
+-----END CERTIFICATE-----";
+
+        // this one is generated with the command below. We need a password.
+        // > openssl rsa -des3 -in selfcert.key -out selfcertenc.key
+        // the one below was encoded with '1234' as the password.
+        private const string _myWebServerPrivateKey =
+@"-----BEGIN RSA PRIVATE KEY-----
+MORETEXTANDENCRYPTED
+-----END RSA PRIVATE KEY-----";
+
+using (WebServer server = new WebServer(443, HttpProtocol.Https)
+{
+    // Add a handler for commands that are received by the server.
+    server.CommandReceived += ServerCommandReceived;
+    server.HttpsCert = _myWebServerCertificate509;
+
+    server.SslProtocols = System.Net.Security.SslProtocols.Tls | System.Net.Security.SslProtocols.Tls11 | System.Net.Security.SslProtocols.Tls12;
+    // Start the server.
+    server.Start();
+
+    Thread.Sleep(Timeout.Infinite);
+}
+```
+
+You can of course use the routes as defined earlier. Both will work, event or route with the notion of controller.

@@ -10,13 +10,13 @@ namespace nanoFramework.WebServer.Sample
         [Method("GET")]
         public void RoutePostTest(WebServerEventArgs e)
         {
-            WebServer.OutputHttpCode(e.Response, HttpCode.OK);
+            WebServer.OutputHttpCode(e.Context.Response, HttpCode.OK);
         }
 
         [Route("test/any")]
         public void RouteAnyTest(WebServerEventArgs e)
         {
-            WebServer.OutputHttpCode(e.Response, HttpCode.OK);
+            WebServer.OutputHttpCode(e.Context.Response, HttpCode.OK);
         }
     }
 }
