@@ -10,14 +10,19 @@ namespace nanoFramework.WebServer
     /// <summary>
     /// Route custom attribute
     /// </summary>
-    [AttributeUsage(AttributeTargets.Method)]
-    public class RouteAttribute: Attribute
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+    public class RouteAttribute : Attribute
     {
         public string Route { get; set; }
 
+        /// <summary>
+        /// A route attribute
+        /// </summary>
+        /// <param name="route">The route like route/second/third</param>
         public RouteAttribute(string route)
         {
             Route = route;
         }
+
     }
 }

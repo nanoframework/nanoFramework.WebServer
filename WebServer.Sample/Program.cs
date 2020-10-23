@@ -165,7 +165,7 @@ namespace nanoFramework.WebServer.Sample
                         // Check the security key
                         if (!CheckAPiKey(e.Context.Request.Headers))
                         {
-                            WebServer.OutputHttpCode(e.Context.Response, HttpCode.Forbidden);
+                            WebServer.OutputHttpCode(e.Context.Response, HttpStatusCode.Forbidden);
                             return;
                         }
 
@@ -184,11 +184,11 @@ namespace nanoFramework.WebServer.Sample
                             }
                             else
                             {
-                                WebServer.OutputHttpCode(e.Context.Response, HttpCode.BadRequest);
+                                WebServer.OutputHttpCode(e.Context.Response, HttpStatusCode.BadRequest);
                                 return;
                             }
 
-                            WebServer.OutputHttpCode(e.Context.Response, HttpCode.OK);
+                            WebServer.OutputHttpCode(e.Context.Response, HttpStatusCode.OK);
                             return;
                         }
                         else if (routes[1].ToLower() == "open")
@@ -213,7 +213,7 @@ namespace nanoFramework.WebServer.Sample
                             }
                             else
                             {
-                                WebServer.OutputHttpCode(e.Context.Response, HttpCode.BadRequest);
+                                WebServer.OutputHttpCode(e.Context.Response, HttpStatusCode.BadRequest);
                                 return;
                             }
                         }
@@ -226,11 +226,11 @@ namespace nanoFramework.WebServer.Sample
                         }
                         else
                         {
-                            WebServer.OutputHttpCode(e.Context.Response, HttpCode.BadRequest);
+                            WebServer.OutputHttpCode(e.Context.Response, HttpStatusCode.BadRequest);
                             return;
                         }
 
-                        WebServer.OutputHttpCode(e.Context.Response, HttpCode.OK);
+                        WebServer.OutputHttpCode(e.Context.Response, HttpStatusCode.OK);
                         return;
                     }
                     else if (routes.Length == 2)
@@ -240,20 +240,20 @@ namespace nanoFramework.WebServer.Sample
                             // Check the security key
                             if (!CheckAPiKey(e.Context.Request.Headers))
                             {
-                                WebServer.OutputHttpCode(e.Context.Response, HttpCode.Forbidden);
+                                WebServer.OutputHttpCode(e.Context.Response, HttpStatusCode.Forbidden);
                                 return;
                             }
 
                             if (e.Context.Request.HttpMethod != "POST")
                             {
-                                WebServer.OutputHttpCode(e.Context.Response, HttpCode.BadRequest);
+                                WebServer.OutputHttpCode(e.Context.Response, HttpStatusCode.BadRequest);
                                 return;
                             }
 
                             // Get the param from the body
                             if(e.Context.Request.ContentLength64 == 0)
                             {
-                                WebServer.OutputHttpCode(e.Context.Response, HttpCode.BadRequest);
+                                WebServer.OutputHttpCode(e.Context.Response, HttpStatusCode.BadRequest);
                                 return;
                             }
 
@@ -263,18 +263,18 @@ namespace nanoFramework.WebServer.Sample
                             var parameters = rawData.Split('=');
                             if (parameters.Length < 2)
                             {
-                                WebServer.OutputHttpCode(e.Context.Response, HttpCode.BadRequest);
+                                WebServer.OutputHttpCode(e.Context.Response, HttpStatusCode.BadRequest);
                                 return;
                             }
 
                             if (parameters[0].ToLower() == "newkey")
                             {
                                 _securityKey = parameters[1];
-                                WebServer.OutputHttpCode(e.Context.Response, HttpCode.OK);
+                                WebServer.OutputHttpCode(e.Context.Response, HttpStatusCode.OK);
                                 return;
                             }
 
-                            WebServer.OutputHttpCode(e.Context.Response, HttpCode.BadRequest);
+                            WebServer.OutputHttpCode(e.Context.Response, HttpStatusCode.BadRequest);
                             return;
                         }
                     }
@@ -297,12 +297,12 @@ namespace nanoFramework.WebServer.Sample
                         }
                     }
 
-                    WebServer.OutputHttpCode(e.Context.Response, HttpCode.NotFound);
+                    WebServer.OutputHttpCode(e.Context.Response, HttpStatusCode.NotFound);
                 }
             }
             catch (Exception)
             {
-                WebServer.OutputHttpCode(e.Context.Response, HttpCode.InternalServerError);
+                WebServer.OutputHttpCode(e.Context.Response, HttpStatusCode.InternalServerError);
             }
         }
 

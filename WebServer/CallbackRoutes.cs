@@ -23,6 +23,11 @@ namespace nanoFramework.WebServer
         public string Route { get; set; }
 
         /// <summary>
+        /// Is the root case sensitive?
+        /// </summary>
+        public bool CaseSensitive { get; set; }
+
+        /// <summary>
         /// The http method ex GET or POST, leave string.Empty for any
         /// </summary>
         public string Method { get; set; }

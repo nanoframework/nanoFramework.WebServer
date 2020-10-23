@@ -1,4 +1,4 @@
-# nanoFrmaework WebServer
+# .NET nanoFrmaework WebServer
 
 This is a simple nanoFrmaework WebServer. Features:
 
@@ -53,26 +53,44 @@ With the previous example, a very simple and straight forward Test controller wi
 ```csharp
 public class ControllerTest
 {
-    [Route("test")]
+    [Route("test"), Route("Test2"), Route("tEst42"), Route("TEST")]
+    [CaseSensitive]
     [Method("GET")]
     public void RoutePostTest(WebServerEventArgs e)
     {
-        WebServer.OutputHttpCode(e.Context.Response, HttpCode.OK);
+        string route = $"The route asked is {e.Context.Request.RawUrl.TrimStart('/').Split('/')[0]}";
+        e.Context.Response.ContentType = "text/plain";
+        WebServer.OutPutStream(e.Context.Response, route);
     }
 
     [Route("test/any")]
     public void RouteAnyTest(WebServerEventArgs e)
     {
-        WebServer.OutputHttpCode(e.Context.Response, HttpCode.OK);
+        WebServer.OutputHttpCode(e.Context.Response, HttpStatusCode.OK);
     }
 }
 ```
 
-In this example, the `RoutePostTest` will be called everytime the called url will be `test`, the url can be with parameters and the method POST. Be aware that `Test` won't call the function, neither `test/`.
+In this example, the `RoutePostTest` will be called everytime the called url will be `test` or `Test2` or `tEst42` or `TEST`, the url can be with parameters and the method GET. Be aware that `Test` won't call the function, neither `test/`.
 
 The `RouteAnyTest`is called whenever the url is `test/any` whatever the method is.
 
 There is a more advance example with simple REST API to get a list of Person and add a Person. Check it in the [sample](./WebServer.Sample/ControllerPerson.cs).
+
+**Important**
+* By default the routes are not case sensitive and the attribute **must** be lowercase
+* If you want to use case sensite routes like in the previous example, use the attribute `CaseSensitive`. As in the previous example, you **must** write the route as you want it to be restonded too
+
+## A simple GPIO controller REST API
+
+You will find in simple [GPIO controller sample](./WebServer.GpioRest) REST API. The controller not case sensitive and is working like this:
+
+- To open the pin 2 as output: http://yoururl/open/2/output
+- To open pin 4 as input: http://yoururl/open/4/input
+- To write the value high to pin 2: http://yoururl/write/2/high
+  - You can use high or 1, it has the same effect and will place the pin in high value
+  - You can use low of 0, it has the same effect and will place the pin in low value
+- To read the pin 4: http://yoururl/read/4, you will get as a raw text `high`or `low`depending on the state
 
 ## Managing incoming querries thru events
 
@@ -91,7 +109,7 @@ private static void ServerCommandReceived(object source, WebServerEventArgs e)
     }
     else
     {
-        WebServer.OutputHttpCode(e.Context.Response, HttpCode.NotFound);
+        WebServer.OutputHttpCode(e.Context.Response, HttpStatusCode.NotFound);
     }
 }
 ```
@@ -136,7 +154,7 @@ foreach (var file in files)
     }
 }
 
-WebServer.OutputHttpCode(e.Context.Response, HttpCode.NotFound);
+WebServer.OutputHttpCode(e.Context.Response, HttpStatusCode.NotFound);
 ```
 
 And also **REST API** is supported, here is a comprehensive example:

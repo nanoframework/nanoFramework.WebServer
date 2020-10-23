@@ -83,11 +83,11 @@ namespace nanoFramework.WebServer.Sample
                 {
                     _persons.Add(person);
                 }
-                WebServer.OutputHttpCode(response, HttpCode.Accepted);
+                WebServer.OutputHttpCode(response, HttpStatusCode.Accepted);
             }
             else
             {
-                WebServer.OutputHttpCode(response, HttpCode.BadRequest);
+                WebServer.OutputHttpCode(response, HttpStatusCode.BadRequest);
             }
         }
     }

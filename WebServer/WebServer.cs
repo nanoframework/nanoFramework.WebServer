@@ -9,7 +9,6 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Security;
-using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
@@ -179,21 +178,23 @@ namespace nanoFramework.WebServer
                             {
                                 callbackRoutes = new CallbackRoutes();
                                 callbackRoutes.Route = ((RouteAttribute)attrib).Route;
-                                break;
-                            }
-                        }
-                        if (callbackRoutes != null)
-                        {
-                            callbackRoutes.Callback = func;
-                            foreach (var attrib in attributes)
-                            {
-                                if (typeof(MethodAttribute) == attrib.GetType())
+                                callbackRoutes.CaseSensitive = false;
+                                callbackRoutes.Method = string.Empty;
+
+                                callbackRoutes.Callback = func;
+                                foreach (var otherattrib in attributes)
                                 {
-                                    callbackRoutes.Method = ((MethodAttribute)attrib).Method;
-                                    break;
+                                    if (typeof(MethodAttribute) == otherattrib.GetType())
+                                    {
+                                        callbackRoutes.Method = ((MethodAttribute)otherattrib).Method;
+                                    }
+                                    else if (typeof(CaseSensitiveAttribute) == otherattrib.GetType())
+                                    {
+                                        callbackRoutes.CaseSensitive = true;
+                                    }
                                 }
+                                _callbackRoutes.Add(callbackRoutes); ;
                             }
-                            _callbackRoutes.Add(callbackRoutes);
                         }
                     }
 
@@ -203,7 +204,7 @@ namespace nanoFramework.WebServer
             foreach (var callback in _callbackRoutes)
             {
                 var cb = (CallbackRoutes)callback;
-                Debug.WriteLine($"{cb.Callback.Name}, {cb.Route}, {cb.Method}");
+                Debug.WriteLine($"{cb.Callback.Name}, {cb.Route}, {cb.Method}, {cb.CaseSensitive}");
             }
 
             Protocol = protocol;
@@ -298,7 +299,7 @@ namespace nanoFramework.WebServer
         /// </summary>
         /// <param name="response">the socket stream</param>
         /// <param name="code">the http code</param>
-        public static void OutputHttpCode(HttpListenerResponse response, HttpCode code)
+        public static void OutputHttpCode(HttpListenerResponse response, HttpStatusCode code)
         {
             if (response == null)
             {
@@ -370,7 +371,6 @@ namespace nanoFramework.WebServer
                         // Writes data to browser
                         response.OutputStream.Write(buf, 0, (int)bytesToRead);
                         // allow some time to physically send the bits. Can be reduce to 10 or even less if not too much other code running in parallel
-                        //Thread.Sleep((int)TimeSleepSocketWork.TotalMilliseconds);
                         // Updates bytes read.
                         bytesSent += bytesToRead;
                     }
@@ -398,7 +398,8 @@ namespace nanoFramework.WebServer
                     var urlParam = context.Request.RawUrl.IndexOf(ParamStart);
                     bool isFound = false;
                     int incForSlash = route.Route.IndexOf('/') == 0 ? 0 : 1;
-                    if (context.Request.RawUrl.IndexOf(route.Route) == incForSlash)
+                    var toCompare = route.CaseSensitive ? context.Request.RawUrl : context.Request.RawUrl.ToLower();
+                    if (toCompare.IndexOf(route.Route) == incForSlash)
                     {
                         if (urlParam > 0)
                         {
@@ -414,6 +415,7 @@ namespace nanoFramework.WebServer
 
                         if (isFound && ((route.Method == string.Empty || (context.Request.HttpMethod == route.Method))))
                         {
+                            // Starting a new thread to be able to handle a new request in parallel
                             isRoute = true;
                             new Thread(() =>
                             {
@@ -427,12 +429,23 @@ namespace nanoFramework.WebServer
 
                 if (!isRoute)
                 {
-                    new Thread(() =>
+                    if (CommandReceived != null)
                     {
-                        CommandReceived?.Invoke(this, new WebServerEventArgs(context));
+                        // Starting a new thread to be able to handle a new request in parallel
+                        new Thread(() =>
+                        {
+                            CommandReceived.Invoke(this, new WebServerEventArgs(context));
+                            context.Response.Close();
+                            context.Close();
+                        }).Start();
+                    }
+                    else
+                    {
+                        context.Response.StatusCode = 404;
+                        context.Response.ContentLength64 = 0;
                         context.Response.Close();
                         context.Close();
-                    }).Start();
+                    }
                 }
 
             }
