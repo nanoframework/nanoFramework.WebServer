@@ -187,6 +187,9 @@ namespace nanoFramework.WebServer.Sample
                                 WebServer.OutputHttpCode(e.Context.Response, HttpCode.BadRequest);
                                 return;
                             }
+
+                            WebServer.OutputHttpCode(e.Context.Response, HttpCode.OK);
+                            return;
                         }
                         else if (routes[1].ToLower() == "open")
                         {
@@ -228,6 +231,7 @@ namespace nanoFramework.WebServer.Sample
                         }
 
                         WebServer.OutputHttpCode(e.Context.Response, HttpCode.OK);
+                        return;
                     }
                     else if (routes.Length == 2)
                     {

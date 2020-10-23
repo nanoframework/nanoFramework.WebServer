@@ -18,7 +18,6 @@
   </PropertyGroup>
   <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.props" Condition="Exists('$(NanoFrameworkProjectSystemPath)NFProjectSystem.props')" />
   <ItemGroup>
-    <Compile Include="ControllerGpio.cs" />
     <Compile Include="ControllerPerson.cs" />
     <Compile Include="ControllerTest.cs" />
     <Compile Include="NetworkHelpers.cs" />
@@ -54,7 +53,7 @@
       <SpecificVersion>True</SpecificVersion>
     </Reference>
     <Reference Include="System.Device.Gpio, Version=1.0.0.0, Culture=neutral, PublicKeyToken=c07d481e9758c731">
-      <HintPath>..\packages\nanoFramework.System.Device.Gpio.1.0.0-preview.8\lib\System.Device.Gpio.dll</HintPath>
+      <HintPath>..\packages\nanoFramework.System.Device.Gpio.1.0.0-preview.14\lib\System.Device.Gpio.dll</HintPath>
       <Private>True</Private>
       <SpecificVersion>True</SpecificVersion>
     </Reference>

@@ -291,8 +291,6 @@ namespace nanoFramework.WebServer
             byte[] messageBody = Encoding.UTF8.GetBytes(strResponse);
             response.ContentLength64 = messageBody.Length;
             response.OutputStream.Write(messageBody, 0, messageBody.Length);
-            //allow time to physically send the bits
-            //Thread.Sleep((int)TimeSleepSocketWork.TotalMilliseconds);
         }
 
         /// <summary>
@@ -307,65 +305,10 @@ namespace nanoFramework.WebServer
                 return;
             }
 
+            // This is needed to force the 200 OK without body to go thru
+            response.ContentLength64 = 0;
+            response.KeepAlive = false;
             response.StatusCode = (int)code;
-            response.OutputStream.Write(new byte[0], 0, 0);
-            //string strResponse = string.Empty;
-            //switch (code)
-            //{
-            //    case HttpCode.Continue:
-            //        strResponse = $"HTTP/1.1 100 Continue\r\nConnection: Close\r\n\r\n";
-            //        break;
-            //    case HttpCode.OK:
-            //        strResponse = $"HTTP/1.1 200 OK\r\nConnection: Close\r\n\r\n";
-            //        break;
-            //    case HttpCode.Created:
-            //        strResponse = $"HTTP/1.1 201 Created\r\nConnection: Close\r\n\r\n";
-            //        break;
-            //    case HttpCode.Accepted:
-            //        strResponse = $"HTTP/1.1 202 Accepted\r\nConnection: Close\r\n\r\n";
-            //        break;
-            //    case HttpCode.BadRequest:
-            //        strResponse = $"HTTP/1.1 400 Bad Request\r\nConnection: Close\r\n\r\n";
-            //        break;
-            //    case HttpCode.Unauthorized:
-            //        strResponse = $"HTTP/1.1 401 Unauthorized\r\nConnection: Close\r\n\r\n";
-            //        break;
-            //    case HttpCode.Forbidden:
-            //        strResponse = $"HTTP/1.1 403 Forbidden\r\nConnection: Close\r\n\r\n";
-            //        break;
-            //    case HttpCode.NotFound:
-            //        strResponse = $"HTTP/1.1 404 Not Found\r\nConnection: Close\r\n\r\n";
-            //        break;
-            //    case HttpCode.MethodNotAllowed:
-            //        strResponse = $"HTTP/1.1 405 Method Not Allowed\r\nConnection: Close\r\n\r\n";
-            //        break;
-            //    case HttpCode.NotAccepted:
-            //        strResponse = $"HTTP/1.1 406 Not Accepted\r\nConnection: Close\r\n\r\n";
-            //        break;
-            //    case HttpCode.RequestTimeout:
-            //        strResponse = $"HTTP/1.1 408 Request Timeout\r\nConnection: Close\r\n\r\n";
-            //        break;
-            //    case HttpCode.Conflict:
-            //        strResponse = $"HTTP/1.1 409 Conflict\r\nConnection: Close\r\n\r\n";
-            //        break;
-            //    case HttpCode.InternalServerError:
-            //        strResponse = $"HTTP/1.1 500 Internal Server Error\r\nConnection: Close\r\n\r\n";
-            //        break;
-            //    case HttpCode.NotImplemented:
-            //        strResponse = $"HTTP/1.1 501 Not Implemented\r\nConnection: Close\r\n\r\n";
-            //        break;
-            //    case HttpCode.ServiceUnavailable:
-            //        strResponse = $"HTTP/1.1 503 Service Unavailable\r\nConnection: Close\r\n\r\n";
-            //        break;
-            //    default:
-            //        strResponse = $"HTTP/1.1 400 Bad Request\r\nConnection: Close\r\n\r\n";
-            //        break;
-            //}
-
-            //byte[] messageBody = Encoding.UTF8.GetBytes(strResponse);
-            //response.Send(messageBody, 0, messageBody.Length, SocketFlags.None);
-            ////allow time to physically send the bits
-            //Thread.Sleep((int)TimeSleepSocketWork.TotalMilliseconds);
         }
 
         /// <summary>
