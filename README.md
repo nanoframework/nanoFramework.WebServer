@@ -1,4 +1,4 @@
-# nanoFrmaework WebServer
+# .NET nanoFramework WebServer
 
 This is a simple nanoFrmaework WebServer. Features:
 
