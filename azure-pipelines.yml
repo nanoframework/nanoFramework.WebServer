@@ -1,0 +1,147 @@
+# no trigger config here, this is handled at Azure Pipelines interface
+
+# add nf-tools repo to resources (for Azure Pipelines templates)
+resources:
+  repositories:
+    - repository: templates
+      type: github
+      name: nanoframework/nf-tools
+      endpoint: nfbot
+    - repository: webserver
+      type: github
+      endpoint: ellerbach
+      name: ellerbach/nanoFramework.Webserver
+      ref: master
+
+pool:
+  vmImage: 'VS2017-Win2016'
+
+variables:
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  solution: './webserver/WebServer.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+  NF_Library: 'nanoFramework.WebServer'
+  # creates a counter called versioncounter and assigns it to the minor variable
+  REVISION: $[counter('versioncounter', 200)]
+
+steps:
+
+- checkout: self
+  fetchDepth: 1
+  path: s/cd
+- checkout: webserver
+  fetchDepth: 1
+- checkout: templates
+  fetchDepth: 1
+
+- task: CopyFiles@1
+  displayName: Copy NuGet.config
+  inputs:
+    sourceFolder: $(Build.SourcesDirectory)/cd
+    Contents: NuGet.config
+    TargetFolder: $(Build.SourcesDirectory)/webserver
+
+- task: NuGetToolInstaller@0
+  displayName: Install specifc version of NuGet
+  inputs:
+    versionSpec: '5.4.0'
+  
+- task: PowerShell@2
+  displayName: Update dependencies
+  inputs:
+    targetType: filePath
+    filePath: nf-tools/github-actions/update-nf-dependencies.ps1
+
+- task: NuGetCommand@2
+  displayName: NuGet restore
+  inputs:
+    restoreSolution: '$(solution)'
+    feedsToUse: config
+    nugetConfigPath: cd/NuGet.config
+
+- task: InstallnFBuildComponents@1
+  displayName: Install nanoFramework MSBuild components
+
+- task: VSBuild@1
+  inputs:
+    solution: '$(solution)'
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
+
+- task: PowerShell@2
+  displayName: Tweak NuGet package version
+  inputs:
+      targetType: 'inline'
+      script: |
+          $counter = $env:REVISION
+          $version = [int]$counter
+          # preview version          
+          $nugetVersion = "2.4.0-preview."
+          
+          # stable version
+          # $nugetVersion = "2.4.0."
+          
+          
+          $nugetVersion = $nugetVersion + $version.ToString()
+          Write-Host "$("##vso[task.setvariable variable=NUGET_VERSION]")$nugetVersion"
+      errorActionPreference: 'stop'
+      failOnStderr: 'true'
+
+- task: NuGetCommand@2
+  displayName: Pack NuGet for nanoFramework.WebServer
+  condition: succeeded()
+  inputs:
+    command: 'custom' 
+    arguments: 'pack .\webserver\nuspec\nanoFramework.WebServer.nuspec -Version $(NUGET_VERSION) -BasePath $(Build.SourcesDirectory)\webserver'
+
+- task: CopyFiles@1
+  displayName: Collecting deployable artifacts
+  condition: succeeded()
+  inputs:
+    sourceFolder: $(Build.SourcesDirectory)
+    Contents: |
+      **\nanoFramework.WebServer*.nupkg
+    TargetFolder: '$(Build.ArtifactStagingDirectory)'
+    flattenFolders: true
+
+# publish artifacts (only possible if this is not a PR originated on a fork)
+- task: PublishBuildArtifacts@1
+  displayName: Publish deployables artifacts
+  condition: and( succeeded(), ne(variables['system.pullrequest.isfork'], true) )
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: deployables
+    ArtifactType: Container
+
+# push NuGet packages to Azure Artifacts feed (always happens except on PR builds)
+- task: NuGetCommand@2
+  displayName: Push NuGet packages to Azure Artifacts
+  condition: and( succeeded(), ne(variables['system.pullrequest.isfork'], true) )
+  continueOnError: true
+  inputs:
+    command: push
+    nuGetFeedType: external
+    packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+    publishFeedCredentials: 'AzureArtifacts-nanowebserver'
+    allowPackageConflicts: true
+
+# push NuGet packages to MyGet feed (always happens except on PR builds)
+- task: NuGetCommand@2
+  displayName: Push NuGet packages to NuGet
+  condition: and( succeeded(), ne(variables['system.pullrequest.isfork'], true) )
+  continueOnError: true
+  inputs:
+    command: push
+    nuGetFeedType: external
+    packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+    publishFeedCredentials: 'NuGet-nanowebserver'
+    allowPackageConflicts: true
+
+# step from template @ nf-tools repo
+# report error
+- template: azure-pipelines-templates/discord-webhook-task.yml@templates  
+  parameters:
+    status: 'failure'
+    webhookUrl: '$(DiscordWebhook)'
+    message: ''
