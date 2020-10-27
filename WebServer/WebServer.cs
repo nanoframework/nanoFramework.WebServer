@@ -385,25 +385,45 @@ namespace nanoFramework.WebServer
 
         private void StartListener()
         {
+            CallbackRoutes route;
+            bool isFound;
+            bool isRoute;
+            string rawUrl;
+            int urlParamStartIndex;
+            int incForSlash;
+            string toCompare;
+
             _listener.Start();
+
+
             while (!_cancel)
             {
                 HttpListenerContext context = _listener.GetContext();
 
-                bool isRoute = false;
+                isRoute = false;
+
+                // developer note: better store the RawURL from the request 
+                // because sometimes the request hasn't been completely processed on the first pass and it causes an exception
+                // when the request starts to be re-processed on the second pass of the foreach below
+
+                // store request URL and...
+                rawUrl = context.Request.RawUrl;
+
+                // ... do some preparations to speed-up processing of routes
+                urlParamStartIndex = rawUrl.IndexOf(ParamStart);
 
                 foreach (var rt in _callbackRoutes)
                 {
-                    var route = (CallbackRoutes)rt;
-                    var urlParam = context.Request.RawUrl.IndexOf(ParamStart);
-                    bool isFound = false;
-                    int incForSlash = route.Route.IndexOf('/') == 0 ? 0 : 1;
-                    var toCompare = route.CaseSensitive ? context.Request.RawUrl : context.Request.RawUrl.ToLower();
+                    route = (CallbackRoutes)rt;
+                    isFound = false;
+                    incForSlash = route.Route.IndexOf('/') == 0 ? 0 : 1;
+                    toCompare = route.CaseSensitive ? rawUrl : rawUrl.ToLower();
+
                     if (toCompare.IndexOf(route.Route) == incForSlash)
                     {
-                        if (urlParam > 0)
+                        if (urlParamStartIndex > 0)
                         {
-                            if (urlParam == route.Route.Length + incForSlash)
+                            if (urlParamStartIndex == route.Route.Length + incForSlash)
                             {
                                 isFound = true;
                             }
@@ -413,7 +433,7 @@ namespace nanoFramework.WebServer
                             isFound = true;
                         }
 
-                        if (isFound && ((route.Method == string.Empty || (context.Request.HttpMethod == route.Method))))
+                        if (isFound && (route.Method == string.Empty || (context.Request.HttpMethod == route.Method)))
                         {
                             // Starting a new thread to be able to handle a new request in parallel
                             isRoute = true;
@@ -447,8 +467,8 @@ namespace nanoFramework.WebServer
                         context.Close();
                     }
                 }
-
             }
+
             if (_listener.IsListening)
             {
                 _listener.Stop();
