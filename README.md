@@ -92,6 +92,92 @@ You will find in simple [GPIO controller sample](./WebServer.GpioRest) REST API.
   - You can use low of 0, it has the same effect and will place the pin in low value
 - To read the pin 4: http://yoururl/read/4, you will get as a raw text `high`or `low`depending on the state
 
+## Authentication on controllers
+
+Controllers support authentication. 3 types of authentications are currently implemented on controllers only:
+
+- Basic: the classic user and password following the HTTP standard. Usage:
+    - `[Authentication("Basic")]` will use the default credential of the webserver
+    - `[Authentication("Basic:myuser mypassword")]` will use myuser as a user and my password as a password. Note: the user cannot contains spaces.
+- APiKey in header: add ApiKey in headers with the API key. Usage:
+    - `[Authentication("ApiKey")]` will use the default credential of the webserver
+    - `[Authentication("ApiKeyc:akey")]` will use akey as ApiKey.
+- None: no authentication required. Usage:
+    - `[Authentication("None")]` will use the default credential of the webserver
+
+The Authentication attribute applies to both public Classes an public Methods.
+
+As for the rest of the controller, you can add attributes to define them, override them. The following example gives an idea of what can be done:
+
+```csharp
+[Authentication("Basic")]
+class ControllerAuth
+{
+    [Route("authbasic")]
+    public void Basic(WebServerEventArgs e)
+    {
+        WebServer.OutputHttpCode(e.Context.Response, HttpStatusCode.OK);
+    }
+
+    [Route("authbasicspecial")]
+    [Authentication("Basic:user2 password")]
+    public void Special(WebServerEventArgs e)
+    {
+        WebServer.OutputHttpCode(e.Context.Response, HttpStatusCode.OK);
+    }
+
+    [Authentication("ApiKey:superKey1234")]
+    [Route("authapi")]
+    public void Key(WebServerEventArgs e)
+    {
+        WebServer.OutputHttpCode(e.Context.Response, HttpStatusCode.OK);
+    }
+
+    [Route("authnone")]
+    [Authentication("None")]
+    public void None(WebServerEventArgs e)
+    {
+        WebServer.OutputHttpCode(e.Context.Response, HttpStatusCode.OK);
+    }
+
+    [Authentication("ApiKey")]
+    [Route("authdefaultapi")]
+    public void DefaultApi(WebServerEventArgs e)
+    {
+        WebServer.OutputHttpCode(e.Context.Response, HttpStatusCode.OK);
+    }
+}
+```
+
+And you can pass default credentials to the server:
+
+```csharp
+using (WebServer server = new WebServer(80, HttpProtocol.Http, new Type[] { typeof(ControllerPerson), typeof(ControllerTest), typeof(ControllerAuth) }))
+{
+    // To test authentication with various scenarios
+    server.ApiKey = "ATopSecretAPIKey1234";
+    server.Credential = new NetworkCredential("topuser", "topPassword");
+
+    // Start the server.
+    server.Start();
+
+    Thread.Sleep(Timeout.Infinite);
+}
+```
+
+With the previous example the following happens:
+
+- All the controller by default, even when nothing is specified will use the controller credentials. In our case, the Basic authentication with the default user (topuser) and password (topPassword) will be used.
+    - When calling http://yoururl/authbasic from a browser, you will be prompted for the user and password, use the default one topuser and topPassword to get access
+    - When calling http://yoururl/authnone, you won't be prompted because the authentication has been overrided for no authentication
+    - When calling http://yoururl/authbasicspecial, the user and password are different from the defautl ones, user2 and password is the right couple here
+- If you would have define in the controller a speicif user and password like `[Authentication("Basic:myuser mypassword")]`, then the default one for all the controller would have been myuser and mypassword
+- When calling http://yoururl/authapi, you must pass the header `ApiKey` (case sensitive) with the value `superKey1234` to get authorized, this is overriden the default Basic authentication
+- When calling http://yoururl/authdefaultapi, the defautl key `ATopSecretAPIKey1234` will be used so you have to pass it in the headers of the request
+
+All up, this is an example to show how to use authentication, it's been defined to allow flexibility.
+
+
 ## Managing incoming querries thru events
 
 Very basic usage is the following:

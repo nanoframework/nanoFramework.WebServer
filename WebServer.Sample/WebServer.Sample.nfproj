@@ -18,6 +18,7 @@
   </PropertyGroup>
   <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.props" Condition="Exists('$(NanoFrameworkProjectSystemPath)NFProjectSystem.props')" />
   <ItemGroup>
+    <Compile Include="ControllerAuth.cs" />
     <Compile Include="ControllerPerson.cs" />
     <Compile Include="ControllerTest.cs" />
     <Compile Include="NetworkHelpers.cs" />

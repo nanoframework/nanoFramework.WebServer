@@ -71,8 +71,11 @@ namespace nanoFramework.WebServer.Sample
                 _controller = new GpioController();
 
                 // Instantiate a new web server on port 80.
-                using (WebServer server = new WebServer(80, HttpProtocol.Http, new Type[] { typeof(ControllerPerson), typeof(ControllerTest) }))
+                using (WebServer server = new WebServer(80, HttpProtocol.Http, new Type[] { typeof(ControllerPerson), typeof(ControllerTest), typeof(ControllerAuth) }))
                 {
+                    // To test authentication with various scenarios
+                    server.ApiKey = _securityKey;
+                    server.Credential = new NetworkCredential("user", "password");
                     // Add a handler for commands that are received by the server.
                     server.CommandReceived += ServerCommandReceived;
 
@@ -98,7 +101,7 @@ namespace nanoFramework.WebServer.Sample
                 Debug.WriteLine($"SSID: {net.Ssid}, strength: {net.SignalBars}");
                 if (net.Ssid == MySsid)
                 {
-                    if(_isConnected)
+                    if (_isConnected)
                     {
                         sender.Disconnect();
                         _isConnected = false;
@@ -251,7 +254,7 @@ namespace nanoFramework.WebServer.Sample
                             }
 
                             // Get the param from the body
-                            if(e.Context.Request.ContentLength64 == 0)
+                            if (e.Context.Request.ContentLength64 == 0)
                             {
                                 WebServer.OutputHttpCode(e.Context.Response, HttpStatusCode.BadRequest);
                                 return;

@@ -78,6 +78,15 @@ namespace nanoFramework.WebServer
             set => _listener.SslProtocols = value;
         }
 
+        /// <summary>
+        /// Network credential used for default user:password couple during basic authentication
+        /// </summary>
+        public NetworkCredential Credential { get; set; }
+
+        /// <summary>
+        /// Default APiKey to be used for authentication when no key is specified in the attribute
+        /// </summary>
+        public string ApiKey { get; set; }
 
         #endregion
 
@@ -167,6 +176,18 @@ namespace nanoFramework.WebServer
             {
                 foreach (var controller in controllers)
                 {
+                    var controlAttribs = controller.GetCustomAttributes(true);
+                    Authentication authentication = null;
+                    foreach (var ctrlAttrib in controlAttribs)
+                    {
+                        if (typeof(AuthenticationAttribute) == ctrlAttrib.GetType())
+                        {
+                            var strAuth = ((AuthenticationAttribute)ctrlAttrib).AuthenticationMethod;
+                            // We do support only None, Basic and ApiKey, raising an exception if this doesn't start by any
+                            authentication = ExtractAuthentication(strAuth);
+                        }
+                    }
+
                     var functions = controller.GetMethods();
                     foreach (var func in functions)
                     {
@@ -180,6 +201,7 @@ namespace nanoFramework.WebServer
                                 callbackRoutes.Route = ((RouteAttribute)attrib).Route;
                                 callbackRoutes.CaseSensitive = false;
                                 callbackRoutes.Method = string.Empty;
+                                callbackRoutes.Authentication = authentication;
 
                                 callbackRoutes.Callback = func;
                                 foreach (var otherattrib in attributes)
@@ -192,7 +214,14 @@ namespace nanoFramework.WebServer
                                     {
                                         callbackRoutes.CaseSensitive = true;
                                     }
+                                    else if (typeof(AuthenticationAttribute) == otherattrib.GetType())
+                                    {
+                                        var strAuth = ((AuthenticationAttribute)otherattrib).AuthenticationMethod;
+                                        // A method can have a different authentication than the main class, so we override if any
+                                        callbackRoutes.Authentication = ExtractAuthentication(strAuth);
+                                    }
                                 }
+
                                 _callbackRoutes.Add(callbackRoutes); ;
                             }
                         }
@@ -213,6 +242,78 @@ namespace nanoFramework.WebServer
             _listener = new HttpListener(prefix, port);
             _serverThread = new Thread(StartListener);
             Debug.WriteLine("Web server started on port " + port.ToString());
+        }
+
+        private Authentication ExtractAuthentication(string strAuth)
+        {
+            const string None = "None";
+            const string Basic = "Basic";
+            const string ApiKey = "ApiKey";
+
+            Authentication authentication = null;
+            if (strAuth.IndexOf(None) == 0)
+            {
+                if (strAuth.Length == None.Length)
+                {
+                    authentication = new Authentication();
+                }
+                else
+                {
+                    throw new ArgumentException($"Authentication attribute None can only be used alone");
+                }
+            }
+            else if (strAuth.IndexOf(Basic) == 0)
+            {
+                if (strAuth.Length == Basic.Length)
+                {
+                    authentication = new Authentication((NetworkCredential)null);
+                }
+                else
+                {
+                    var sep = strAuth.IndexOf(':');
+                    if (sep == Basic.Length)
+                    {
+                        var space = strAuth.IndexOf(' ');
+                        if (space < 0)
+                        {
+                            throw new ArgumentException($"Authentication attribute Basic should be 'Basic:user passowrd'");
+                        }
+
+                        var user = strAuth.Substring(sep + 1, space - sep - 1);
+                        var password = strAuth.Substring(space + 1);
+                        authentication = new Authentication(new NetworkCredential(user, password, System.Net.AuthenticationType.Basic));
+                    }
+                    else
+                    {
+                        throw new ArgumentException($"Authentication attribute Basic should be 'Basic:user passowrd'");
+                    }
+                }
+            }
+            else if (strAuth.IndexOf(ApiKey) == 0)
+            {
+                if (strAuth.Length == ApiKey.Length)
+                {
+                    authentication = new Authentication(string.Empty);
+                }
+                else
+                {
+                    var sep = strAuth.IndexOf(':');
+                    if (sep == ApiKey.Length)
+                    {
+                        var key = strAuth.Substring(sep + 1);
+                        authentication = new Authentication(key);
+                    }
+                    else
+                    {
+                        throw new ArgumentException($"Authentication attribute ApiKey should be 'ApiKey:thekey'");
+                    }
+                }
+            }
+            else
+            {
+                throw new ArgumentException($"Authentication attribute can only start with Basic, None or ApiKey and case sensitive");
+            }
+            return authentication;
         }
 
         #endregion
@@ -390,69 +491,151 @@ namespace nanoFramework.WebServer
             {
                 HttpListenerContext context = _listener.GetContext();
 
-                bool isRoute = false;
-
-                foreach (var rt in _callbackRoutes)
+                new Thread(() =>
                 {
-                    var route = (CallbackRoutes)rt;
-                    var urlParam = context.Request.RawUrl.IndexOf(ParamStart);
-                    bool isFound = false;
-                    int incForSlash = route.Route.IndexOf('/') == 0 ? 0 : 1;
-                    var toCompare = route.CaseSensitive ? context.Request.RawUrl : context.Request.RawUrl.ToLower();
-                    if (toCompare.IndexOf(route.Route) == incForSlash)
+                    bool isRoute = false;
+                    CallbackRoutes route;
+                    int urlParam;
+                    bool isFound;
+                    int incForSlash;
+                    string toCompare;
+                    string routeStr;
+                    string rawUrl;
+
+                    foreach (var rt in _callbackRoutes)
                     {
-                        if (urlParam > 0)
+                        route = (CallbackRoutes)rt;
+                        urlParam = context.Request.RawUrl.IndexOf(ParamStart);
+                        isFound = false;
+                        routeStr = route.Route;
+                        rawUrl = context.Request.RawUrl;
+                        incForSlash = routeStr.IndexOf('/') == 0 ? 0 : 1;
+                        toCompare = route.CaseSensitive ? rawUrl : rawUrl.ToLower();
+                        if (toCompare.IndexOf(routeStr) == incForSlash)
                         {
-                            if (urlParam == route.Route.Length + incForSlash)
+                            if (urlParam > 0)
                             {
-                                isFound = true;
+                                if (urlParam == routeStr.Length + incForSlash)
+                                {
+                                    isFound = true;
+                                }
+                            }
+                            else
+                            {
+                                if (toCompare.Length == routeStr.Length + incForSlash)
+                                {
+                                    isFound = true;
+                                }
+                            }
+
+                            if (isFound && ((route.Method == string.Empty || (context.Request.HttpMethod == route.Method))))
+                            {
+                                // Starting a new thread to be able to handle a new request in parallel
+                                isRoute = true;
+
+                                // Check auth first
+                                bool isAuthOk = false;
+                                if (route.Authentication != null)
+                                {
+                                    if (route.Authentication.AuthenticationType == AuthenticationType.None)
+                                    {
+                                        isAuthOk = true;
+                                    }
+                                }
+                                else
+                                {
+                                    isAuthOk = true;
+                                }
+
+                                if (!isAuthOk)
+                                {
+                                    if (route.Authentication.AuthenticationType == AuthenticationType.Basic)
+                                    {
+                                        var credSite = route.Authentication.Credentials == null ? Credential : route.Authentication.Credentials;
+                                        var credReq = context.Request.Credentials;
+                                        if (credReq != null)
+                                        {
+                                            if ((credSite.UserName == credReq.UserName) && (credSite.Password == credSite.Password))
+                                            {
+                                                isAuthOk = true;
+                                            }
+                                        }
+                                    }
+                                    else if (route.Authentication.AuthenticationType == AuthenticationType.ApiKey)
+                                    {
+                                        var apikeySite = route.Authentication.ApiKey == null ? ApiKey : route.Authentication.ApiKey;
+                                        var apikeyReq = GetApiKeyFromHeaders(context.Request.Headers);
+
+                                        if (apikeyReq != null)
+                                        {
+                                            if (apikeyReq == apikeySite)
+                                            {
+                                                isAuthOk = true;
+                                            }
+                                        }
+                                    }
+                                }
+
+                                if (isAuthOk)
+                                {
+                                    route.Callback.Invoke(null, new object[] { new WebServerEventArgs(context) });
+                                    context.Response.Close();
+                                    context.Close();
+                                }
+                                else
+                                {
+                                    if (route.Authentication.AuthenticationType == AuthenticationType.Basic)
+                                    {
+                                        context.Response.Headers.Add("WWW-Authenticate", $"Basic realm=\"Access to {routeStr}\"");
+                                    }
+
+                                    context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                                    context.Response.ContentLength64 = 0;
+                                    context.Response.Close();
+                                    context.Close();
+                                }
                             }
                         }
-                        else
-                        {
-                            isFound = true;
-                        }
+                    }
 
-                        if (isFound && ((route.Method == string.Empty || (context.Request.HttpMethod == route.Method))))
+                    if (!isRoute)
+                    {
+                        if (CommandReceived != null)
                         {
                             // Starting a new thread to be able to handle a new request in parallel
-                            isRoute = true;
-                            new Thread(() =>
-                            {
-                                route.Callback.Invoke(null, new object[] { new WebServerEventArgs(context) });
-                                context.Response.Close();
-                                context.Close();
-                            }).Start();
-                        }
-                    }
-                }
-
-                if (!isRoute)
-                {
-                    if (CommandReceived != null)
-                    {
-                        // Starting a new thread to be able to handle a new request in parallel
-                        new Thread(() =>
-                        {
                             CommandReceived.Invoke(this, new WebServerEventArgs(context));
                             context.Response.Close();
                             context.Close();
-                        }).Start();
+                        }
+                        else
+                        {
+                            context.Response.StatusCode = 404;
+                            context.Response.ContentLength64 = 0;
+                            context.Response.Close();
+                            context.Close();
+                        }
                     }
-                    else
-                    {
-                        context.Response.StatusCode = 404;
-                        context.Response.ContentLength64 = 0;
-                        context.Response.Close();
-                        context.Close();
-                    }
-                }
+                }).Start();
 
             }
             if (_listener.IsListening)
             {
                 _listener.Stop();
             }
+        }
+
+        private string GetApiKeyFromHeaders(WebHeaderCollection headers)
+        {
+            var sec = headers.GetValues("ApiKey");
+            if (sec != null)
+            {
+                if (sec.Length > 0)
+                {
+                    return sec[0];
+                }
+            }
+
+            return null;
         }
 
         /// <summary>
