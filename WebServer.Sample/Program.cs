@@ -6,21 +6,34 @@
 using System;
 using System.Threading;
 using System.Diagnostics;
-using Windows.Devices.WiFi;
 using nanoFramework.Networking;
-using Windows.Storage;
 using System.Device.Gpio;
 using System.Text;
 using System.Net;
+
+#if HAS_WIFI
+using Windows.Devices.WiFi;
+#endif
+
+#if HAS_STORAGE
+using Windows.Storage;
+#endif
 
 namespace nanoFramework.WebServer.Sample
 {
     public class Program
     {
+
+#if HAS_WIFI
         private static string MySsid = "ssid";
         private static string MyPassword = "password";
         private static bool _isConnected = false;
+#endif
+
+#if HAS_STORAGE
         private static StorageFolder _storage;
+#endif
+
         private static GpioController _controller;
         private static string _securityKey = "MySecurityKey42";
 
@@ -30,13 +43,15 @@ namespace nanoFramework.WebServer.Sample
 
             try
             {
+                int connectRetry = 0;
+
+#if HAS_WIFI
                 // Get the first WiFI Adapter
                 WiFiAdapter wifi = WiFiAdapter.FindAllAdapters()[0];
                 Debug.WriteLine("Getting wifi adaptor");
 
                 wifi.AvailableNetworksChanged += WifiAvailableNetworksChanged;
 
-                int connectRetry = 0;
             rescan:
                 wifi.ScanAsync();
                 Debug.WriteLine("Scanning...");
@@ -50,11 +65,16 @@ namespace nanoFramework.WebServer.Sample
                         goto rescan;
                     }
                 }
+#endif
 
-                NetworkHelpers.SetupAndConnectNetwork(false);
+                NetworkHelpers.SetupAndConnectNetwork(true);
 
                 Debug.WriteLine("Waiting for network up and IP address...");
 
+                NetworkHelpers.IpAddressAvailable.WaitOne();
+                NetworkHelpers.DateTimeAvailable.WaitOne();
+
+#if HAS_WIFI
                 while (!NetworkHelpers.CheckIP())
                 {
                     Thread.Sleep(500);
@@ -65,9 +85,12 @@ namespace nanoFramework.WebServer.Sample
                         goto rescan;
                     }
                 }
+#endif
 
-
+#if HAS_STORAGE
                 _storage = KnownFolders.RemovableDevices.GetFolders()[0];
+#endif
+
                 _controller = new GpioController();
 
                 // Instantiate a new web server on port 80.
@@ -93,6 +116,7 @@ namespace nanoFramework.WebServer.Sample
             }
         }
 
+#if HAS_WIFI
         private static void WifiAvailableNetworksChanged(WiFiAdapter sender, object e)
         {
             var wifiNetworks = sender.NetworkReport.AvailableNetworks;
@@ -125,7 +149,7 @@ namespace nanoFramework.WebServer.Sample
 
             }
         }
-
+#endif
         private static void ServerCommandReceived(object source, WebServerEventArgs e)
         {
             try
@@ -147,6 +171,7 @@ namespace nanoFramework.WebServer.Sample
                         "<a href='/Text.txt'>Download the Text.txt file</a><br>" +
                         "Try this url with parameters: <a href='/param.htm?param1=42&second=24&NAme=Ellerbach'>/param.htm?param1=42&second=24&NAme=Ellerbach</a></body></html>");
                 }
+#if HAS_STORAGE
                 else if (url.ToLower() == "/useinternal")
                 {
                     // This tells the web server to use the internal storage and create a simple text file
@@ -155,6 +180,7 @@ namespace nanoFramework.WebServer.Sample
                     FileIO.WriteText(testFile, "This is an example of file\r\nAnd this is the second line");
                     WebServer.OutPutStream(e.Context.Response, "Created a test file text.txt on internal storage");
                 }
+#endif
                 else if (url.ToLower().IndexOf("/param.htm") == 0)
                 {
                     ParamHtml(e);
@@ -287,6 +313,7 @@ namespace nanoFramework.WebServer.Sample
                     }
                 }
 
+#if HAS_STORAGE
                 else
                 {
                     // Very simple example serving a static file on an SD card
@@ -302,6 +329,8 @@ namespace nanoFramework.WebServer.Sample
 
                     WebServer.OutputHttpCode(e.Context.Response, HttpStatusCode.NotFound);
                 }
+#endif
+
             }
             catch (Exception)
             {

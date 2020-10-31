@@ -1,16 +1,23 @@
 using System;
 using System.Threading;
 using System.Diagnostics;
-using Windows.Devices.WiFi;
 using nanoFramework.Networking;
 using nanoFramework.WebServer;
+
+#if HAS_WIFI
+using Windows.Devices.WiFi;
+#endif
 
 namespace nanoFramework.WebServer.GpioRest
 {
     public class Program
     {
+
+#if HAS_WIFI
         private static string MySsid = "ssid";
         private static string MyPassword = "password";
+#endif
+
         private static bool _isConnected = false;
 
         public static void Main()
@@ -19,13 +26,16 @@ namespace nanoFramework.WebServer.GpioRest
 
             try
             {
+
+                int connectRetry = 0;
+
+#if HAS_WIFI
                 // Get the first WiFI Adapter
                 WiFiAdapter wifi = WiFiAdapter.FindAllAdapters()[0];
                 Debug.WriteLine("Getting wifi adaptor");
 
                 wifi.AvailableNetworksChanged += WifiAvailableNetworksChanged;
 
-                int connectRetry = 0;
             rescan:
                 wifi.ScanAsync();
                 Debug.WriteLine("Scanning...");
@@ -39,11 +49,13 @@ namespace nanoFramework.WebServer.GpioRest
                         goto rescan;
                     }
                 }
+#endif
 
                 NetworkHelpers.SetupAndConnectNetwork(false);
 
                 Debug.WriteLine("Waiting for network up and IP address...");
 
+#if HAS_WIFI
                 while (!NetworkHelpers.CheckIP())
                 {
                     Thread.Sleep(500);
@@ -54,7 +66,7 @@ namespace nanoFramework.WebServer.GpioRest
                         goto rescan;
                     }
                 }
-
+#endif
 
                 // Instantiate a new web server on port 80.
                 using (WebServer server = new WebServer(80, HttpProtocol.Http, new Type[] { typeof(ControllerGpio) }))
@@ -73,6 +85,7 @@ namespace nanoFramework.WebServer.GpioRest
             }
         }
 
+#if HAS_WIFI
         private static void WifiAvailableNetworksChanged(WiFiAdapter sender, object e)
         {
             var wifiNetworks = sender.NetworkReport.AvailableNetworks;
@@ -105,5 +118,7 @@ namespace nanoFramework.WebServer.GpioRest
 
             }
         }
+#endif
+
     }
 }
