@@ -107,6 +107,7 @@ namespace nanoFramework.WebServer.Sample
 #else
                 // Instantiate a new web server on port 80.
                 using (WebServer server = new WebServer(80, HttpProtocol.Http, new Type[] { typeof(ControllerPerson), typeof(ControllerTest), typeof(ControllerAuth) }))
+#endif                
                 {
                     // To test authentication with various scenarios
                     server.ApiKey = _securityKey;
@@ -442,7 +443,7 @@ namespace nanoFramework.WebServer.Sample
 
         }
 
-#region certificates & keys
+        #region certificates & keys
 
         // X509 RSA key PEM format 2048 bytes
         // generate with openssl:
@@ -502,6 +503,6 @@ ISOWmrUCgYAFEmRxgwAc/u+D6t0syCwAYh6POtscq9Y0i9GyWk89NzgC4NdwwbBH
 TB6l9VGoxJL4fyHnZb8L5gGvnB1bbD8cL6YPaDiOhcRseC9vBiEuVg==
 -----END RSA PRIVATE KEY-----";
 
-#endregion
+        #endregion
     }
 }
