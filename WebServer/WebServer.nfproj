@@ -18,6 +18,9 @@
   </PropertyGroup>
   <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.props" Condition="Exists('$(NanoFrameworkProjectSystemPath)NFProjectSystem.props')" />
   <ItemGroup>
+    <Compile Include="Authentication.cs" />
+    <Compile Include="AuthenticationAttirbute.cs" />
+    <Compile Include="AuthenticationType.cs" />
     <Compile Include="CallbackRoutes.cs" />
     <Compile Include="CaseSensitiveAttribute.cs" />
     <Compile Include="HttpProtocol.cs" />

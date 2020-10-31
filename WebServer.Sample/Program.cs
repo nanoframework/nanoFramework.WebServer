@@ -103,12 +103,14 @@ namespace nanoFramework.WebServer.Sample
                 X509Certificate _myWebServerCertificate509 = new X509Certificate2(_myWebServerCrt, _myWebServerPrivateKey, "1234");
 
                 // Instantiate a new web server on port 443.
-                using (WebServer server = new WebServer(443, HttpProtocol.Https, new Type[] { typeof(ControllerPerson), typeof(ControllerTest) }))
+                using (WebServer server = new WebServer(443, HttpProtocol.Https, new Type[] { typeof(ControllerPerson), typeof(ControllerTest), typeof(ControllerAuth) }))
 #else
                 // Instantiate a new web server on port 80.
-                using (WebServer server = new WebServer(80, HttpProtocol.Http, new Type[] { typeof(ControllerPerson), typeof(ControllerTest) }))
-#endif
+                using (WebServer server = new WebServer(80, HttpProtocol.Http, new Type[] { typeof(ControllerPerson), typeof(ControllerTest), typeof(ControllerAuth) }))
                 {
+                    // To test authentication with various scenarios
+                    server.ApiKey = _securityKey;
+                    server.Credential = new NetworkCredential("user", "password");
                     // Add a handler for commands that are received by the server.
                     server.CommandReceived += ServerCommandReceived;
 
@@ -296,7 +298,7 @@ namespace nanoFramework.WebServer.Sample
                             }
 
                             // Get the param from the body
-                            if(e.Context.Request.ContentLength64 == 0)
+                            if (e.Context.Request.ContentLength64 == 0)
                             {
                                 WebServer.OutputHttpCode(e.Context.Response, HttpStatusCode.BadRequest);
                                 return;

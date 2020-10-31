@@ -31,5 +31,10 @@ namespace nanoFramework.WebServer
         /// The http method ex GET or POST, leave string.Empty for any
         /// </summary>
         public string Method { get; set; }
+
+        /// <summary>
+        /// the authentication details
+        /// </summary>
+        public Authentication Authentication { get; set; }
     }
 }
