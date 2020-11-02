@@ -418,38 +418,8 @@ namespace nanoFramework.WebServer
         /// </summary>
         public static void SendFileOverHTTP(HttpListenerResponse response, StorageFile strFilePath)
         {
-            string ContentType = "text/html";
-            //determine the type of file for the http header
-            if (strFilePath.FileType.ToLower() == ".cs" ||
-                strFilePath.FileType.ToLower() == ".txt" ||
-                strFilePath.FileType.ToLower() == ".csproj"
-            )
-            {
-                ContentType = "text/plain";
-            }
-            else if (strFilePath.FileType.ToLower() == ".jpg" ||
-                strFilePath.FileType.ToLower() == ".bmp" ||
-                strFilePath.FileType.ToLower() == ".jpeg" ||
-                strFilePath.FileType.ToLower() == ".png"
-              )
-            {
-                ContentType = "image";
-            }
-            else if (strFilePath.FileType.ToLower() == ".htm" ||
-                strFilePath.FileType.ToLower() == ".html"
-              )
-            {
-                ContentType = "text/html";
-            }
-            else if (strFilePath.FileType.ToLower() == ".mp3")
-            {
-                ContentType = "audio/mpeg";
-            }
-            else if (strFilePath.FileType.ToLower() == ".css")
-            {
-                ContentType = "text/css";
-            }
-
+            string ContentType = GetContentTypeFromFileName(strFilePath.FileType);
+           
             try
             {
                 IBuffer readBuffer = FileIO.ReadBuffer(strFilePath);
@@ -651,6 +621,7 @@ namespace nanoFramework.WebServer
             }
         }
 
+        /// Get the MIME-type for a file name.
         /// <summary>
         /// Dispose of any resources.
         /// </summary>
