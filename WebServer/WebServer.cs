@@ -1,4 +1,4 @@
-﻿//
+//
 // Copyright (c) 2020 Laurent Ellerbach and the project contributors
 // See LICENSE file in the project root for full license information.
 //
@@ -414,7 +414,7 @@ namespace nanoFramework.WebServer
         }
 
         /// <summary>
-        /// Read the timeout for a request to be send.
+        /// Return a file from Storage over HTTP response.
         /// </summary>
         public static void SendFileOverHTTP(HttpListenerResponse response, StorageFile strFilePath)
         {
@@ -658,7 +658,56 @@ namespace nanoFramework.WebServer
             }
         }
 
+        /// <summary>
         /// Get the MIME-type for a file name.
+        /// </summary>
+        /// <param name="fileName">File name to get content type for.</param>
+        /// <returns>The MIME-type for the file name.</returns>
+        private static string GetContentTypeFromFileName(string fileName)
+        {
+            // normalize to lower case to speed comparison
+            fileName = fileName.ToLower();
+
+            string contentType = "text/html";
+
+            //determine the type of file for the http header
+            if (fileName == ".cs" ||
+                fileName == ".txt" ||
+                fileName == ".csproj"
+            )
+            {
+                contentType = "text/plain";
+            }
+            else if (fileName == ".jpg" ||
+                fileName == ".bmp" ||
+                fileName == ".jpeg" ||
+                fileName == ".png"
+              )
+            {
+                contentType = "image";
+            }
+            else if (fileName == ".htm" ||
+                fileName == ".html"
+              )
+            {
+                contentType = "text/html";
+            }
+            else if (fileName == ".mp3")
+            {
+                contentType = "audio/mpeg";
+            }
+            else if (fileName == ".css")
+            {
+                contentType = "text/css";
+            }
+            else if (fileName == ".ico")
+            {
+                contentType = "image/x-icon";
+            }
+
+            return contentType;
+        }
+
         /// <summary>
         /// Dispose of any resources.
         /// </summary>
