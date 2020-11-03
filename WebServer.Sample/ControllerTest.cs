@@ -37,7 +37,7 @@ namespace nanoFramework.WebServer.Sample
                 ret += $"{param.Value} | ";
                 // Need to wait for latest version of System.Net
                 // See https://github.com/nanoframework/lib-nanoFramework.System.Net.Http/blob/develop/nanoFramework.System.Net.Http/Http/System.Net.HttpUtility.cs
-                // ret += $"{System.Web.HttpUtility.UrlDecode(param.Value)}";
+                ret += $"{System.Web.HttpUtility.UrlDecode(param.Value)}";
                 ret += "\r\n";
             }
             WebServer.OutPutStream(e.Context.Response, ret);
