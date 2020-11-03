@@ -12,10 +12,10 @@ This is a simple nanoFrmaework WebServer. Features:
 - Reflection for easy usage of controllers and notion of routes
 - Helpers to return error code directly facilitating REST API
 - HTTPS support
+- [URL decode/encode](https://github.com/nanoframework/lib-nanoFramework.System.Net.Http/blob/develop/nanoFramework.System.Net.Http/Http/System.Net.HttpUtility.cs)
 
 Limitations:
-- Does not support any zip way
-- No URL decode/encode implemented yet
+- Does not support any zip in the request or response stream
 
 ## Usage
 

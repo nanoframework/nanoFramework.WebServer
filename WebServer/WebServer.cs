@@ -416,16 +416,19 @@ namespace nanoFramework.WebServer
         /// <summary>
         /// Return a file from Storage over HTTP response.
         /// </summary>
-        public static void SendFileOverHTTP(HttpListenerResponse response, StorageFile strFilePath)
+        /// <param name="response"><see cref="HttpListenerResponse"/> to send the content over.</param>
+        /// <param name="strFilePath">The file to send</param>
+        /// <param name="contentType">The type of file, if empty string, then will use auto detection</param>
+        public static void SendFileOverHTTP(HttpListenerResponse response, StorageFile strFilePath, string contentType = "")
         {
-            string ContentType = GetContentTypeFromFileName(strFilePath.FileType);
-           
+            contentType = contentType == "" ? GetContentTypeFromFileName(strFilePath.FileType) : contentType;
+
             try
             {
                 IBuffer readBuffer = FileIO.ReadBuffer(strFilePath);
                 long fileLength = readBuffer.Length;
 
-                response.ContentType = ContentType;
+                response.ContentType = contentType;
                 response.ContentLength64 = fileLength;
                 // Now loops sending all the data.
 
@@ -459,13 +462,14 @@ namespace nanoFramework.WebServer
         /// <param name="response"><see cref="HttpListenerResponse"/> to send the content over.</param>
         /// <param name="fileName">Name of the file to send over <see cref="HttpListenerResponse"/>.</param>
         /// <param name="content">Content of the file to send.</param>
-        public static void SendFileOverHTTP(HttpListenerResponse response, string fileName, byte[] content)
+        /// /// <param name="contentType">The type of file, if empty string, then will use auto detection</param>
+        public static void SendFileOverHTTP(HttpListenerResponse response, string fileName, byte[] content, string contentType = "")
         {
-            string ContentType = GetContentTypeFromFileName(fileName.Substring(fileName.LastIndexOf('.')));
+            contentType = contentType == "" ? GetContentTypeFromFileName(fileName.Substring(fileName.LastIndexOf('.'))) : contentType;
 
             try
             {
-                response.ContentType = ContentType;
+                response.ContentType = contentType;
                 response.ContentLength64 = content.Length;
 
                 // Now loop to send all the data.
@@ -480,7 +484,7 @@ namespace nanoFramework.WebServer
                     response.OutputStream.Write(content, (int)bytesSent, (int)bytesToSend);
 
                     // allow some time to physically send the bits. Can be reduce to 10 or even less if not too much other code running in parallel
-                    
+
                     // update bytes sent
                     bytesSent += bytesToSend;
                 }
@@ -658,7 +662,6 @@ namespace nanoFramework.WebServer
             }
         }
 
-        /// Get the MIME-type for a file name.
         /// <summary>
         /// Get the MIME-type for a file name.
         /// </summary>
