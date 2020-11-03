@@ -1,6 +1,6 @@
 # .NET nanoFramework WebServer
 
-This is a simple nanoFrmaework WebServer. Features:
+This is a simple nanoFramework WebServer. Features:
 
 - Handle multithread requests
 - Serve static files on any storage
@@ -19,7 +19,7 @@ Limitations:
 
 ## Usage
 
-You just need to specify a port and a timeout for the querries and add an event handler when a request is incoming. With this first way, you will have an event raised every time you'll receive a request.
+You just need to specify a port and a timeout for the queries and add an event handler when a request is incoming. With this first way, you will have an event raised every time you'll receive a request.
 
 ```csharp
 using (WebServer server = new WebServer(80, HttpProtocol.Http)
@@ -46,7 +46,7 @@ using (WebServer server = new WebServer(80, HttpProtocol.Http, new Type[] { type
 }
 ```
 
-In this case, you're passing 2 classes where you have public methods decorated which will be called everytime the route is found.
+In this case, you're passing 2 classes where you have public methods decorated which will be called every time the route is found.
 
 With the previous example, a very simple and straight forward Test controller will look like that:
 
@@ -71,7 +71,7 @@ public class ControllerTest
 }
 ```
 
-In this example, the `RoutePostTest` will be called everytime the called url will be `test` or `Test2` or `tEst42` or `TEST`, the url can be with parameters and the method GET. Be aware that `Test` won't call the function, neither `test/`.
+In this example, the `RoutePostTest` will be called every time the called url will be `test` or `Test2` or `tEst42` or `TEST`, the url can be with parameters and the method GET. Be aware that `Test` won't call the function, neither `test/`.
 
 The `RouteAnyTest`is called whenever the url is `test/any` whatever the method is.
 
@@ -79,7 +79,7 @@ There is a more advance example with simple REST API to get a list of Person and
 
 **Important**
 * By default the routes are not case sensitive and the attribute **must** be lowercase
-* If you want to use case sensite routes like in the previous example, use the attribute `CaseSensitive`. As in the previous example, you **must** write the route as you want it to be restonded too
+* If you want to use case sensitive routes like in the previous example, use the attribute `CaseSensitive`. As in the previous example, you **must** write the route as you want it to be responded to.
 
 ## A simple GPIO controller REST API
 
@@ -169,16 +169,16 @@ With the previous example the following happens:
 
 - All the controller by default, even when nothing is specified will use the controller credentials. In our case, the Basic authentication with the default user (topuser) and password (topPassword) will be used.
     - When calling http://yoururl/authbasic from a browser, you will be prompted for the user and password, use the default one topuser and topPassword to get access
-    - When calling http://yoururl/authnone, you won't be prompted because the authentication has been overrided for no authentication
+    - When calling http://yoururl/authnone, you won't be prompted because the authentication has been overridden for no authentication
     - When calling http://yoururl/authbasicspecial, the user and password are different from the defautl ones, user2 and password is the right couple here
-- If you would have define in the controller a speicif user and password like `[Authentication("Basic:myuser mypassword")]`, then the default one for all the controller would have been myuser and mypassword
-- When calling http://yoururl/authapi, you must pass the header `ApiKey` (case sensitive) with the value `superKey1234` to get authorized, this is overriden the default Basic authentication
-- When calling http://yoururl/authdefaultapi, the defautl key `ATopSecretAPIKey1234` will be used so you have to pass it in the headers of the request
+- If you would have define in the controller a specific user and password like `[Authentication("Basic:myuser mypassword")]`, then the default one for all the controller would have been myuser and mypassword
+- When calling http://yoururl/authapi, you must pass the header `ApiKey` (case sensitive) with the value `superKey1234` to get authorized, this is overridden the default Basic authentication
+- When calling http://yoururl/authdefaultapi, the default key `ATopSecretAPIKey1234` will be used so you have to pass it in the headers of the request
 
 All up, this is an example to show how to use authentication, it's been defined to allow flexibility.
 
 
-## Managing incoming querries thru events
+## Managing incoming queries thru events
 
 Very basic usage is the following:
 
