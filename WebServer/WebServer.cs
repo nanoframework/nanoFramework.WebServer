@@ -414,7 +414,7 @@ namespace nanoFramework.WebServer
         }
 
         /// <summary>
-        /// Read the timeout for a request to be send.
+        /// Return a file from Storage over HTTP response.
         /// </summary>
         public static void SendFileOverHTTP(HttpListenerResponse response, StorageFile strFilePath)
         {
@@ -621,6 +621,7 @@ namespace nanoFramework.WebServer
             }
         }
 
+        /// Get the MIME-type for a file name.
         /// <summary>
         /// Get the MIME-type for a file name.
         /// </summary>
