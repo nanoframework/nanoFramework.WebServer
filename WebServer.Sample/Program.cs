@@ -16,6 +16,7 @@ using System.Device.Gpio;
 using System.Text;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
+using WebServer.Sample;
 
 #if HAS_WIFI
 using Windows.Devices.WiFi;
@@ -331,7 +332,10 @@ namespace nanoFramework.WebServer.Sample
                         ApiDefault(e);
                     }
                 }
-
+                else if (url.ToLower().IndexOf("/favicon.ico") == 0)
+                {
+                    WebServer.SendFileOverHTTP(e.Context.Response, "favicon.ico", Resources.GetBytes(Resources.BinaryResources.favicon));
+                }
 #if HAS_STORAGE
                 else
                 {

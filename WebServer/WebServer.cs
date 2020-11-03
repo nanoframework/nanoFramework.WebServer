@@ -658,6 +658,7 @@ namespace nanoFramework.WebServer
             }
         }
 
+        /// Get the MIME-type for a file name.
         /// <summary>
         /// Get the MIME-type for a file name.
         /// </summary>
