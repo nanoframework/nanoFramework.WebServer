@@ -1,5 +1,5 @@
-<?xml version="1.0"?>
-<dependency>
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
   <metadata>
     <id>nanoFramework.WebServer</id>
     <title>WebServer for nanoFramework</title>
@@ -40,4 +40,4 @@
     <file src="readme.txt" target="readme.txt" />
     <file src="nanoFramework.WebServer\nf-logo.png" target="images\" />
   </files>
-</dependency>
+</package>
