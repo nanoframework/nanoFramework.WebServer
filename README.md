@@ -10,8 +10,8 @@
 
 | Component | Build Status | NuGet Package |
 |:-|---|---|
-| nanoFramework.WebServer | [![Build Status](https://dev.azure.com/nanoframework/nanoFramework.WebServer/_apis/build/status/nanoframework.lib-nanoFramework.WebServer?branchName=develop)](https://dev.azure.com/nanoframework/nanoFramework.WebServer/_build/latest?definitionId=1?branchName=master) | [![NuGet](https://img.shields.io/nuget/v/nanoFramework.WebServer.svg?label=NuGet&style=flat&logo=nuget)](https://www.nuget.org/packages/nanoFramework.WebServer/) |
-| nanoFramework.WebServer (preview) | [![Build Status](https://dev.azure.com/nanoframework/nanoFramework.WebServer/_apis/build/status/nanoframework.lib-nanoFramework.WebServer?branchName=develop)](https://dev.azure.com/nanoframework/nanoFramework.WebServer/_build/latest?definitionId=1?branchName=develop) | [![](https://badgen.net/badge/NuGet/preview/D7B023?icon=https://simpleicons.now.sh/azuredevops/fff)](https://dev.azure.com/nanoframework/feed/_packaging?_a=package&feed=sandbox&package=nanoFramework.WebServer&protocolType=NuGet&view=overview) |
+| nanoFramework.WebServer | [![Build Status](https://dev.azure.com/nanoframework/nanoFramework.WebServer/_apis/build/status/nanoframework.lib-nanoFramework.WebServer?branchName=master)](https://dev.azure.com/nanoframework/nanoFramework.WebServer/_build/latest?definitionId=65&branchName=master) | [![NuGet](https://img.shields.io/nuget/v/nanoFramework.WebServer.svg?label=NuGet&style=flat&logo=nuget)](https://www.nuget.org/packages/nanoFramework.WebServer/) |
+| nanoFramework.WebServer (preview) | [![Build Status](https://dev.azure.com/nanoframework/nanoFramework.WebServer/_apis/build/status/nanoframework.lib-nanoFramework.WebServer?branchName=develop)](https://dev.azure.com/nanoframework/nanoFramework.WebServer/_build/latest?definitionId=65&branchName=develop) | [![](https://badgen.net/badge/NuGet/preview/D7B023?icon=https://simpleicons.now.sh/azuredevops/fff)](https://dev.azure.com/nanoframework/feed/_packaging?_a=package&feed=sandbox&package=nanoFramework.WebServer&protocolType=NuGet&view=overview) |
 
 ## .NET nanoFramework WebServer
 
