@@ -15,7 +15,7 @@
 
 ## .NET nanoFramework WebServer
 
-This library was coded by [Laurent Ellerbach](@Ellerbach) who generously offered the project to the **nanoFramework** project.
+This library was coded by [Laurent Ellerbach](@Ellerbach) who generously offered it to the .NET **nanoFramework** project.
 
 This is a simple nanoFramework WebServer. Features:
 
