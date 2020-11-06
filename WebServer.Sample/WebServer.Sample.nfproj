@@ -32,7 +32,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\WebServer\WebServer.nfproj" />
+    <ProjectReference Include="..\nanoFramework.WebServer\nanoFramework.WebServer.nfproj" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
