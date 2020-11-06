@@ -21,7 +21,7 @@ pool:
 
 variables:
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
-  solution: 'nanoFramework.WebServer'
+  solution: 'nanoFramework.WebServer.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
   nugetPackageName: 'nanoFramework.WebServer'
