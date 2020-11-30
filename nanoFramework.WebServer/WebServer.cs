@@ -566,7 +566,7 @@ namespace nanoFramework.WebServer
                                         var credReq = context.Request.Credentials;
                                         if (credReq != null)
                                         {
-                                            if ((credSite.UserName == credReq.UserName) && (credSite.Password == credSite.Password))
+                                            if ((credSite.UserName == credReq.UserName) && (credSite.Password == credReq.Password))
                                             {
                                                 isAuthOk = true;
                                             }
