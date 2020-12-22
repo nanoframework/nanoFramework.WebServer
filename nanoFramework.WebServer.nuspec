@@ -5,14 +5,12 @@
     <title>WebServer for nanoFramework</title>
     <version>$version$</version>
     <authors>Laurent Ellerbach</authors>
-    <owners>nanoFramework project contributors</owners>
-    <license type="expression">MIT</license>
+    <owners>nanoFramework project contributors,dotnetfoundation</owners>
+    <license type="file">LICENSE.md</license>
     <projectUrl>https://github.com/nanoframework/nanoFramework.WebServer</projectUrl>
-    <iconUrl>https://secure.gravatar.com/avatar/97d0e092247f0716db6d4b47b7d1d1ad</iconUrl>
-    <icon>images\nf-logo.png</icon>
+    <icon>nf-logo.png</icon>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <developmentDependency>false</developmentDependency>
-    <summary>.NET nanoFramework WebServer</summary>
     <description>
       This is a simple multithread WebServer supporting simple controller and event based
       calls. Perfect for nanoFramework REST API based project. Support all type of Http Methods.
@@ -37,7 +35,8 @@
   <files>
     <file src="nanoFramework.WebServer\bin\Release\nanoFramework.WebServer.*" target="lib" />
 
-    <file src="readme.txt" target="readme.txt" />
-    <file src="nanoFramework.WebServer\nf-logo.png" target="images\" />
+    <file src="assets\readme.txt" target="" />
+    <file src="assets\nf-logo.png" target="" />
+    <file src="LICENSE.md" target="" />
   </files>
 </package>
