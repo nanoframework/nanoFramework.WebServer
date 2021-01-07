@@ -1,5 +1,9 @@
 # Changelog
 
+## [v1.0.0-preview.10](https://github.com/nanoframework/lib-nanoFramework.WebServer/tree/v1.0.0-preview.10) (2020-12-22)
+
+[Full Changelog](https://github.com/nanoframework/lib-nanoFramework.WebServer/compare/v1.0.0-preview.6...v1.0.0-preview.10)
+
 ## [v1.0.0-preview.6](https://github.com/nanoframework/lib-nanoFramework.WebServer/tree/v1.0.0-preview.6) (2020-12-01)
 
 [Full Changelog](https://github.com/nanoframework/lib-nanoFramework.WebServer/compare/v1.0.0-preview.3...v1.0.0-preview.6)
