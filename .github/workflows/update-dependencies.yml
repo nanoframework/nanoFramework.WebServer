@@ -3,7 +3,7 @@
 
 # This workflow will periodically check .NET nanoFramework dependencies and updates them in the repository it's running.
 
-name: Update dependencies
+name: Daily update dependencies
 
 on:
   schedule:
@@ -23,11 +23,11 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v2.3.1
         with:
           path: main
       - name: Checkout tools repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v2.3.1
         with:
           repository: nanoframework/nf-tools
           path: tools
@@ -45,6 +45,8 @@ jobs:
             [version update]
             
             ### :warning: This is an automated update. :warning:
-          committer: 'nfbot <nanoframework@outlook.com>'
+          committer: 'nfbot <dependencybot@nanoframework.net>'
           branch: ${{ env.BRANCH_NAME }}
           path: main
+          labels: |
+            Type: dependencies
