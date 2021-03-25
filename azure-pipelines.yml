@@ -25,7 +25,7 @@ variables:
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
   nugetPackageName: 'nanoFramework.WebServer'
-  repoName: 'lib-nanoFramework.WebServer'
+  repoName: 'nanoFramework.WebServer'
 
 steps:
 
