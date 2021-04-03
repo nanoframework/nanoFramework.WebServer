@@ -504,137 +504,130 @@ namespace nanoFramework.WebServer
 
                 new Thread(() =>
                 {
-                    try
+                    bool isRoute = false;
+                    CallbackRoutes route;
+                    int urlParam;
+                    bool isFound;
+                    int incForSlash;
+                    string toCompare;
+                    string routeStr;
+                    string rawUrl;
+
+                    foreach (var rt in _callbackRoutes)
                     {
-                        bool isRoute = false;
-                        CallbackRoutes route;
-                        int urlParam;
-                        bool isFound;
-                        int incForSlash;
-                        string toCompare;
-                        string routeStr;
-                        string rawUrl;
+                        route = (CallbackRoutes)rt;
+                        rawUrl = context.Request.RawUrl;
+                        if (rawUrl == null)
+                            break;
 
-                        foreach (var rt in _callbackRoutes)
+                        urlParam = context.Request.RawUrl.IndexOf(ParamStart);
+                        isFound = false;
+                        routeStr = route.Route;
+                        incForSlash = routeStr.IndexOf('/') == 0 ? 0 : 1;
+                        toCompare = route.CaseSensitive ? rawUrl : rawUrl.ToLower();
+                        if (toCompare.IndexOf(routeStr) == incForSlash)
                         {
-                            route = (CallbackRoutes)rt;
-                            rawUrl = context.Request.RawUrl;
-                            if (rawUrl == null)
-                                break;
-
-                            urlParam = context.Request.RawUrl.IndexOf(ParamStart);
-                            isFound = false;
-                            routeStr = route.Route;
-                            incForSlash = routeStr.IndexOf('/') == 0 ? 0 : 1;
-                            toCompare = route.CaseSensitive ? rawUrl : rawUrl.ToLower();
-                            if (toCompare.IndexOf(routeStr) == incForSlash)
+                            if (urlParam > 0)
                             {
-                                if (urlParam > 0)
+                                if (urlParam == routeStr.Length + incForSlash)
                                 {
-                                    if (urlParam == routeStr.Length + incForSlash)
+                                    isFound = true;
+                                }
+                            }
+                            else
+                            {
+                                if (toCompare.Length == routeStr.Length + incForSlash)
+                                {
+                                    isFound = true;
+                                }
+                            }
+
+                            if (isFound && ((route.Method == string.Empty || (context.Request.HttpMethod == route.Method))))
+                            {
+                                // Starting a new thread to be able to handle a new request in parallel
+                                isRoute = true;
+
+                                // Check auth first
+                                bool isAuthOk = false;
+                                if (route.Authentication != null)
+                                {
+                                    if (route.Authentication.AuthenticationType == AuthenticationType.None)
                                     {
-                                        isFound = true;
+                                        isAuthOk = true;
                                     }
                                 }
                                 else
                                 {
-                                    if (toCompare.Length == routeStr.Length + incForSlash)
-                                    {
-                                        isFound = true;
-                                    }
+                                    isAuthOk = true;
                                 }
 
-                                if (isFound && ((route.Method == string.Empty || (context.Request.HttpMethod == route.Method))))
+                                if (!isAuthOk)
                                 {
-                                    // Starting a new thread to be able to handle a new request in parallel
-                                    isRoute = true;
-
-                                    // Check auth first
-                                    bool isAuthOk = false;
-                                    if (route.Authentication != null)
+                                    if (route.Authentication.AuthenticationType == AuthenticationType.Basic)
                                     {
-                                        if (route.Authentication.AuthenticationType == AuthenticationType.None)
+                                        var credSite = route.Authentication.Credentials == null ? Credential : route.Authentication.Credentials;
+                                        var credReq = context.Request.Credentials;
+                                        if (credReq != null)
                                         {
-                                            isAuthOk = true;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        isAuthOk = true;
-                                    }
-
-                                    if (!isAuthOk)
-                                    {
-                                        if (route.Authentication.AuthenticationType == AuthenticationType.Basic)
-                                        {
-                                            var credSite = route.Authentication.Credentials == null ? Credential : route.Authentication.Credentials;
-                                            var credReq = context.Request.Credentials;
-                                            if (credReq != null)
+                                            if ((credSite.UserName == credReq.UserName) && (credSite.Password == credReq.Password))
                                             {
-                                                if ((credSite.UserName == credReq.UserName) && (credSite.Password == credReq.Password))
-                                                {
-                                                    isAuthOk = true;
-                                                }
-                                            }
-                                        }
-                                        else if (route.Authentication.AuthenticationType == AuthenticationType.ApiKey)
-                                        {
-                                            var apikeySite = route.Authentication.ApiKey == null ? ApiKey : route.Authentication.ApiKey;
-                                            var apikeyReq = GetApiKeyFromHeaders(context.Request.Headers);
-
-                                            if (apikeyReq != null)
-                                            {
-                                                if (apikeyReq == apikeySite)
-                                                {
-                                                    isAuthOk = true;
-                                                }
+                                                isAuthOk = true;
                                             }
                                         }
                                     }
+                                    else if (route.Authentication.AuthenticationType == AuthenticationType.ApiKey)
+                                    {
+                                        var apikeySite = route.Authentication.ApiKey == null ? ApiKey : route.Authentication.ApiKey;
+                                        var apikeyReq = GetApiKeyFromHeaders(context.Request.Headers);
 
-                                    if (isAuthOk)
-                                    {
-                                        route.Callback.Invoke(null, new object[] { new WebServerEventArgs(context) });
-                                        context.Response.Close();
-                                        context.Close();
-                                    }
-                                    else
-                                    {
-                                        if (route.Authentication.AuthenticationType == AuthenticationType.Basic)
+                                        if (apikeyReq != null)
                                         {
-                                            context.Response.Headers.Add("WWW-Authenticate", $"Basic realm=\"Access to {routeStr}\"");
+                                            if (apikeyReq == apikeySite)
+                                            {
+                                                isAuthOk = true;
+                                            }
                                         }
-
-                                        context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                                        context.Response.ContentLength64 = 0;
-                                        context.Response.Close();
-                                        context.Close();
                                     }
                                 }
-                            }
-                        }
 
-                        if (!isRoute)
-                        {
-                            if (CommandReceived != null)
-                            {
-                                // Starting a new thread to be able to handle a new request in parallel
-                                CommandReceived.Invoke(this, new WebServerEventArgs(context));
-                                context.Response.Close();
-                                context.Close();
-                            }
-                            else
-                            {
-                                context.Response.StatusCode = 404;
-                                context.Response.ContentLength64 = 0;
-                                context.Response.Close();
-                                context.Close();
+                                if (isAuthOk)
+                                {
+                                    route.Callback.Invoke(null, new object[] { new WebServerEventArgs(context) });
+                                    context.Response.Close();
+                                    context.Close();
+                                }
+                                else
+                                {
+                                    if (route.Authentication.AuthenticationType == AuthenticationType.Basic)
+                                    {
+                                        context.Response.Headers.Add("WWW-Authenticate", $"Basic realm=\"Access to {routeStr}\"");
+                                    }
+
+                                    context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                                    context.Response.ContentLength64 = 0;
+                                    context.Response.Close();
+                                    context.Close();
+                                }
                             }
                         }
                     }
-                    catch (Exception ex)
+
+                    if (!isRoute)
                     {
-                        Debug.WriteLine(ex.Message);
+                        if (CommandReceived != null)
+                        {
+                            // Starting a new thread to be able to handle a new request in parallel
+                            CommandReceived.Invoke(this, new WebServerEventArgs(context));
+                            context.Response.Close();
+                            context.Close();
+                        }
+                        else
+                        {
+                            context.Response.StatusCode = 404;
+                            context.Response.ContentLength64 = 0;
+                            context.Response.Close();
+                            context.Close();
+                        }
                     }
                 }).Start();
 
