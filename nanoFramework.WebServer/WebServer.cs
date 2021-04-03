@@ -518,10 +518,13 @@ namespace nanoFramework.WebServer
                         foreach (var rt in _callbackRoutes)
                         {
                             route = (CallbackRoutes)rt;
+                            rawUrl = context.Request.RawUrl;
+                            if (rawUrl == null)
+                                break;
+
                             urlParam = context.Request.RawUrl.IndexOf(ParamStart);
                             isFound = false;
                             routeStr = route.Route;
-                            rawUrl = context.Request.RawUrl;
                             incForSlash = routeStr.IndexOf('/') == 0 ? 0 : 1;
                             toCompare = route.CaseSensitive ? rawUrl : rawUrl.ToLower();
                             if (toCompare.IndexOf(routeStr) == incForSlash)
