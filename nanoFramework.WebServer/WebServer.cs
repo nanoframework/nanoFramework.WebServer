@@ -18,6 +18,9 @@ using Windows.Storage.Streams;
 
 namespace nanoFramework.WebServer
 {
+    /// <summary>
+    /// This class instantiates a web server.
+    /// </summary>
     public class WebServer : IDisposable
     {
         /// <summary>
@@ -41,8 +44,8 @@ namespace nanoFramework.WebServer
 
         private bool _cancel = false;
         private Thread _serverThread = null;
-        private ArrayList _callbackRoutes;
-        private HttpListener _listener;
+        private readonly ArrayList _callbackRoutes;
+        private readonly HttpListener _listener;
 
         #endregion
 
@@ -101,16 +104,13 @@ namespace nanoFramework.WebServer
         {
             UrlParameter[] retParams = null;
             int i = parameter.IndexOf(ParamStart);
-            int j = i;
             int k;
 
             if (i >= 0)
             {
-                //look at the number of = and ;
-
                 while ((i < parameter.Length) || (i == -1))
                 {
-                    j = parameter.IndexOf(ParamEqual, i);
+                    int j = parameter.IndexOf(ParamEqual, i);
                     if (j > i)
                     {
                         //first param!
@@ -161,13 +161,19 @@ namespace nanoFramework.WebServer
         #region Constructors
 
         /// <summary>
-        /// Instantiates a new webserver.
+        /// Instantiates a new web server.
         /// </summary>
         /// <param name="port">Port number to listen on.</param>
-        /// <param name="timeout">Timeout to listen and respond to a request in millisecond.</param>
+        /// <param name="protocol"><see cref="HttpProtocol"/> version to use with web server.</param>
         public WebServer(int port, HttpProtocol protocol) : this(port, protocol, null)
         { }
 
+        /// <summary>
+        /// Instantiates a new web server.
+        /// </summary>
+        /// <param name="port">Port number to listen on.</param>
+        /// <param name="protocol"><see cref="HttpProtocol"/> version to use with web server.</param>
+        /// <param name="controllers">Controllers to use with this web server.</param>
         public WebServer(int port, HttpProtocol protocol, Type[] controllers)
         {
             _callbackRoutes = new ArrayList();
@@ -222,7 +228,7 @@ namespace nanoFramework.WebServer
                                     }
                                 }
 
-                                _callbackRoutes.Add(callbackRoutes); ;
+                                _callbackRoutes.Add(callbackRoutes); 
                             }
                         }
                     }
@@ -246,14 +252,14 @@ namespace nanoFramework.WebServer
 
         private Authentication ExtractAuthentication(string strAuth)
         {
-            const string None = "None";
-            const string Basic = "Basic";
-            const string ApiKey = "ApiKey";
+            const string _none = "None";
+            const string _basic = "Basic";
+            const string _apiKey = "ApiKey";
 
-            Authentication authentication = null;
-            if (strAuth.IndexOf(None) == 0)
+            Authentication authentication;
+            if (strAuth.IndexOf(_none) == 0)
             {
-                if (strAuth.Length == None.Length)
+                if (strAuth.Length == _none.Length)
                 {
                     authentication = new Authentication();
                 }
@@ -262,16 +268,16 @@ namespace nanoFramework.WebServer
                     throw new ArgumentException($"Authentication attribute None can only be used alone");
                 }
             }
-            else if (strAuth.IndexOf(Basic) == 0)
+            else if (strAuth.IndexOf(_basic) == 0)
             {
-                if (strAuth.Length == Basic.Length)
+                if (strAuth.Length == _basic.Length)
                 {
                     authentication = new Authentication((NetworkCredential)null);
                 }
                 else
                 {
                     var sep = strAuth.IndexOf(':');
-                    if (sep == Basic.Length)
+                    if (sep == _basic.Length)
                     {
                         var space = strAuth.IndexOf(' ');
                         if (space < 0)
@@ -289,16 +295,16 @@ namespace nanoFramework.WebServer
                     }
                 }
             }
-            else if (strAuth.IndexOf(ApiKey) == 0)
+            else if (strAuth.IndexOf(_apiKey) == 0)
             {
-                if (strAuth.Length == ApiKey.Length)
+                if (strAuth.Length == _apiKey.Length)
                 {
                     authentication = new Authentication(string.Empty);
                 }
                 else
                 {
                     var sep = strAuth.IndexOf(':');
-                    if (sep == ApiKey.Length)
+                    if (sep == _apiKey.Length)
                     {
                         var key = strAuth.Substring(sep + 1);
                         authentication = new Authentication(key);
@@ -422,37 +428,29 @@ namespace nanoFramework.WebServer
         public static void SendFileOverHTTP(HttpListenerResponse response, StorageFile strFilePath, string contentType = "")
         {
             contentType = contentType == "" ? GetContentTypeFromFileName(strFilePath.FileType) : contentType;
+            IBuffer readBuffer = FileIO.ReadBuffer(strFilePath);
+            long fileLength = readBuffer.Length;
 
-            try
+            response.ContentType = contentType;
+            response.ContentLength64 = fileLength;
+            // Now loops sending all the data.
+
+            byte[] buf = new byte[MaxSizeBuffer];
+            using (DataReader dataReader = DataReader.FromBuffer(readBuffer))
             {
-                IBuffer readBuffer = FileIO.ReadBuffer(strFilePath);
-                long fileLength = readBuffer.Length;
-
-                response.ContentType = contentType;
-                response.ContentLength64 = fileLength;
-                // Now loops sending all the data.
-
-                byte[] buf = new byte[MaxSizeBuffer];
-                using (DataReader dataReader = DataReader.FromBuffer(readBuffer))
+                for (long bytesSent = 0; bytesSent < fileLength;)
                 {
-                    for (long bytesSent = 0; bytesSent < fileLength;)
-                    {
-                        // Determines amount of data left.
-                        long bytesToRead = fileLength - bytesSent;
-                        bytesToRead = bytesToRead < MaxSizeBuffer ? bytesToRead : MaxSizeBuffer;
-                        // Reads the data.
-                        dataReader.ReadBytes(buf);
-                        // Writes data to browser
-                        response.OutputStream.Write(buf, 0, (int)bytesToRead);
-                        // allow some time to physically send the bits. Can be reduce to 10 or even less if not too much other code running in parallel
-                        // Updates bytes read.
-                        bytesSent += bytesToRead;
-                    }
+                    // Determines amount of data left.
+                    long bytesToRead = fileLength - bytesSent;
+                    bytesToRead = bytesToRead < MaxSizeBuffer ? bytesToRead : MaxSizeBuffer;
+                    // Reads the data.
+                    dataReader.ReadBytes(buf);
+                    // Writes data to browser
+                    response.OutputStream.Write(buf, 0, (int)bytesToRead);
+                    // allow some time to physically send the bits. Can be reduce to 10 or even less if not too much other code running in parallel
+                    // Updates bytes read.
+                    bytesSent += bytesToRead;
                 }
-            }
-            catch (Exception e)
-            {
-                throw e;
             }
         }
 
@@ -466,32 +464,24 @@ namespace nanoFramework.WebServer
         public static void SendFileOverHTTP(HttpListenerResponse response, string fileName, byte[] content, string contentType = "")
         {
             contentType = contentType == "" ? GetContentTypeFromFileName(fileName.Substring(fileName.LastIndexOf('.'))) : contentType;
+            response.ContentType = contentType;
+            response.ContentLength64 = content.Length;
 
-            try
+            // Now loop to send all the data.
+
+            for (long bytesSent = 0; bytesSent < content.Length;)
             {
-                response.ContentType = contentType;
-                response.ContentLength64 = content.Length;
+                // Determines amount of data left
+                long bytesToSend = content.Length - bytesSent;
+                bytesToSend = bytesToSend < MaxSizeBuffer ? bytesToSend : MaxSizeBuffer;
 
-                // Now loop to send all the data.
+                // Writes data to output stream
+                response.OutputStream.Write(content, (int)bytesSent, (int)bytesToSend);
 
-                for (long bytesSent = 0; bytesSent < content.Length;)
-                {
-                    // Determines amount of data left
-                    long bytesToSend = content.Length - bytesSent;
-                    bytesToSend = bytesToSend < MaxSizeBuffer ? bytesToSend : MaxSizeBuffer;
+                // allow some time to physically send the bits. Can be reduce to 10 or even less if not too much other code running in parallel
 
-                    // Writes data to output stream
-                    response.OutputStream.Write(content, (int)bytesSent, (int)bytesToSend);
-
-                    // allow some time to physically send the bits. Can be reduce to 10 or even less if not too much other code running in parallel
-
-                    // update bytes sent
-                    bytesSent += bytesToSend;
-                }
-            }
-            catch (Exception e)
-            {
-                throw e;
+                // update bytes sent
+                bytesSent += bytesToSend;
             }
         }
 
@@ -539,7 +529,9 @@ namespace nanoFramework.WebServer
                                 }
                             }
 
-                            if (isFound && ((route.Method == string.Empty || (context.Request.HttpMethod == route.Method))))
+                            if (isFound
+                                && (route.Method == string.Empty
+                                    || (context.Request.HttpMethod == route.Method)))
                             {
                                 // Starting a new thread to be able to handle a new request in parallel
                                 isRoute = true;
@@ -562,27 +554,24 @@ namespace nanoFramework.WebServer
                                 {
                                     if (route.Authentication.AuthenticationType == AuthenticationType.Basic)
                                     {
-                                        var credSite = route.Authentication.Credentials == null ? Credential : route.Authentication.Credentials;
+                                        var credSite = route.Authentication.Credentials ?? Credential;
                                         var credReq = context.Request.Credentials;
-                                        if (credReq != null)
+                                        if (credReq != null
+                                            && (credSite.UserName == credReq.UserName)
+                                            && (credSite.Password == credReq.Password))
                                         {
-                                            if ((credSite.UserName == credReq.UserName) && (credSite.Password == credReq.Password))
-                                            {
-                                                isAuthOk = true;
-                                            }
+                                            isAuthOk = true;
                                         }
                                     }
                                     else if (route.Authentication.AuthenticationType == AuthenticationType.ApiKey)
                                     {
-                                        var apikeySite = route.Authentication.ApiKey == null ? ApiKey : route.Authentication.ApiKey;
+                                        var apikeySite = route.Authentication.ApiKey ?? ApiKey;
                                         var apikeyReq = GetApiKeyFromHeaders(context.Request.Headers);
 
-                                        if (apikeyReq != null)
+                                        if (apikeyReq != null
+                                            && apikeyReq == apikeySite)
                                         {
-                                            if (apikeyReq == apikeySite)
-                                            {
-                                                isAuthOk = true;
-                                            }
+                                            isAuthOk = true;
                                         }
                                     }
                                 }
@@ -638,12 +627,10 @@ namespace nanoFramework.WebServer
         private string GetApiKeyFromHeaders(WebHeaderCollection headers)
         {
             var sec = headers.GetValues("ApiKey");
-            if (sec != null)
+            if (sec != null
+                && sec.Length > 0)
             {
-                if (sec.Length > 0)
-                {
-                    return sec[0];
-                }
+                return sec[0];
             }
 
             return null;
