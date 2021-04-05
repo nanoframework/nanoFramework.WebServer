@@ -15,8 +15,6 @@ namespace nanoFramework.WebServer
         /// <summary>
         /// Constructor for the event arguments
         /// </summary>
-        /// <param name="mresponse"></param>
-        /// <param name="mrawURL"></param>
         public WebServerEventArgs(HttpListenerContext context)
         {
             Context = context;
