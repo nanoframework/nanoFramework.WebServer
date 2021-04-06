@@ -2,7 +2,19 @@
 
 ## [**Changes available only in 'Preview' NuGet packages:**](https://github.com/nanoframework/nanoFramework.WebServer/tree/HEAD)
 
-[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.0.0-preview.32...HEAD)
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.0.0-preview.41...HEAD)
+
+**Implemented enhancements:**
+
+- Various fixes from Sonarcloud analysis [\#34](https://github.com/nanoframework/nanoFramework.WebServer/pull/34)
+
+**Documentation and other chores:**
+
+- Update 1 nuget dependencies [\#37](https://github.com/nanoframework/nanoFramework.WebServer/pull/37)
+
+## [v1.0.0-preview.41](https://github.com/nanoframework/nanoFramework.WebServer/tree/v1.0.0-preview.41) (2021-04-05)
+
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.0.0-preview.32...v1.0.0-preview.41)
 
 **Documentation and other chores:**
 
