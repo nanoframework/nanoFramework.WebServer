@@ -495,26 +495,23 @@ namespace nanoFramework.WebServer
                 new Thread(() =>
                 {
                     bool isRoute = false;
-                    CallbackRoutes route;
-                    int urlParam;
-                    bool isFound;
-                    int incForSlash;
-                    string toCompare;
-                    string routeStr;
-                    string rawUrl;
+                    string rawUrl = context.Request.RawUrl;
+                    
+                    //This is for handling with transitory or bad requests
+                    if (rawUrl == null)
+                        return;
+
+                    int urlParam = rawUrl.IndexOf(ParamStart);
 
                     foreach (var rt in _callbackRoutes)
                     {
-                        route = (CallbackRoutes)rt;
-                        rawUrl = context.Request.RawUrl;
-                        if (rawUrl == null)
-                            break;
+                        CallbackRoutes route = (CallbackRoutes)rt;
 
-                        urlParam = context.Request.RawUrl.IndexOf(ParamStart);
-                        isFound = false;
-                        routeStr = route.Route;
-                        incForSlash = routeStr.IndexOf('/') == 0 ? 0 : 1;
-                        toCompare = route.CaseSensitive ? rawUrl : rawUrl.ToLower();
+                        bool isFound = false;
+                        string routeStr = route.Route;
+                        int incForSlash = routeStr.IndexOf('/') == 0 ? 0 : 1;
+                        string toCompare = route.CaseSensitive ? rawUrl : rawUrl.ToLower();
+
                         if (toCompare.IndexOf(routeStr) == incForSlash)
                         {
                             if (urlParam > 0)
