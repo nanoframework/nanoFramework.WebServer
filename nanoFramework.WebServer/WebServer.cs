@@ -499,38 +499,54 @@ namespace nanoFramework.WebServer
 
                     //This is for handling with transitory or bad requests
                     if (rawUrl == null)
+                    {
                         return;
+                    }
 
                     int urlParam = rawUrl.IndexOf(ParamStart);
+
+                    // Variables used only within the "for". They are here for performance reasons
+                    bool isFound;
+                    string routeStr;
+                    int incForSlash;
+                    string toCompare;
+                    bool mustAuthenticate;
+                    bool isAuthOk;
+                    //
 
                     foreach (var rt in _callbackRoutes)
                     {
                         CallbackRoutes route = (CallbackRoutes)rt;
 
-                        bool isFound;
-                        string routeStr = route.Route;
-                        int incForSlash = routeStr.IndexOf('/') == 0 ? 0 : 1;
-                        string toCompare = route.CaseSensitive ? rawUrl : rawUrl.ToLower();
+                        routeStr = route.Route;
+                        incForSlash = routeStr.IndexOf('/') == 0 ? 0 : 1;
+                        toCompare = route.CaseSensitive ? rawUrl : rawUrl.ToLower();
 
                         if (urlParam > 0)
+                        {
                             isFound = urlParam == routeStr.Length + incForSlash;
+                        }
                         else
+                        {
                             isFound = toCompare.Length == routeStr.Length + incForSlash;
+                        }
 
-                        // todo - please help to name the variables: neededName, neededName2
-                        bool neededName = toCompare.IndexOf(routeStr) == incForSlash;
-                        bool neededName2 = isFound
-                                && (route.Method == string.Empty || context.Request.HttpMethod == route.Method);
-
-                        if (!neededName || !neededName2)
+                        // Matching the route name
+                        // Matching the method type
+                        if (!isFound ||
+                            (toCompare.IndexOf(routeStr) != incForSlash) ||
+                            (route.Method != string.Empty && context.Request.HttpMethod != route.Method)
+                            )
+                        {
                             continue;
+                        }
 
                         // Starting a new thread to be able to handle a new request in parallel
                         isRoute = true;
 
                         // Check auth first
-                        bool mustAuthenticate = route.Authentication != null && route.Authentication.AuthenticationType != AuthenticationType.None;
-                        bool isAuthOk = false;
+                        mustAuthenticate = route.Authentication != null && route.Authentication.AuthenticationType != AuthenticationType.None;
+                        isAuthOk = false;
 
                         if (mustAuthenticate)
                         {
