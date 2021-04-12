@@ -2,7 +2,15 @@
 
 ## [**Changes available only in 'Preview' NuGet packages:**](https://github.com/nanoframework/nanoFramework.WebServer/tree/HEAD)
 
-[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.0.0-preview.44...HEAD)
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.0.0-preview.47...HEAD)
+
+**Implemented enhancements:**
+
+- Improve treatment of SocketException [\#29](https://github.com/nanoframework/nanoFramework.WebServer/pull/29)
+
+## [v1.0.0-preview.47](https://github.com/nanoframework/nanoFramework.WebServer/tree/v1.0.0-preview.47) (2021-04-10)
+
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.0.0-preview.44...v1.0.0-preview.47)
 
 **Documentation and other chores:**
 
