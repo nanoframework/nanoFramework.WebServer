@@ -2,7 +2,28 @@
 
 ## [**Changes available only in 'Preview' NuGet packages:**](https://github.com/nanoframework/nanoFramework.WebServer/tree/HEAD)
 
-[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.0.0-preview.32...HEAD)
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.0.0-preview.44...HEAD)
+
+**Documentation and other chores:**
+
+- Update 4 NuGet dependencies [\#39](https://github.com/nanoframework/nanoFramework.WebServer/pull/39)
+- Update 5 NuGet dependencies [\#38](https://github.com/nanoframework/nanoFramework.WebServer/pull/38)
+
+## [v1.0.0-preview.44](https://github.com/nanoframework/nanoFramework.WebServer/tree/v1.0.0-preview.44) (2021-04-06)
+
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.0.0-preview.41...v1.0.0-preview.44)
+
+**Implemented enhancements:**
+
+- Various fixes from Sonarcloud analysis [\#34](https://github.com/nanoframework/nanoFramework.WebServer/pull/34)
+
+**Documentation and other chores:**
+
+- Update 1 nuget dependencies [\#37](https://github.com/nanoframework/nanoFramework.WebServer/pull/37)
+
+## [v1.0.0-preview.41](https://github.com/nanoframework/nanoFramework.WebServer/tree/v1.0.0-preview.41) (2021-04-05)
+
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.0.0-preview.32...v1.0.0-preview.41)
 
 **Documentation and other chores:**
 
