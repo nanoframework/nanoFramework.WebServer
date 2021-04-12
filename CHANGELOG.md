@@ -1,8 +1,8 @@
 # Changelog
 
-## [**Changes available only in 'Preview' NuGet packages:**](https://github.com/nanoframework/nanoFramework.WebServer/tree/HEAD)
+## [v1.0.0-preview.49](https://github.com/nanoframework/nanoFramework.WebServer/tree/v1.0.0-preview.49) (2021-04-12)
 
-[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.0.0-preview.47...HEAD)
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.0.0-preview.47...v1.0.0-preview.49)
 
 **Implemented enhancements:**
 
