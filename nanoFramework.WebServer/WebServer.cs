@@ -228,7 +228,7 @@ namespace nanoFramework.WebServer
                                     }
                                 }
 
-                                _callbackRoutes.Add(callbackRoutes); 
+                                _callbackRoutes.Add(callbackRoutes);
                             }
                         }
                     }
@@ -495,106 +495,97 @@ namespace nanoFramework.WebServer
                 new Thread(() =>
                 {
                     bool isRoute = false;
-                    CallbackRoutes route;
-                    int urlParam;
+                    string rawUrl = context.Request.RawUrl;
+
+                    //This is for handling with transitory or bad requests
+                    if (rawUrl == null)
+                    {
+                        return;
+                    }
+
+                    int urlParam = rawUrl.IndexOf(ParamStart);
+
+                    // Variables used only within the "for". They are here for performance reasons
                     bool isFound;
+                    string routeStr;
                     int incForSlash;
                     string toCompare;
-                    string routeStr;
-                    string rawUrl;
+                    bool mustAuthenticate;
+                    bool isAuthOk;
+                    //
 
                     foreach (var rt in _callbackRoutes)
                     {
-                        route = (CallbackRoutes)rt;
-                        urlParam = context.Request.RawUrl.IndexOf(ParamStart);
-                        isFound = false;
+                        CallbackRoutes route = (CallbackRoutes)rt;
+
                         routeStr = route.Route;
-                        rawUrl = context.Request.RawUrl;
                         incForSlash = routeStr.IndexOf('/') == 0 ? 0 : 1;
                         toCompare = route.CaseSensitive ? rawUrl : rawUrl.ToLower();
-                        if (toCompare.IndexOf(routeStr) == incForSlash)
+
+                        if (urlParam > 0)
                         {
-                            if (urlParam > 0)
+                            isFound = urlParam == routeStr.Length + incForSlash;
+                        }
+                        else
+                        {
+                            isFound = toCompare.Length == routeStr.Length + incForSlash;
+                        }
+
+                        // Matching the route name
+                        // Matching the method type
+                        if (!isFound ||
+                            (toCompare.IndexOf(routeStr) != incForSlash) ||
+                            (route.Method != string.Empty && context.Request.HttpMethod != route.Method)
+                            )
+                        {
+                            continue;
+                        }
+
+                        // Starting a new thread to be able to handle a new request in parallel
+                        isRoute = true;
+
+                        // Check auth first
+                        mustAuthenticate = route.Authentication != null && route.Authentication.AuthenticationType != AuthenticationType.None;
+                        isAuthOk = false;
+
+                        if (mustAuthenticate)
+                        {
+                            if (route.Authentication.AuthenticationType == AuthenticationType.Basic)
                             {
-                                if (urlParam == routeStr.Length + incForSlash)
-                                {
-                                    isFound = true;
-                                }
+                                var credSite = route.Authentication.Credentials ?? Credential;
+                                var credReq = context.Request.Credentials;
+
+                                isAuthOk = credReq != null
+                                    && (credSite.UserName == credReq.UserName)
+                                    && (credSite.Password == credReq.Password);
                             }
-                            else
+                            else if (route.Authentication.AuthenticationType == AuthenticationType.ApiKey)
                             {
-                                if (toCompare.Length == routeStr.Length + incForSlash)
-                                {
-                                    isFound = true;
-                                }
-                            }
+                                var apikeySite = route.Authentication.ApiKey ?? ApiKey;
+                                var apikeyReq = GetApiKeyFromHeaders(context.Request.Headers);
 
-                            if (isFound
-                                && (route.Method == string.Empty
-                                    || (context.Request.HttpMethod == route.Method)))
+                                isAuthOk = apikeyReq != null
+                                    && apikeyReq == apikeySite;
+                            }
+                        }
+
+                        if (mustAuthenticate && isAuthOk)
+                        {
+                            route.Callback.Invoke(null, new object[] { new WebServerEventArgs(context) });
+                            context.Response.Close();
+                            context.Close();
+                        }
+                        else
+                        {
+                            if (route.Authentication.AuthenticationType == AuthenticationType.Basic)
                             {
-                                // Starting a new thread to be able to handle a new request in parallel
-                                isRoute = true;
-
-                                // Check auth first
-                                bool isAuthOk = false;
-                                if (route.Authentication != null)
-                                {
-                                    if (route.Authentication.AuthenticationType == AuthenticationType.None)
-                                    {
-                                        isAuthOk = true;
-                                    }
-                                }
-                                else
-                                {
-                                    isAuthOk = true;
-                                }
-
-                                if (!isAuthOk)
-                                {
-                                    if (route.Authentication.AuthenticationType == AuthenticationType.Basic)
-                                    {
-                                        var credSite = route.Authentication.Credentials ?? Credential;
-                                        var credReq = context.Request.Credentials;
-                                        if (credReq != null
-                                            && (credSite.UserName == credReq.UserName)
-                                            && (credSite.Password == credReq.Password))
-                                        {
-                                            isAuthOk = true;
-                                        }
-                                    }
-                                    else if (route.Authentication.AuthenticationType == AuthenticationType.ApiKey)
-                                    {
-                                        var apikeySite = route.Authentication.ApiKey ?? ApiKey;
-                                        var apikeyReq = GetApiKeyFromHeaders(context.Request.Headers);
-
-                                        if (apikeyReq != null
-                                            && apikeyReq == apikeySite)
-                                        {
-                                            isAuthOk = true;
-                                        }
-                                    }
-                                }
-
-                                if (isAuthOk)
-                                {
-                                    route.Callback.Invoke(null, new object[] { new WebServerEventArgs(context) });
-                                    context.Response.Close();
-                                    context.Close();
-                                }
-                                else
-                                {
-                                    if (route.Authentication.AuthenticationType == AuthenticationType.Basic)
-                                    {
-                                        context.Response.Headers.Add("WWW-Authenticate", $"Basic realm=\"Access to {routeStr}\"");
-                                    }
-
-                                    context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                                    context.Response.ContentLength64 = 0;
-                                    context.Response.Close();
-                                    context.Close();
-                                }
+                                context.Response.Headers.Add("WWW-Authenticate", $"Basic realm=\"Access to {routeStr}\"");
                             }
+
+                            context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                            context.Response.ContentLength64 = 0;
+                            context.Response.Close();
+                            context.Close();
                         }
                     }
 
