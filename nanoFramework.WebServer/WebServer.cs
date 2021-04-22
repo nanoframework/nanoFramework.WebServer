@@ -491,11 +491,16 @@ namespace nanoFramework.WebServer
             while (!_cancel)
             {
                 HttpListenerContext context = _listener.GetContext();
+                if (context == null)
+                {
+                    return;
+                }
+
 
                 new Thread(() =>
                 {
                     bool isRoute = false;
-                    string rawUrl = context.Request.RawUrl;
+                    string rawUrl = context.Request?.RawUrl;
 
                     //This is for handling with transitory or bad requests
                     if (rawUrl == null)
