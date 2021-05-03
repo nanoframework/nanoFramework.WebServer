@@ -491,6 +491,10 @@ namespace nanoFramework.WebServer
             while (!_cancel)
             {
                 HttpListenerContext context = _listener.GetContext();
+                if (context == null)
+                {
+                    return;
+                }
 
                 new Thread(() =>
                 {
@@ -572,21 +576,20 @@ namespace nanoFramework.WebServer
                         if (mustAuthenticate && isAuthOk)
                         {
                             route.Callback.Invoke(null, new object[] { new WebServerEventArgs(context) });
-                            context.Response.Close();
-                            context.Close();
                         }
                         else
                         {
-                            if (route.Authentication.AuthenticationType == AuthenticationType.Basic)
+                            if (route.Authentication != null && route.Authentication.AuthenticationType == AuthenticationType.Basic)
                             {
                                 context.Response.Headers.Add("WWW-Authenticate", $"Basic realm=\"Access to {routeStr}\"");
                             }
 
                             context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                             context.Response.ContentLength64 = 0;
-                            context.Response.Close();
-                            context.Close();
                         }
+
+                        context.Response.Close();
+                        context.Close();
                     }
 
                     if (!isRoute)
@@ -595,16 +598,15 @@ namespace nanoFramework.WebServer
                         {
                             // Starting a new thread to be able to handle a new request in parallel
                             CommandReceived.Invoke(this, new WebServerEventArgs(context));
-                            context.Response.Close();
-                            context.Close();
                         }
                         else
                         {
                             context.Response.StatusCode = 404;
                             context.Response.ContentLength64 = 0;
-                            context.Response.Close();
-                            context.Close();
                         }
+
+                        context.Response.Close();
+                        context.Close();
                     }
                 }).Start();
 
