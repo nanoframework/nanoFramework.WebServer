@@ -246,7 +246,6 @@ namespace nanoFramework.WebServer
             Port = port;
             string prefix = Protocol == HttpProtocol.Http ? "http" : "https";
             _listener = new HttpListener(prefix, port);
-            _serverThread = new Thread(StartListener);
             Debug.WriteLine("Web server started on port " + port.ToString());
         }
 
@@ -346,6 +345,11 @@ namespace nanoFramework.WebServer
         /// </summary>
         public bool Start()
         {
+            if (_serverThread == null)
+            {
+                _serverThread = new Thread(StartListener);
+            }
+
             bool bStarted = true;
             // List Ethernet interfaces, so we can determine the server's address
             ListInterfaces();
@@ -381,6 +385,7 @@ namespace nanoFramework.WebServer
             _cancel = true;
             Thread.Sleep(100);
             _serverThread.Abort();
+            _serverThread = null;
             Debug.WriteLine("Stoped server in thread ");
         }
 
