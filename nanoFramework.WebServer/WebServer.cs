@@ -246,7 +246,6 @@ namespace nanoFramework.WebServer
             Port = port;
             string prefix = Protocol == HttpProtocol.Http ? "http" : "https";
             _listener = new HttpListener(prefix, port);
-            _serverThread = new Thread(StartListener);
             Debug.WriteLine("Web server started on port " + port.ToString());
         }
 
@@ -346,6 +345,11 @@ namespace nanoFramework.WebServer
         /// </summary>
         public bool Start()
         {
+            if (_serverThread == null)
+            {
+                _serverThread = new Thread(StartListener);
+            }
+
             bool bStarted = true;
             // List Ethernet interfaces, so we can determine the server's address
             ListInterfaces();
@@ -381,6 +385,7 @@ namespace nanoFramework.WebServer
             _cancel = true;
             Thread.Sleep(100);
             _serverThread.Abort();
+            _serverThread = null;
             Debug.WriteLine("Stoped server in thread ");
         }
 
@@ -491,6 +496,10 @@ namespace nanoFramework.WebServer
             while (!_cancel)
             {
                 HttpListenerContext context = _listener.GetContext();
+                if (context == null)
+                {
+                    return;
+                }
 
                 new Thread(() =>
                 {
@@ -572,21 +581,20 @@ namespace nanoFramework.WebServer
                         if (mustAuthenticate && isAuthOk)
                         {
                             route.Callback.Invoke(null, new object[] { new WebServerEventArgs(context) });
-                            context.Response.Close();
-                            context.Close();
                         }
                         else
                         {
-                            if (route.Authentication.AuthenticationType == AuthenticationType.Basic)
+                            if (route.Authentication != null && route.Authentication.AuthenticationType == AuthenticationType.Basic)
                             {
                                 context.Response.Headers.Add("WWW-Authenticate", $"Basic realm=\"Access to {routeStr}\"");
                             }
 
                             context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                             context.Response.ContentLength64 = 0;
-                            context.Response.Close();
-                            context.Close();
                         }
+
+                        context.Response.Close();
+                        context.Close();
                     }
 
                     if (!isRoute)
@@ -595,16 +603,15 @@ namespace nanoFramework.WebServer
                         {
                             // Starting a new thread to be able to handle a new request in parallel
                             CommandReceived.Invoke(this, new WebServerEventArgs(context));
-                            context.Response.Close();
-                            context.Close();
                         }
                         else
                         {
                             context.Response.StatusCode = 404;
                             context.Response.ContentLength64 = 0;
-                            context.Response.Close();
-                            context.Close();
                         }
+
+                        context.Response.Close();
+                        context.Close();
                     }
                 }).Start();
 
