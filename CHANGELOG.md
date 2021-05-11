@@ -2,7 +2,15 @@
 
 ## [**Changes available only in 'Preview' NuGet packages:**](https://github.com/nanoframework/nanoFramework.WebServer/tree/HEAD)
 
-[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.0.0-preview.59...HEAD)
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.0.0-preview.62...HEAD)
+
+**Fixed bugs:**
+
+- Fixes issue with no Authentication attribute in controllers [\#42](https://github.com/nanoframework/nanoFramework.WebServer/pull/42)
+
+## [v1.0.0-preview.62](https://github.com/nanoframework/nanoFramework.WebServer/tree/v1.0.0-preview.62) (2021-05-11)
+
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.0.0-preview.59...v1.0.0-preview.62)
 
 **Documentation and other chores:**
 
