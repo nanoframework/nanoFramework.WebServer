@@ -555,7 +555,7 @@ namespace nanoFramework.WebServer
 
                         // Check auth first
                         mustAuthenticate = route.Authentication != null && route.Authentication.AuthenticationType != AuthenticationType.None;
-                        isAuthOk = false;
+                        isAuthOk = !mustAuthenticate;
 
                         if (mustAuthenticate)
                         {
@@ -578,7 +578,7 @@ namespace nanoFramework.WebServer
                             }
                         }
 
-                        if (mustAuthenticate && isAuthOk)
+                        if (isAuthOk)
                         {
                             route.Callback.Invoke(null, new object[] { new WebServerEventArgs(context) });
                         }
