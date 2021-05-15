@@ -69,11 +69,11 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Windows.Storage, Version=1.4.4.0, Culture=neutral, PublicKeyToken=c07d481e9758c731">
-      <HintPath>..\packages\nanoFramework.Windows.Storage.1.4.4-preview.67\lib\Windows.Storage.dll</HintPath>
+      <HintPath>..\packages\nanoFramework.Windows.Storage.1.4.4-preview.71\lib\Windows.Storage.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Windows.Storage.Streams, Version=1.10.1.0, Culture=neutral, PublicKeyToken=c07d481e9758c731">
-      <HintPath>..\packages\nanoFramework.Windows.Storage.Streams.1.10.1-preview.38\lib\Windows.Storage.Streams.dll</HintPath>
+    <Reference Include="Windows.Storage.Streams, Version=1.12.2.0, Culture=neutral, PublicKeyToken=c07d481e9758c731">
+      <HintPath>..\packages\nanoFramework.Windows.Storage.Streams.1.12.2-preview.1\lib\Windows.Storage.Streams.dll</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>
