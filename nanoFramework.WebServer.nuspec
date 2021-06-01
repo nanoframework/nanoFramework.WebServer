@@ -12,12 +12,9 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <developmentDependency>false</developmentDependency>
     <description>
-      This is a simple multithread WebServer supporting simple controller and event based calls.
-
-Perfect for .NET nanoFramework REST API based project. Support all type of Http Methods.
-
-Perfect for simple embedded web pages, with Support of file on a storage (USB, SD Card, in Memory).
-
+      This is a simple multithread WebServer supporting simple controller and event based calls.&#10;
+Perfect for .NET nanoFramework REST API based project. Support all type of Http Methods.&#10;
+Perfect for simple embedded web pages, with Support of file on a storage (USB, SD Card, in Memory).&#10;
 Supports both HTTPS and HTTP.
     </description>
     <releaseNotes>

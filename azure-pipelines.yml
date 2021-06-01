@@ -20,12 +20,11 @@ pool:
   vmImage: 'windows-2019'
 
 variables:
-  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_NOLOGO: true
   solution: 'nanoFramework.WebServer.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
   nugetPackageName: 'nanoFramework.WebServer'
-  repoName: 'nanoFramework.WebServer'
 
 steps:
 
