@@ -100,7 +100,7 @@ There is a more advance example with simple REST API to get a list of Person and
 
 ## A simple GPIO controller REST API
 
-You will find in simple [GPIO controller sample](./WebServer.GpioRest) REST API. The controller not case sensitive and is working like this:
+You will find in simple [GPIO controller sample](https://github.com/nanoframework/Samples/tree/main/samples/Webserver/WebServer.GpioRest) REST API. The controller not case sensitive and is working like this:
 
 - To open the pin 2 as output: http://yoururl/open/2/output
 - To open pin 4 as input: http://yoururl/open/4/input
