@@ -2,7 +2,16 @@
 
 ## [**Changes available only in 'Preview' NuGet packages:**](https://github.com/nanoframework/nanoFramework.WebServer/tree/HEAD)
 
-[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.0.0-preview.136...HEAD)
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.0.0-preview.138...HEAD)
+
+**Documentation and other chores:**
+
+- Bumps nanoFramework.System.Net.Http.Server from 1.3.4 to 1.3.5-preview.5 [\#92](https://github.com/nanoframework/nanoFramework.WebServer/pull/92)
+- Fix REST API sample URL as it appears samples are consolidated to the nanoFramework repo [\#91](https://github.com/nanoframework/nanoFramework.WebServer/pull/91)
+
+## [v1.0.0-preview.138](https://github.com/nanoframework/nanoFramework.WebServer/tree/v1.0.0-preview.138) (2021-10-18)
+
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.0.0-preview.136...v1.0.0-preview.138)
 
 **Documentation and other chores:**
 
