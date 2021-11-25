@@ -2,28 +2,21 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
   <metadata>
     <id>nanoFramework.WebServer</id>
-    <title>WebServer for nanoFramework</title>
+    <title>WebServer for .NET nanoFramework</title>
     <version>$version$</version>
     <authors>Laurent Ellerbach</authors>
-    <owners>nanoFramework project contributors,dotnetfoundation</owners>
-    <license type="file">LICENSE.md</license>
-    <projectUrl>https://github.com/nanoframework/nanoFramework.WebServer</projectUrl>
-    <icon>images\nf-logo.png</icon>
+    <owners>nanoframework,dotnetfoundation</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <developmentDependency>false</developmentDependency>
-    <description>
-      This is a simple multithread WebServer supporting simple controller and event based calls.
-
-Perfect for .NET nanoFramework REST API based project. Support all type of Http Methods.
-
-Perfect for simple embedded web pages, with Support of file on a storage (USB, SD Card, in Memory).
-
-Supports both HTTPS and HTTP.
-    </description>
+    <license type="file">LICENSE.md</license>
     <releaseNotes>
     </releaseNotes>
+    <readme>docs\README.md</readme>
+    <developmentDependency>false</developmentDependency>
+    <projectUrl>https://github.com/nanoframework/nanoFramework.WebServer</projectUrl>
+    <icon>images\nf-logo.png</icon>
     <repository type="git" url="https://github.com/nanoframework/nanoFramework.WebServer" commit="$commit$" />
     <copyright>Copyright (c) .NET Foundation and Contributors</copyright>
+    <description>This is a simple multithread WebServer supporting simple controller and event based calls.&#10;Perfect for .NET nanoFramework REST API based project. Support all type of Http Methods.&#10;Perfect for simple embedded web pages, with Support of file on a storage (USB, SD Card, in Memory).&#10;Supports both HTTPS and HTTP.</description>
     <tags>http https webserver net netmf nf nanoframework</tags>
     <dependencies>
       <dependency id="nanoFramework.CoreLibrary" version="1.10.5" />
@@ -39,7 +32,8 @@ Supports both HTTPS and HTTP.
   <files>
     <file src="nanoFramework.WebServer\bin\Release\nanoFramework.WebServer.*" target="lib" />
     <file src="assets\readme.txt" target="" />
-    <file src="assets\nf-logo.png" target="images\" />
+    <file src="README.md" target="docs\" />
+    <file src="assets\nf-logo.png" target="images" />
     <file src="LICENSE.md" target="" />
   </files>
 </package>
