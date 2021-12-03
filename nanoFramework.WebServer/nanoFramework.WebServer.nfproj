@@ -52,8 +52,8 @@
       <HintPath>..\packages\nanoFramework.Runtime.Events.1.9.2\lib\nanoFramework.Runtime.Events.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="nanoFramework.System.Collections, Version=1.3.0.0, Culture=neutral, PublicKeyToken=c07d481e9758c731">
-      <HintPath>..\packages\nanoFramework.System.Collections.1.3.0-preview.14\lib\nanoFramework.System.Collections.dll</HintPath>
+    <Reference Include="nanoFramework.System.Collections, Version=1.3.0.3, Culture=neutral, PublicKeyToken=c07d481e9758c731">
+      <HintPath>..\packages\nanoFramework.System.Collections.1.3.0\lib\nanoFramework.System.Collections.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="nanoFramework.System.Text, Version=1.1.2.3, Culture=neutral, PublicKeyToken=c07d481e9758c731">
@@ -65,11 +65,11 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Net.Http, Version=1.3.6.0, Culture=neutral, PublicKeyToken=c07d481e9758c731">
-      <HintPath>..\packages\nanoFramework.System.Net.Http.Server.1.3.6-preview.20\lib\System.Net.Http.dll</HintPath>
+      <HintPath>..\packages\nanoFramework.System.Net.Http.Server.1.3.6-preview.21\lib\System.Net.Http.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Windows.Storage, Version=1.4.5.0, Culture=neutral, PublicKeyToken=c07d481e9758c731">
-      <HintPath>..\packages\nanoFramework.Windows.Storage.1.4.5-preview.28\lib\Windows.Storage.dll</HintPath>
+      <HintPath>..\packages\nanoFramework.Windows.Storage.1.4.5-preview.30\lib\Windows.Storage.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Windows.Storage.Streams, Version=1.12.3.3, Culture=neutral, PublicKeyToken=c07d481e9758c731">
