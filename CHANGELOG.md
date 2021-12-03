@@ -2,7 +2,15 @@
 
 ## [**Changes available only in 'Preview' NuGet packages:**](https://github.com/nanoframework/nanoFramework.WebServer/tree/HEAD)
 
-[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.0.0-preview.170...HEAD)
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.0.0-preview.172...HEAD)
+
+**Documentation and other chores:**
+
+- Bumps nanoFramework.System.Net.Http.Server from 1.3.6-preview.23 to 1.3.6 [\#108](https://github.com/nanoframework/nanoFramework.WebServer/pull/108)
+
+## [v1.0.0-preview.172](https://github.com/nanoframework/nanoFramework.WebServer/tree/v1.0.0-preview.172) (2021-12-03)
+
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.0.0-preview.170...v1.0.0-preview.172)
 
 **Documentation and other chores:**
 
