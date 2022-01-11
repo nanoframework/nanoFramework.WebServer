@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
   <metadata>
     <id>nanoFramework.WebServer</id>
-    <title>WebServer for .NET nanoFramework</title>
+    <title>nanoFramework.WebServer</title>
     <version>$version$</version>
     <authors>Laurent Ellerbach</authors>
     <owners>nanoframework,dotnetfoundation</owners>
