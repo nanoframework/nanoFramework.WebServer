@@ -593,7 +593,8 @@ namespace nanoFramework.WebServer
                             context.Response.ContentLength64 = 0;
                         }
 
-                        if (context.Response == null) //When context is handed over to WebsocketServer, this will become null
+                        // When context has been handed over to WebsocketServer, it will be null at this point
+                        if (context.Response == null)
                         {
                             //do nothing this is a websocket that is managed by a websocketserver that is responsible for the context now. 
                         }
