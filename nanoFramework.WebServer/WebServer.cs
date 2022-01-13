@@ -618,7 +618,7 @@ namespace nanoFramework.WebServer
                         }
 
                         context.Response.Close();
-                        context.Close();
+                        context.Close();                       
                     }
                 }).Start();
 
