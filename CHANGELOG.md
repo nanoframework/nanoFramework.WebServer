@@ -2,7 +2,15 @@
 
 ## [**Changes available only in 'Preview' NuGet packages:**](https://github.com/nanoframework/nanoFramework.WebServer/tree/HEAD)
 
-[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.0.0-preview.190...HEAD)
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.0.0-preview.192...HEAD)
+
+**Implemented enhancements:**
+
+- Integration for WebsocketServer [\#120](https://github.com/nanoframework/nanoFramework.WebServer/pull/120)
+
+## [v1.0.0-preview.192](https://github.com/nanoframework/nanoFramework.WebServer/tree/v1.0.0-preview.192) (2022-01-12)
+
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.0.0-preview.190...v1.0.0-preview.192)
 
 **Documentation and other chores:**
 
