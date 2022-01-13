@@ -593,8 +593,16 @@ namespace nanoFramework.WebServer
                             context.Response.ContentLength64 = 0;
                         }
 
-                        context.Response.Close();
-                        context.Close();
+                        // When context has been handed over to WebsocketServer, it will be null at this point
+                        if (context.Response == null)
+                        {
+                            //do nothing this is a websocket that is managed by a websocketserver that is responsible for the context now. 
+                        }
+                        else
+                        {
+                            context.Response.Close();
+                            context.Close();
+                        }
                     }
 
                     if (!isRoute)
@@ -611,7 +619,7 @@ namespace nanoFramework.WebServer
                         }
 
                         context.Response.Close();
-                        context.Close();
+                        context.Close();                       
                     }
                 }).Start();
 
