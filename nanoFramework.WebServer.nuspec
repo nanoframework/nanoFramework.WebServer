@@ -30,6 +30,7 @@ Supports both HTTPS and HTTP.</description>
       <dependency id="nanoFramework.System.Net.Http.Server" version="1.4.0-preview.6" />
       <dependency id="nanoFramework.Windows.Storage" version="1.4.6-preview.5" />
       <dependency id="nanoFramework.Windows.Storage.Streams" version="1.12.4-preview.3" />
+      <dependency id="nanoFramework.System.Threading" version="1.0.4-preview.6" />
     </dependencies>
   </metadata>
   <files>
