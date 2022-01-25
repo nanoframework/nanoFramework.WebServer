@@ -73,7 +73,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Windows.Storage, Version=1.4.6.0, Culture=neutral, PublicKeyToken=c07d481e9758c731">
-      <HintPath>..\packages\nanoFramework.Windows.Storage.1.4.6-preview.11\lib\Windows.Storage.dll</HintPath>
+      <HintPath>..\packages\nanoFramework.Windows.Storage.1.4.6-preview.13\lib\Windows.Storage.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Windows.Storage.Streams, Version=1.12.4.0, Culture=neutral, PublicKeyToken=c07d481e9758c731">
