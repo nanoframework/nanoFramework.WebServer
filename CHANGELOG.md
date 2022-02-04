@@ -2,7 +2,15 @@
 
 ## [**Changes available only in 'Preview' NuGet packages:**](https://github.com/nanoframework/nanoFramework.WebServer/tree/HEAD)
 
-[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.0.0-preview.210...HEAD)
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.0.0-preview.212...HEAD)
+
+**Documentation and other chores:**
+
+- Update 5 NuGet dependencies [\#132](https://github.com/nanoframework/nanoFramework.WebServer/pull/132)
+
+## [v1.0.0-preview.212](https://github.com/nanoframework/nanoFramework.WebServer/tree/v1.0.0-preview.212) (2022-01-28)
+
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.0.0-preview.210...v1.0.0-preview.212)
 
 **Documentation and other chores:**
 
