@@ -2,7 +2,95 @@
 
 ## [**Changes available only in 'Preview' NuGet packages:**](https://github.com/nanoframework/nanoFramework.WebServer/tree/HEAD)
 
-[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.0.0-preview.190...HEAD)
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.0.0-preview.212...HEAD)
+
+**Documentation and other chores:**
+
+- Update 5 NuGet dependencies [\#132](https://github.com/nanoframework/nanoFramework.WebServer/pull/132)
+
+## [v1.0.0-preview.212](https://github.com/nanoframework/nanoFramework.WebServer/tree/v1.0.0-preview.212) (2022-01-28)
+
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.0.0-preview.210...v1.0.0-preview.212)
+
+**Documentation and other chores:**
+
+- Update 4 NuGet dependencies [\#131](https://github.com/nanoframework/nanoFramework.WebServer/pull/131)
+
+## [v1.0.0-preview.210](https://github.com/nanoframework/nanoFramework.WebServer/tree/v1.0.0-preview.210) (2022-01-28)
+
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.0.0-preview.208...v1.0.0-preview.210)
+
+**Documentation and other chores:**
+
+- Update 2 NuGet dependencies [\#129](https://github.com/nanoframework/nanoFramework.WebServer/pull/129)
+
+## [v1.0.0-preview.208](https://github.com/nanoframework/nanoFramework.WebServer/tree/v1.0.0-preview.208) (2022-01-28)
+
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.0.0-preview.206...v1.0.0-preview.208)
+
+**Documentation and other chores:**
+
+- Update 7 NuGet dependencies [\#128](https://github.com/nanoframework/nanoFramework.WebServer/pull/128)
+
+## [v1.0.0-preview.206](https://github.com/nanoframework/nanoFramework.WebServer/tree/v1.0.0-preview.206) (2022-01-25)
+
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.0.0-preview.204...v1.0.0-preview.206)
+
+**Documentation and other chores:**
+
+- Update 1 NuGet dependencies [\#127](https://github.com/nanoframework/nanoFramework.WebServer/pull/127)
+
+## [v1.0.0-preview.204](https://github.com/nanoframework/nanoFramework.WebServer/tree/v1.0.0-preview.204) (2022-01-21)
+
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.0.0-preview.202...v1.0.0-preview.204)
+
+**Documentation and other chores:**
+
+- Update 2 NuGet dependencies [\#126](https://github.com/nanoframework/nanoFramework.WebServer/pull/126)
+
+## [v1.0.0-preview.202](https://github.com/nanoframework/nanoFramework.WebServer/tree/v1.0.0-preview.202) (2022-01-21)
+
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.0.0-preview.200...v1.0.0-preview.202)
+
+**Documentation and other chores:**
+
+- Update 1 NuGet dependencies [\#125](https://github.com/nanoframework/nanoFramework.WebServer/pull/125)
+
+## [v1.0.0-preview.200](https://github.com/nanoframework/nanoFramework.WebServer/tree/v1.0.0-preview.200) (2022-01-21)
+
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.0.0-preview.198...v1.0.0-preview.200)
+
+**Documentation and other chores:**
+
+- Update 2 NuGet dependencies [\#124](https://github.com/nanoframework/nanoFramework.WebServer/pull/124)
+
+## [v1.0.0-preview.198](https://github.com/nanoframework/nanoFramework.WebServer/tree/v1.0.0-preview.198) (2022-01-21)
+
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.0.0-preview.196...v1.0.0-preview.198)
+
+**Documentation and other chores:**
+
+- Update 2 NuGet dependencies [\#123](https://github.com/nanoframework/nanoFramework.WebServer/pull/123)
+
+## [v1.0.0-preview.196](https://github.com/nanoframework/nanoFramework.WebServer/tree/v1.0.0-preview.196) (2022-01-21)
+
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.0.0-preview.194...v1.0.0-preview.196)
+
+**Documentation and other chores:**
+
+- Update 3 NuGet dependencies [\#121](https://github.com/nanoframework/nanoFramework.WebServer/pull/121)
+
+## [v1.0.0-preview.194](https://github.com/nanoframework/nanoFramework.WebServer/tree/v1.0.0-preview.194) (2022-01-13)
+
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.0.0-preview.192...v1.0.0-preview.194)
+
+**Implemented enhancements:**
+
+- Integration for WebsocketServer [\#120](https://github.com/nanoframework/nanoFramework.WebServer/pull/120)
+
+## [v1.0.0-preview.192](https://github.com/nanoframework/nanoFramework.WebServer/tree/v1.0.0-preview.192) (2022-01-12)
+
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.0.0-preview.190...v1.0.0-preview.192)
 
 **Documentation and other chores:**
 
