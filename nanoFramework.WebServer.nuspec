@@ -26,7 +26,7 @@ Supports both HTTPS and HTTP.</description>
       <dependency id="nanoFramework.System.Collections" version="1.4.0" />
       <dependency id="nanoFramework.System.Text" version="1.1.3-preview.4" />
       <dependency id="nanoFramework.System.Net" version="1.8.1" />
-      <dependency id="nanoFramework.System.Net.Http.Server" version="1.4.0-preview.52" />
+      <dependency id="nanoFramework.System.Net.Http.Server" version="1.4.0" />
       <dependency id="nanoFramework.Windows.Storage" version="1.4.6-preview.48" />
       <dependency id="nanoFramework.Windows.Storage.Streams" version="1.12.4-preview.19" />
       <dependency id="nanoFramework.System.Threading" version="1.0.4-preview.6" />
