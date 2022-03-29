@@ -18,6 +18,9 @@ using Windows.Storage.Streams;
 
 namespace nanoFramework.WebServer
 {
+    /// <summary>
+    /// This class instantiates a web server.
+    /// </summary>
     public class WebServer : IDisposable
     {
         /// <summary>
@@ -41,8 +44,8 @@ namespace nanoFramework.WebServer
 
         private bool _cancel = false;
         private Thread _serverThread = null;
-        private ArrayList _callbackRoutes;
-        private HttpListener _listener;
+        private readonly ArrayList _callbackRoutes;
+        private readonly HttpListener _listener;
 
         #endregion
 
@@ -101,16 +104,13 @@ namespace nanoFramework.WebServer
         {
             UrlParameter[] retParams = null;
             int i = parameter.IndexOf(ParamStart);
-            int j = i;
             int k;
 
             if (i >= 0)
             {
-                //look at the number of = and ;
-
                 while ((i < parameter.Length) || (i == -1))
                 {
-                    j = parameter.IndexOf(ParamEqual, i);
+                    int j = parameter.IndexOf(ParamEqual, i);
                     if (j > i)
                     {
                         //first param!
@@ -161,13 +161,19 @@ namespace nanoFramework.WebServer
         #region Constructors
 
         /// <summary>
-        /// Instantiates a new webserver.
+        /// Instantiates a new web server.
         /// </summary>
         /// <param name="port">Port number to listen on.</param>
-        /// <param name="timeout">Timeout to listen and respond to a request in millisecond.</param>
+        /// <param name="protocol"><see cref="HttpProtocol"/> version to use with web server.</param>
         public WebServer(int port, HttpProtocol protocol) : this(port, protocol, null)
         { }
 
+        /// <summary>
+        /// Instantiates a new web server.
+        /// </summary>
+        /// <param name="port">Port number to listen on.</param>
+        /// <param name="protocol"><see cref="HttpProtocol"/> version to use with web server.</param>
+        /// <param name="controllers">Controllers to use with this web server.</param>
         public WebServer(int port, HttpProtocol protocol, Type[] controllers)
         {
             _callbackRoutes = new ArrayList();
@@ -222,7 +228,7 @@ namespace nanoFramework.WebServer
                                     }
                                 }
 
-                                _callbackRoutes.Add(callbackRoutes); ;
+                                _callbackRoutes.Add(callbackRoutes);
                             }
                         }
                     }
@@ -240,20 +246,19 @@ namespace nanoFramework.WebServer
             Port = port;
             string prefix = Protocol == HttpProtocol.Http ? "http" : "https";
             _listener = new HttpListener(prefix, port);
-            _serverThread = new Thread(StartListener);
             Debug.WriteLine("Web server started on port " + port.ToString());
         }
 
         private Authentication ExtractAuthentication(string strAuth)
         {
-            const string None = "None";
-            const string Basic = "Basic";
-            const string ApiKey = "ApiKey";
+            const string _none = "None";
+            const string _basic = "Basic";
+            const string _apiKey = "ApiKey";
 
-            Authentication authentication = null;
-            if (strAuth.IndexOf(None) == 0)
+            Authentication authentication;
+            if (strAuth.IndexOf(_none) == 0)
             {
-                if (strAuth.Length == None.Length)
+                if (strAuth.Length == _none.Length)
                 {
                     authentication = new Authentication();
                 }
@@ -262,16 +267,16 @@ namespace nanoFramework.WebServer
                     throw new ArgumentException($"Authentication attribute None can only be used alone");
                 }
             }
-            else if (strAuth.IndexOf(Basic) == 0)
+            else if (strAuth.IndexOf(_basic) == 0)
             {
-                if (strAuth.Length == Basic.Length)
+                if (strAuth.Length == _basic.Length)
                 {
                     authentication = new Authentication((NetworkCredential)null);
                 }
                 else
                 {
                     var sep = strAuth.IndexOf(':');
-                    if (sep == Basic.Length)
+                    if (sep == _basic.Length)
                     {
                         var space = strAuth.IndexOf(' ');
                         if (space < 0)
@@ -289,16 +294,16 @@ namespace nanoFramework.WebServer
                     }
                 }
             }
-            else if (strAuth.IndexOf(ApiKey) == 0)
+            else if (strAuth.IndexOf(_apiKey) == 0)
             {
-                if (strAuth.Length == ApiKey.Length)
+                if (strAuth.Length == _apiKey.Length)
                 {
                     authentication = new Authentication(string.Empty);
                 }
                 else
                 {
                     var sep = strAuth.IndexOf(':');
-                    if (sep == ApiKey.Length)
+                    if (sep == _apiKey.Length)
                     {
                         var key = strAuth.Substring(sep + 1);
                         authentication = new Authentication(key);
@@ -340,6 +345,11 @@ namespace nanoFramework.WebServer
         /// </summary>
         public bool Start()
         {
+            if (_serverThread == null)
+            {
+                _serverThread = new Thread(StartListener);
+            }
+
             bool bStarted = true;
             // List Ethernet interfaces, so we can determine the server's address
             ListInterfaces();
@@ -375,6 +385,7 @@ namespace nanoFramework.WebServer
             _cancel = true;
             Thread.Sleep(100);
             _serverThread.Abort();
+            _serverThread = null;
             Debug.WriteLine("Stoped server in thread ");
         }
 
@@ -422,37 +433,29 @@ namespace nanoFramework.WebServer
         public static void SendFileOverHTTP(HttpListenerResponse response, StorageFile strFilePath, string contentType = "")
         {
             contentType = contentType == "" ? GetContentTypeFromFileName(strFilePath.FileType) : contentType;
+            IBuffer readBuffer = FileIO.ReadBuffer(strFilePath);
+            long fileLength = readBuffer.Length;
 
-            try
+            response.ContentType = contentType;
+            response.ContentLength64 = fileLength;
+            // Now loops sending all the data.
+
+            byte[] buf = new byte[MaxSizeBuffer];
+            using (DataReader dataReader = DataReader.FromBuffer(readBuffer))
             {
-                IBuffer readBuffer = FileIO.ReadBuffer(strFilePath);
-                long fileLength = readBuffer.Length;
-
-                response.ContentType = contentType;
-                response.ContentLength64 = fileLength;
-                // Now loops sending all the data.
-
-                byte[] buf = new byte[MaxSizeBuffer];
-                using (DataReader dataReader = DataReader.FromBuffer(readBuffer))
+                for (long bytesSent = 0; bytesSent < fileLength;)
                 {
-                    for (long bytesSent = 0; bytesSent < fileLength;)
-                    {
-                        // Determines amount of data left.
-                        long bytesToRead = fileLength - bytesSent;
-                        bytesToRead = bytesToRead < MaxSizeBuffer ? bytesToRead : MaxSizeBuffer;
-                        // Reads the data.
-                        dataReader.ReadBytes(buf);
-                        // Writes data to browser
-                        response.OutputStream.Write(buf, 0, (int)bytesToRead);
-                        // allow some time to physically send the bits. Can be reduce to 10 or even less if not too much other code running in parallel
-                        // Updates bytes read.
-                        bytesSent += bytesToRead;
-                    }
+                    // Determines amount of data left.
+                    long bytesToRead = fileLength - bytesSent;
+                    bytesToRead = bytesToRead < MaxSizeBuffer ? bytesToRead : MaxSizeBuffer;
+                    // Reads the data.
+                    dataReader.ReadBytes(buf);
+                    // Writes data to browser
+                    response.OutputStream.Write(buf, 0, (int)bytesToRead);
+                    // allow some time to physically send the bits. Can be reduce to 10 or even less if not too much other code running in parallel
+                    // Updates bytes read.
+                    bytesSent += bytesToRead;
                 }
-            }
-            catch (Exception e)
-            {
-                throw e;
             }
         }
 
@@ -466,32 +469,24 @@ namespace nanoFramework.WebServer
         public static void SendFileOverHTTP(HttpListenerResponse response, string fileName, byte[] content, string contentType = "")
         {
             contentType = contentType == "" ? GetContentTypeFromFileName(fileName.Substring(fileName.LastIndexOf('.'))) : contentType;
+            response.ContentType = contentType;
+            response.ContentLength64 = content.Length;
 
-            try
+            // Now loop to send all the data.
+
+            for (long bytesSent = 0; bytesSent < content.Length;)
             {
-                response.ContentType = contentType;
-                response.ContentLength64 = content.Length;
+                // Determines amount of data left
+                long bytesToSend = content.Length - bytesSent;
+                bytesToSend = bytesToSend < MaxSizeBuffer ? bytesToSend : MaxSizeBuffer;
 
-                // Now loop to send all the data.
+                // Writes data to output stream
+                response.OutputStream.Write(content, (int)bytesSent, (int)bytesToSend);
 
-                for (long bytesSent = 0; bytesSent < content.Length;)
-                {
-                    // Determines amount of data left
-                    long bytesToSend = content.Length - bytesSent;
-                    bytesToSend = bytesToSend < MaxSizeBuffer ? bytesToSend : MaxSizeBuffer;
+                // allow some time to physically send the bits. Can be reduce to 10 or even less if not too much other code running in parallel
 
-                    // Writes data to output stream
-                    response.OutputStream.Write(content, (int)bytesSent, (int)bytesToSend);
-
-                    // allow some time to physically send the bits. Can be reduce to 10 or even less if not too much other code running in parallel
-
-                    // update bytes sent
-                    bytesSent += bytesToSend;
-                }
-            }
-            catch (Exception e)
-            {
-                throw e;
+                // update bytes sent
+                bytesSent += bytesToSend;
             }
         }
 
@@ -501,111 +496,112 @@ namespace nanoFramework.WebServer
             while (!_cancel)
             {
                 HttpListenerContext context = _listener.GetContext();
+                if (context == null)
+                {
+                    return;
+                }
 
                 new Thread(() =>
                 {
                     bool isRoute = false;
-                    CallbackRoutes route;
-                    int urlParam;
+                    string rawUrl = context.Request.RawUrl;
+
+                    //This is for handling with transitory or bad requests
+                    if (rawUrl == null)
+                    {
+                        return;
+                    }
+
+                    int urlParam = rawUrl.IndexOf(ParamStart);
+
+                    // Variables used only within the "for". They are here for performance reasons
                     bool isFound;
+                    string routeStr;
                     int incForSlash;
                     string toCompare;
-                    string routeStr;
-                    string rawUrl;
+                    bool mustAuthenticate;
+                    bool isAuthOk;
+                    //
 
                     foreach (var rt in _callbackRoutes)
                     {
-                        route = (CallbackRoutes)rt;
-                        urlParam = context.Request.RawUrl.IndexOf(ParamStart);
-                        isFound = false;
+                        CallbackRoutes route = (CallbackRoutes)rt;
+
                         routeStr = route.Route;
-                        rawUrl = context.Request.RawUrl;
                         incForSlash = routeStr.IndexOf('/') == 0 ? 0 : 1;
                         toCompare = route.CaseSensitive ? rawUrl : rawUrl.ToLower();
-                        if (toCompare.IndexOf(routeStr) == incForSlash)
+
+                        if (urlParam > 0)
                         {
-                            if (urlParam > 0)
+                            isFound = urlParam == routeStr.Length + incForSlash;
+                        }
+                        else
+                        {
+                            isFound = toCompare.Length == routeStr.Length + incForSlash;
+                        }
+
+                        // Matching the route name
+                        // Matching the method type
+                        if (!isFound ||
+                            (toCompare.IndexOf(routeStr) != incForSlash) ||
+                            (route.Method != string.Empty && context.Request.HttpMethod != route.Method)
+                            )
+                        {
+                            continue;
+                        }
+
+                        // Starting a new thread to be able to handle a new request in parallel
+                        isRoute = true;
+
+                        // Check auth first
+                        mustAuthenticate = route.Authentication != null && route.Authentication.AuthenticationType != AuthenticationType.None;
+                        isAuthOk = !mustAuthenticate;
+
+                        if (mustAuthenticate)
+                        {
+                            if (route.Authentication.AuthenticationType == AuthenticationType.Basic)
                             {
-                                if (urlParam == routeStr.Length + incForSlash)
-                                {
-                                    isFound = true;
-                                }
+                                var credSite = route.Authentication.Credentials ?? Credential;
+                                var credReq = context.Request.Credentials;
+
+                                isAuthOk = credReq != null
+                                    && (credSite.UserName == credReq.UserName)
+                                    && (credSite.Password == credReq.Password);
                             }
-                            else
+                            else if (route.Authentication.AuthenticationType == AuthenticationType.ApiKey)
                             {
-                                if (toCompare.Length == routeStr.Length + incForSlash)
-                                {
-                                    isFound = true;
-                                }
-                            }
+                                var apikeySite = route.Authentication.ApiKey ?? ApiKey;
+                                var apikeyReq = GetApiKeyFromHeaders(context.Request.Headers);
 
-                            if (isFound && ((route.Method == string.Empty || (context.Request.HttpMethod == route.Method))))
+                                isAuthOk = apikeyReq != null
+                                    && apikeyReq == apikeySite;
+                            }
+                        }
+
+                        if (isAuthOk)
+                        {
+                            route.Callback.Invoke(null, new object[] { new WebServerEventArgs(context) });
+                        }
+                        else
+                        {
+                            if (route.Authentication != null && route.Authentication.AuthenticationType == AuthenticationType.Basic)
                             {
-                                // Starting a new thread to be able to handle a new request in parallel
-                                isRoute = true;
-
-                                // Check auth first
-                                bool isAuthOk = false;
-                                if (route.Authentication != null)
-                                {
-                                    if (route.Authentication.AuthenticationType == AuthenticationType.None)
-                                    {
-                                        isAuthOk = true;
-                                    }
-                                }
-                                else
-                                {
-                                    isAuthOk = true;
-                                }
-
-                                if (!isAuthOk)
-                                {
-                                    if (route.Authentication.AuthenticationType == AuthenticationType.Basic)
-                                    {
-                                        var credSite = route.Authentication.Credentials == null ? Credential : route.Authentication.Credentials;
-                                        var credReq = context.Request.Credentials;
-                                        if (credReq != null)
-                                        {
-                                            if ((credSite.UserName == credReq.UserName) && (credSite.Password == credSite.Password))
-                                            {
-                                                isAuthOk = true;
-                                            }
-                                        }
-                                    }
-                                    else if (route.Authentication.AuthenticationType == AuthenticationType.ApiKey)
-                                    {
-                                        var apikeySite = route.Authentication.ApiKey == null ? ApiKey : route.Authentication.ApiKey;
-                                        var apikeyReq = GetApiKeyFromHeaders(context.Request.Headers);
-
-                                        if (apikeyReq != null)
-                                        {
-                                            if (apikeyReq == apikeySite)
-                                            {
-                                                isAuthOk = true;
-                                            }
-                                        }
-                                    }
-                                }
-
-                                if (isAuthOk)
-                                {
-                                    route.Callback.Invoke(null, new object[] { new WebServerEventArgs(context) });
-                                    context.Response.Close();
-                                    context.Close();
-                                }
-                                else
-                                {
-                                    if (route.Authentication.AuthenticationType == AuthenticationType.Basic)
-                                    {
-                                        context.Response.Headers.Add("WWW-Authenticate", $"Basic realm=\"Access to {routeStr}\"");
-                                    }
-
-                                    context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                                    context.Response.ContentLength64 = 0;
-                                    context.Response.Close();
-                                    context.Close();
-                                }
+                                context.Response.Headers.Add("WWW-Authenticate", $"Basic realm=\"Access to {routeStr}\"");
                             }
+
+                            context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                            context.Response.ContentLength64 = 0;
+                        }
+
+                        // When context has been handed over to WebsocketServer, it will be null at this point
+                        if (context.Response == null)
+                        {
+                            //do nothing this is a websocket that is managed by a websocketserver that is responsible for the context now. 
+                        }
+                        else
+                        {
+                            context.Response.Close();
+                            context.Close();
                         }
                     }
 
@@ -615,13 +611,20 @@ namespace nanoFramework.WebServer
                         {
                             // Starting a new thread to be able to handle a new request in parallel
                             CommandReceived.Invoke(this, new WebServerEventArgs(context));
-                            context.Response.Close();
-                            context.Close();
                         }
                         else
                         {
                             context.Response.StatusCode = 404;
                             context.Response.ContentLength64 = 0;
+                        }
+
+                        // When context has been handed over to WebsocketServer, it will be null at this point
+                        if (context.Response == null)
+                        {
+                            //do nothing this is a websocket that is managed by a websocketserver that is responsible for the context now. 
+                        }
+                        else
+                        {
                             context.Response.Close();
                             context.Close();
                         }
@@ -638,12 +641,10 @@ namespace nanoFramework.WebServer
         private string GetApiKeyFromHeaders(WebHeaderCollection headers)
         {
             var sec = headers.GetValues("ApiKey");
-            if (sec != null)
+            if (sec != null
+                && sec.Length > 0)
             {
-                if (sec.Length > 0)
-                {
-                    return sec[0];
-                }
+                return sec[0];
             }
 
             return null;

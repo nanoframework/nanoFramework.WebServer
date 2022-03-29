@@ -1,0 +1,32 @@
+# Copyright (c) .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+
+# This workflow will periodically check .NET nanoFramework dependencies and updates them in the repository it's running.
+
+name: Daily update dependencies
+
+on:
+  schedule:
+  # At 00:00 UTC every day.
+  - cron:  '00 00 * * *'
+  repository_dispatch:
+    types: update-dependencies
+
+defaults:
+  run:
+    shell: pwsh
+
+jobs:
+  update-nuget-dependencies:
+    name: Update .NET nanoFramework dependencies
+    timeout-minutes: 26
+    runs-on: windows-latest
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Update dependencies
+        uses: nanoframework/nanodu@v1
+        with:
+          solutionsToCheck: 'nanoFramework.WebServer.sln'

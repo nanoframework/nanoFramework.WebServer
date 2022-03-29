@@ -1,0 +1,63 @@
+# Copyright (c) .NET Foundation and Contributors
+# See LICENSE file in the project root for full license information.
+
+trigger:
+  branches:
+    include:
+      - main
+      - develop
+      - release-*
+  paths:
+    exclude:
+      - .github_changelog_generator
+      - .gitignore
+      - CHANGELOG.md
+      - CODE_OF_CONDUCT.md
+      - LICENSE.md
+      - README.md
+      - NuGet.Config
+      - assets/*
+      - config/*
+      - .github/*
+
+  tags:
+    include: 
+      - v*
+
+# PR always trigger build
+pr:
+  autoCancel: true
+
+# add nf-tools repo to resources (for Azure Pipelines templates)
+resources:
+  repositories:
+    - repository: templates
+      type: github
+      name: nanoframework/nf-tools
+      endpoint: nanoframework
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  DOTNET_NOLOGO: true
+  solution: 'nanoFramework.WebServer.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+  nugetPackageName: 'nanoFramework.WebServer'
+
+steps:
+
+  # step from template @ nf-tools repo
+  # all build, update and publish steps
+  - template: azure-pipelines-templates/class-lib-build.yml@templates
+    parameters:
+      sonarCloudProject: 'nanoframework_lib-nanoframework.WebServer'
+  
+  # step from template @ nf-tools repo
+  # report error
+  - template: azure-pipelines-templates/discord-webhook-task.yml@templates  
+    parameters:
+      status: 'failure'
+      webhookUrl: '$(DiscordWebhook)'
+      message: ''

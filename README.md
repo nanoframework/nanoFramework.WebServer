@@ -1,8 +1,25 @@
-# .NET nanoFramework WebServer
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=nanoframework_lib-nanoframework.WebServer&metric=alert_status)](https://sonarcloud.io/dashboard?id=nanoframework_lib-nanoframework.WebServer) [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=nanoframework_lib-nanoframework.WebServer&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=nanoframework_lib-nanoframework.WebServer) [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) [![NuGet](https://img.shields.io/nuget/dt/nanoFramework.WebServer.svg?label=NuGet&style=flat&logo=nuget)](https://www.nuget.org/packages/nanoFramework.WebServer/) [![#yourfirstpr](https://img.shields.io/badge/first--timers--only-friendly-blue.svg)](https://github.com/nanoframework/Home/blob/main/CONTRIBUTING.md) [![Discord](https://img.shields.io/discord/478725473862549535.svg?logo=discord&logoColor=white&label=Discord&color=7289DA)](https://discord.gg/gCyBu8T)
+
+![nanoFramework logo](https://raw.githubusercontent.com/nanoframework/Home/main/resources/logo/nanoFramework-repo-logo.png)
+
+-----
+
+### Welcome to the .NET **nanoFramework** WebServer repository
+
+## Build status
+
+| Component | Build Status | NuGet Package |
+|:-|---|---|
+| nanoFramework.WebServer | [![Build Status](https://dev.azure.com/nanoframework/nanoFramework.WebServer/_apis/build/status/nanoframework.lib-nanoFramework.WebServer?branchName=main)](https://dev.azure.com/nanoframework/nanoFramework.WebServer/_build/latest?definitionId=65&branchName=main) | [![NuGet](https://img.shields.io/nuget/v/nanoFramework.WebServer.svg?label=NuGet&style=flat&logo=nuget)](https://www.nuget.org/packages/nanoFramework.WebServer/) |
+| nanoFramework.WebServer (preview) | [![Build Status](https://dev.azure.com/nanoframework/nanoFramework.WebServer/_apis/build/status/nanoFramework.WebServer?repoName=nanoframework%2FnanoFramework.WebServer&branchName=develop)](https://dev.azure.com/nanoframework/nanoFramework.WebServer/_build/latest?definitionId=65&repoName=nanoframework%2FnanoFramework.WebServer&branchName=develop) | [![NuGet](https://img.shields.io/nuget/vpre/nanoFramework.WebServer.svg?label=NuGet&style=flat&logo=nuget)](https://www.nuget.org/packages/nanoFramework.WebServer/) |
+
+## .NET nanoFramework WebServer
+
+This library was coded by [Laurent Ellerbach](@Ellerbach) who generously offered it to the .NET **nanoFramework** project.
 
 This is a simple nanoFramework WebServer. Features:
 
-- Handle multithread requests
+- Handle multi-thread requests
 - Serve static files on any storage
 - Handle parameter in URL
 - Possible to have multiple WebServer running at the same time
@@ -83,7 +100,7 @@ There is a more advance example with simple REST API to get a list of Person and
 
 ## A simple GPIO controller REST API
 
-You will find in simple [GPIO controller sample](./WebServer.GpioRest) REST API. The controller not case sensitive and is working like this:
+You will find in simple [GPIO controller sample](https://github.com/nanoframework/Samples/tree/main/samples/Webserver/WebServer.GpioRest) REST API. The controller not case sensitive and is working like this:
 
 - To open the pin 2 as output: http://yoururl/open/2/output
 - To open pin 4 as input: http://yoururl/open/4/input
@@ -350,3 +367,26 @@ using (WebServer server = new WebServer(443, HttpProtocol.Https)
 > IMPORTANT: because the certificate above is not issued from a Certificate Authority it won't be recognized as a valid certificate. If you want to access the nanoFramework device with your browser, for example, you'll have to add the (CRT file)[WebServer.Sample\webserver-cert.crt] as a trusted one. On Windows, you just have to double click on the CRT file and then click "Install Certificate...".
 
 You can of course use the routes as defined earlier. Both will work, event or route with the notion of controller.
+
+## Feedback and documentation
+
+For documentation, providing feedback, issues and finding out how to contribute please refer to the [Home repo](https://github.com/nanoframework/Home).
+
+Join our Discord community [here](https://discord.gg/gCyBu8T).
+
+## Credits
+
+The list of contributors to this project can be found at [CONTRIBUTORS](https://github.com/nanoframework/Home/blob/main/CONTRIBUTORS.md).
+
+## License
+
+The **nanoFramework** WebServer library is licensed under the [MIT license](LICENSE.md).
+
+## Code of Conduct
+
+This project has adopted the code of conduct defined by the Contributor Covenant to clarify expected behaviour in our community.
+For more information see the [.NET Foundation Code of Conduct](https://dotnetfoundation.org/code-of-conduct).
+
+### .NET Foundation
+
+This project is supported by the [.NET Foundation](https://dotnetfoundation.org).
