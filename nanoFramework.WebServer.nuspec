@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
   <metadata>
     <id>nanoFramework.WebServer</id>
@@ -22,7 +22,7 @@ Supports both HTTPS and HTTP.</description>
     <tags>http https webserver net netmf nf nanoframework</tags>
     <dependencies>
       <dependency id="nanoFramework.CoreLibrary" version="1.12.0" />
-      <dependency id="nanoFramework.System.Net.Http.Server" version="1.4.0" />
+      <dependency id="nanoFramework.System.Net.Http.Server" version="1.4.0.10" />
       <dependency id="nanoFramework.Windows.Storage" version="1.4.7" />
     </dependencies>
   </metadata>
