@@ -6,6 +6,7 @@
 
 **Documentation and other chores:**
 
+- Update 2 NuGet dependencies [\#162](https://github.com/nanoframework/nanoFramework.WebServer/pull/162)
 - Update 2 NuGet dependencies [\#161](https://github.com/nanoframework/nanoFramework.WebServer/pull/161)
 
 ## [v1.0.0](https://github.com/nanoframework/nanoFramework.WebServer/tree/v1.0.0) (2022-05-03)
