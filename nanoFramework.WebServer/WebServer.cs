@@ -581,7 +581,6 @@ namespace nanoFramework.WebServer
                         if (isAuthOk)
                         {
                             InvokeRoute(route, context);
-                            //route.Callback.Invoke(null, new object[] { new WebServerEventArgs(context) });
                         }
                         else
                         {
