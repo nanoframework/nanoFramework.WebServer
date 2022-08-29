@@ -2,7 +2,15 @@
 
 ## [**Changes available only in 'Preview' NuGet packages:**](https://github.com/nanoframework/nanoFramework.WebServer/tree/HEAD)
 
-[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.1.14...HEAD)
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.1.17...HEAD)
+
+**Implemented enhancements:**
+
+- Extract InvokeRoute method to allow overriding [\#176](https://github.com/nanoframework/nanoFramework.WebServer/pull/176)
+
+## [v1.1.17](https://github.com/nanoframework/nanoFramework.WebServer/tree/v1.1.17) (2022-08-06)
+
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.1.14...v1.1.17)
 
 **Documentation and other chores:**
 
