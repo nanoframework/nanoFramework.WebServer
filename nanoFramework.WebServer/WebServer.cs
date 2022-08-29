@@ -580,7 +580,7 @@ namespace nanoFramework.WebServer
 
                         if (isAuthOk)
                         {
-                            route.Callback.Invoke(null, new object[] { new WebServerEventArgs(context) });
+                            InvokeRoute(route, context);
                         }
                         else
                         {
@@ -636,6 +636,16 @@ namespace nanoFramework.WebServer
             {
                 _listener.Stop();
             }
+        }
+
+        /// <summary>
+        /// Method which invokes route. Can be overriden to inject custom logic.
+        /// </summary>
+        /// <param name="route">Current rounte to invoke. Resolved based on parameters.</param>
+        /// <param name="context">Context of current request.</param>
+        protected virtual void InvokeRoute(CallbackRoutes route, HttpListenerContext context)
+        {
+            route.Callback.Invoke(null, new object[] { new WebServerEventArgs(context) });
         }
 
         private string GetApiKeyFromHeaders(WebHeaderCollection headers)
