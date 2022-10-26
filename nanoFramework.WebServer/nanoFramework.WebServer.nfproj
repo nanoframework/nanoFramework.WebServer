@@ -68,8 +68,8 @@
       <HintPath>..\packages\nanoFramework.System.Net.1.10.36\lib\System.Net.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="System.Net.Http, Version=1.5.50.30604, Culture=neutral, PublicKeyToken=c07d481e9758c731">
-      <HintPath>..\packages\nanoFramework.System.Net.Http.Server.1.5.50\lib\System.Net.Http.dll</HintPath>
+    <Reference Include="System.Net.Http, Version=1.5.52.50118, Culture=neutral, PublicKeyToken=c07d481e9758c731">
+      <HintPath>..\packages\nanoFramework.System.Net.Http.Server.1.5.52\lib\System.Net.Http.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Threading, Version=1.1.8.6695, Culture=neutral, PublicKeyToken=c07d481e9758c731">
@@ -79,8 +79,8 @@
       <HintPath>..\packages\nanoFramework.Windows.Storage.1.5.21\lib\Windows.Storage.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Windows.Storage.Streams, Version=1.14.15.62472, Culture=neutral, PublicKeyToken=c07d481e9758c731">
-      <HintPath>..\packages\nanoFramework.Windows.Storage.Streams.1.14.15\lib\Windows.Storage.Streams.dll</HintPath>
+    <Reference Include="Windows.Storage.Streams, Version=1.14.19.64023, Culture=neutral, PublicKeyToken=c07d481e9758c731">
+      <HintPath>..\packages\nanoFramework.Windows.Storage.Streams.1.14.19\lib\Windows.Storage.Streams.dll</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>
