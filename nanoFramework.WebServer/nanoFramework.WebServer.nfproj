@@ -60,27 +60,27 @@
       <HintPath>..\packages\nanoFramework.System.Text.1.2.22\lib\nanoFramework.System.Text.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="System.IO.Streams, Version=1.1.24.24967, Culture=neutral, PublicKeyToken=c07d481e9758c731">
-      <HintPath>..\packages\nanoFramework.System.IO.Streams.1.1.24\lib\System.IO.Streams.dll</HintPath>
+    <Reference Include="System.IO.Streams, Version=1.1.27.27650, Culture=neutral, PublicKeyToken=c07d481e9758c731">
+      <HintPath>..\packages\nanoFramework.System.IO.Streams.1.1.27\lib\System.IO.Streams.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="System.Net, Version=1.10.36.8063, Culture=neutral, PublicKeyToken=c07d481e9758c731">
-      <HintPath>..\packages\nanoFramework.System.Net.1.10.36\lib\System.Net.dll</HintPath>
+    <Reference Include="System.Net, Version=1.10.38.33445, Culture=neutral, PublicKeyToken=c07d481e9758c731">
+      <HintPath>..\packages\nanoFramework.System.Net.1.10.38\lib\System.Net.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="System.Net.Http, Version=1.5.50.30604, Culture=neutral, PublicKeyToken=c07d481e9758c731">
-      <HintPath>..\packages\nanoFramework.System.Net.Http.Server.1.5.50\lib\System.Net.Http.dll</HintPath>
+    <Reference Include="System.Net.Http, Version=1.5.54.55551, Culture=neutral, PublicKeyToken=c07d481e9758c731">
+      <HintPath>..\packages\nanoFramework.System.Net.Http.Server.1.5.54\lib\System.Net.Http.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Threading, Version=1.1.8.6695, Culture=neutral, PublicKeyToken=c07d481e9758c731">
       <HintPath>..\packages\nanoFramework.System.Threading.1.1.8\lib\System.Threading.dll</HintPath>
     </Reference>
-    <Reference Include="Windows.Storage, Version=1.5.21.1052, Culture=neutral, PublicKeyToken=c07d481e9758c731">
-      <HintPath>..\packages\nanoFramework.Windows.Storage.1.5.21\lib\Windows.Storage.dll</HintPath>
+    <Reference Include="Windows.Storage, Version=1.5.24.1018, Culture=neutral, PublicKeyToken=c07d481e9758c731">
+      <HintPath>..\packages\nanoFramework.Windows.Storage.1.5.24\lib\Windows.Storage.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Windows.Storage.Streams, Version=1.14.15.62472, Culture=neutral, PublicKeyToken=c07d481e9758c731">
-      <HintPath>..\packages\nanoFramework.Windows.Storage.Streams.1.14.15\lib\Windows.Storage.Streams.dll</HintPath>
+    <Reference Include="Windows.Storage.Streams, Version=1.14.19.64023, Culture=neutral, PublicKeyToken=c07d481e9758c731">
+      <HintPath>..\packages\nanoFramework.Windows.Storage.Streams.1.14.19\lib\Windows.Storage.Streams.dll</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>

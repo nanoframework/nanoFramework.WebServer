@@ -22,21 +22,21 @@
       },
       "nanoFramework.System.IO.Streams": {
         "type": "Direct",
-        "requested": "[1.1.24, 1.1.24]",
-        "resolved": "1.1.24",
-        "contentHash": "hisJ4S40j22CWhgEe6WuayZcoxUpMPn3HdlSpgZ+UAG+YMTJ7FqokvMQc59OnQr0K/Pe25qEp/eazWYSE9VUjg=="
+        "requested": "[1.1.27, 1.1.27]",
+        "resolved": "1.1.27",
+        "contentHash": "9ho/C/ZIQrBw51UnzLVbSc//kE1mDcgykGEZH8p+A5Q4R7JMVwdEKlNQXWr1VHEkGbv2wbyos6nRLqu2rdjpwA=="
       },
       "nanoFramework.System.Net": {
         "type": "Direct",
-        "requested": "[1.10.36, 1.10.36]",
-        "resolved": "1.10.36",
-        "contentHash": "KJTdc133xIVbn1VSqc5cVxFqb6ESuyraJHUBc9CWIXAeyXGkzrFU2+QhtCnU6SqtgmwP0QOvBCn1Cr7CyQZiqQ=="
+        "requested": "[1.10.38, 1.10.38]",
+        "resolved": "1.10.38",
+        "contentHash": "vMGSqPoJvvXmpJXir/QH7vgj3n3M/705IQtmWRo0a99HdVaXnc0iZmmRtLi8JKNGngwEDZ0ge4+ZBBqqtSsyrw=="
       },
       "nanoFramework.System.Net.Http.Server": {
         "type": "Direct",
-        "requested": "[1.5.50, 1.5.50]",
-        "resolved": "1.5.50",
-        "contentHash": "Xp9KBrG0yolVKfAbH0YnueBKFst6JBYeGMAEWQz/klEdDuvOhrVni2n4I8aQsgHStqn3p1qkONP+WpWaiJuMjQ=="
+        "requested": "[1.5.54, 1.5.54]",
+        "resolved": "1.5.54",
+        "contentHash": "889jaWyad4ft822R7KljQs82YuvHKO/MmHQ7HXN9em1eIJLPlQhQF8gW9SXeodmg3A+PlFGYgdLIoqQB0fhNbg=="
       },
       "nanoFramework.System.Text": {
         "type": "Direct",
@@ -52,15 +52,15 @@
       },
       "nanoFramework.Windows.Storage": {
         "type": "Direct",
-        "requested": "[1.5.21, 1.5.21]",
-        "resolved": "1.5.21",
-        "contentHash": "Ic342qfYuaQJSV55axCv6G8heO46gkFA5Owwj3ylQR2r2DabTx014kcT3QSbI5kUDJg0bGglH7N7jq4ne7kVCw=="
+        "requested": "[1.5.24, 1.5.24]",
+        "resolved": "1.5.24",
+        "contentHash": "pQS5wffAwNVdVqXnnCvfJeBmovdFMHMMohgVABQImKu2dj0OtGVwne+5JJjg2+WY9SxmC9mHR8qWKv7cj4e2aw=="
       },
       "nanoFramework.Windows.Storage.Streams": {
         "type": "Direct",
-        "requested": "[1.14.15, 1.14.15]",
-        "resolved": "1.14.15",
-        "contentHash": "eIwTdcNuQkit3SUMRcVxcgGD/XdVo7hmIPG7trPFC8vhQ5tpWIa95HWUWWTGzq4LGBCF+UhPeGMGT+PwqLm07Q=="
+        "requested": "[1.14.19, 1.14.19]",
+        "resolved": "1.14.19",
+        "contentHash": "MP1E40gJ8jVZ6TbxmTPGR2uJh4TGwJVmSqZNZtoazzB7Auiy0mmKmBeOW4BWcNYddvzrJW+9OuyXouwH/hKqpg=="
       },
       "Nerdbank.GitVersioning": {
         "type": "Direct",
