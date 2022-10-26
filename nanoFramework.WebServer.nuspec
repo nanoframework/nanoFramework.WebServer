@@ -22,8 +22,8 @@ Supports both HTTPS and HTTP.</description>
     <tags>http https webserver net netmf nf nanoframework</tags>
     <dependencies>
       <dependency id="nanoFramework.CoreLibrary" version="1.12.0" />
-      <dependency id="nanoFramework.System.Net.Http.Server" version="1.5.50" />
-      <dependency id="nanoFramework.Windows.Storage" version="1.5.21" />
+      <dependency id="nanoFramework.System.Net.Http.Server" version="1.5.54" />
+      <dependency id="nanoFramework.Windows.Storage" version="1.5.24" />
     </dependencies>
   </metadata>
   <files>
