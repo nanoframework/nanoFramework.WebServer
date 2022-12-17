@@ -13,6 +13,9 @@ namespace nanoFramework.WebServer
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     public class RouteAttribute : Attribute
     {
+        /// <summary>
+        /// The route.
+        /// </summary>
         public string Route { get; set; }
 
         /// <summary>

@@ -13,8 +13,17 @@ namespace nanoFramework.WebServer
     [AttributeUsage(AttributeTargets.Method)]
     public class MethodAttribute : Attribute
     {
+        /// <summary>
+        /// The Method.
+        /// </summary>
         public string Method { get; set; }
 
+        /// <summary>
+        /// The Method Attribute.
+        /// </summary>
+        /// <param name="method">
+        /// The method.
+        /// </param>
         public MethodAttribute(string method)
         {
             Method = method;
