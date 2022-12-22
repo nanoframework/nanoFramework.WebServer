@@ -8,24 +8,30 @@ using System;
 namespace nanoFramework.WebServer
 {
     /// <summary>
-    /// Route custom attribute
+    /// This attribute defines which HTTP route a method will handle.
     /// </summary>
+    /// <remarks>
+    /// For example: test/any.
+    /// For details on how to use, see: https://github.com/nanoframework/nanoFramework.WebServer#usage
+    /// </remarks>
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     public class RouteAttribute : Attribute
     {
         /// <summary>
-        /// The route.
+        /// The route that the method will respond to.
         /// </summary>
         public string Route { get; set; }
 
         /// <summary>
-        /// A route attribute
+        /// Initializes a new instance of the <see cref="RouteAttribute"/> class.
         /// </summary>
-        /// <param name="route">The route like route/second/third</param>
+        /// <param name="route">The route the method will handle.</param>
+        /// <remarks>
+        /// For example: test/any.
+        /// For details on how to use, see: https://github.com/nanoframework/nanoFramework.WebServer#usage</remarks>
         public RouteAttribute(string route)
         {
             Route = route;
         }
-
     }
 }
