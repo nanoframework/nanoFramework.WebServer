@@ -22,9 +22,9 @@
       },
       "nanoFramework.System.IO.Streams": {
         "type": "Direct",
-        "requested": "[1.1.27, 1.1.27]",
-        "resolved": "1.1.27",
-        "contentHash": "9ho/C/ZIQrBw51UnzLVbSc//kE1mDcgykGEZH8p+A5Q4R7JMVwdEKlNQXWr1VHEkGbv2wbyos6nRLqu2rdjpwA=="
+        "requested": "[1.1.36, 1.1.36]",
+        "resolved": "1.1.36",
+        "contentHash": "06MsEY7ArgItBdDXo9/I7XA5N/t4y0Zw5yKCQUpyIZJEvTKuo/Lx+RvQ84cddo5ZRIaOxRcrGZqeMB2Xy+AnVA=="
       },
       "nanoFramework.System.Net": {
         "type": "Direct",
@@ -34,15 +34,15 @@
       },
       "nanoFramework.System.Net.Http.Server": {
         "type": "Direct",
-        "requested": "[1.5.70, 1.5.70]",
-        "resolved": "1.5.70",
-        "contentHash": "yFDdnQxWfrzqxRvl9mZaojBlUJUMGnDs/wqJ5JwXSbLbFO9uSrphaw8j44eDr40td2nke1xjkhulwpGL3iFKTQ=="
+        "requested": "[1.5.73, 1.5.73]",
+        "resolved": "1.5.73",
+        "contentHash": "7wXDok/L2xKz+9rH8l8fS1L6BEbLKDF7M4ThuOjKfhbBqX1IVySGDy0Ticc8h8hrm74rgwhkdC4oahaseeN24Q=="
       },
       "nanoFramework.System.Text": {
         "type": "Direct",
-        "requested": "[1.2.22, 1.2.22]",
-        "resolved": "1.2.22",
-        "contentHash": "vLvU0II3oJfajQ8MgNm8aCkaQ2JhjznzruwksOorbMJf86zLRbA5NUeg9X/KjbAE5pIalitUOqtNLKorYTbYGg=="
+        "requested": "[1.2.37, 1.2.37]",
+        "resolved": "1.2.37",
+        "contentHash": "ORgRq0HSynSBhlXRTHdhzZiOdq/nRhdnX+DeIGw56y9OSc8dvqUz6elm97Jz+4WQ6ikpvs5PFGINAa35kBebwQ=="
       },
       "nanoFramework.System.Threading": {
         "type": "Direct",
@@ -52,15 +52,15 @@
       },
       "nanoFramework.Windows.Storage": {
         "type": "Direct",
-        "requested": "[1.5.27, 1.5.27]",
-        "resolved": "1.5.27",
-        "contentHash": "NQm5QyK4LjgXXifGkhaEyHlfu9LDIZIbtGa4Uw4EoKtcnWgp9sk8ZRoiOE3d3jMkT4Ny0r1Bfa0tUAR8ImPDzg=="
+        "requested": "[1.5.31, 1.5.31]",
+        "resolved": "1.5.31",
+        "contentHash": "mMkU63c/hXODRFxmuxFOWYViNFg6GGHLwdU9+cz3T6ntJIaTH+qZUzkg0CJX++6vkMO5COmQfKpqalP8pnl1gg=="
       },
       "nanoFramework.Windows.Storage.Streams": {
         "type": "Direct",
-        "requested": "[1.14.22, 1.14.22]",
-        "resolved": "1.14.22",
-        "contentHash": "a5a65jrVCshHMS5SznqzKm/mfDSWflcF4mU+Yg4V0ykmqlJTZ2jjQhqW1JP9jV84jKNW7FX1CAstRlYMDBfIYA=="
+        "requested": "[1.14.24, 1.14.24]",
+        "resolved": "1.14.24",
+        "contentHash": "dApgYplMFRUTp7izZxvduXgl9B7oqVPqqagkYXFf6cRJRC3Og0y2JZTVJdhGPW/ud0U0+rvjqXOU+1CtEzv88A=="
       },
       "Nerdbank.GitVersioning": {
         "type": "Direct",
