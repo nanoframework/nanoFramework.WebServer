@@ -52,9 +52,9 @@
       },
       "nanoFramework.Windows.Storage": {
         "type": "Direct",
-        "requested": "[1.5.31, 1.5.31]",
-        "resolved": "1.5.31",
-        "contentHash": "mMkU63c/hXODRFxmuxFOWYViNFg6GGHLwdU9+cz3T6ntJIaTH+qZUzkg0CJX++6vkMO5COmQfKpqalP8pnl1gg=="
+        "requested": "[1.5.33, 1.5.33]",
+        "resolved": "1.5.33",
+        "contentHash": "9BDmxivx3h/2MfoXcTAUYhZny6iaDN9DwAngx7OrQNvXFgzdbOTMTB17Qcy0iA9EUqTr6HG8TuE2tv2loyNeIA=="
       },
       "nanoFramework.Windows.Storage.Streams": {
         "type": "Direct",

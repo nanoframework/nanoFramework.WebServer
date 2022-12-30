@@ -23,7 +23,7 @@ Supports both HTTPS and HTTP.</description>
     <dependencies>
       <dependency id="nanoFramework.CoreLibrary" version="1.14.2" />
       <dependency id="nanoFramework.System.Net.Http.Server" version="1.5.78" />
-      <dependency id="nanoFramework.Windows.Storage" version="1.5.31" />
+      <dependency id="nanoFramework.Windows.Storage" version="1.5.33" />
     </dependencies>
   </metadata>
   <files>
