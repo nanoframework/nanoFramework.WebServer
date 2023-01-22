@@ -371,7 +371,7 @@ namespace nanoFramework.WebServer
         /// <summary>
         /// Restart the server.
         /// </summary>
-        private bool Restart()
+        public bool Restart()
         {
             Stop();
             return Start();
@@ -468,7 +468,8 @@ namespace nanoFramework.WebServer
         /// /// <param name="contentType">The type of file, if empty string, then will use auto detection</param>
         public static void SendFileOverHTTP(HttpListenerResponse response, string fileName, byte[] content, string contentType = "")
         {
-            contentType = contentType == "" ? GetContentTypeFromFileName(fileName.Substring(fileName.LastIndexOf('.'))) : contentType;
+            // If no extension, we will get the full file name
+            contentType = contentType == "" ? GetContentTypeFromFileName(fileName.Substring(fileName.LastIndexOf('.') + 1)) : contentType;
             response.ContentType = contentType;
             response.ContentLength64 = content.Length;
 
@@ -482,8 +483,6 @@ namespace nanoFramework.WebServer
 
                 // Writes data to output stream
                 response.OutputStream.Write(content, (int)bytesSent, (int)bytesToSend);
-
-                // allow some time to physically send the bits. Can be reduce to 10 or even less if not too much other code running in parallel
 
                 // update bytes sent
                 bytesSent += bytesToSend;
@@ -686,38 +685,47 @@ namespace nanoFramework.WebServer
             string contentType = "text/html";
 
             //determine the type of file for the http header
-            if (fileName == ".cs" ||
-                fileName == ".txt" ||
-                fileName == ".csproj"
-            )
+            if (fileName == "cs" ||
+                fileName == "txt" ||
+                fileName == "csproj")
             {
                 contentType = "text/plain";
             }
-            else if (fileName == ".jpg" ||
-                fileName == ".bmp" ||
-                fileName == ".jpeg" ||
-                fileName == ".png"
-              )
+            else if (fileName == "jpg" ||
+                fileName == "jpeg" ||
+                fileName == "jpe")
             {
-                contentType = "image";
+                contentType = "image/jpeg";
             }
-            else if (fileName == ".htm" ||
-                fileName == ".html"
-              )
+            else if (fileName == "bmp" ||
+                fileName == "png" ||
+                fileName == "gif" ||
+                fileName == "ief")
+            {
+                contentType = $"image/{fileName}";
+            }
+            else if (fileName == "htm" ||
+                fileName == "html")
             {
                 contentType = "text/html";
             }
-            else if (fileName == ".mp3")
+            else if (fileName == "mp3")
             {
                 contentType = "audio/mpeg";
             }
-            else if (fileName == ".css")
+            else if (fileName == "css")
             {
                 contentType = "text/css";
             }
-            else if (fileName == ".ico")
+            else if (fileName == "ico")
             {
                 contentType = "image/x-icon";
+            }
+            else if (fileName == "zip" ||
+                fileName == "json" ||
+                fileName == "pdf")
+            {
+                contentType = $"application/{fileName}";
             }
 
             return contentType;

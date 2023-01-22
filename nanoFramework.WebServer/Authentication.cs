@@ -10,7 +10,7 @@ using System.Text;
 namespace nanoFramework.WebServer
 {
     /// <summary>
-    /// The authentication to be used by the server
+    /// The authentication to be used by the server.
     /// </summary>
     public class Authentication
     {
@@ -20,7 +20,7 @@ namespace nanoFramework.WebServer
         public AuthenticationType AuthenticationType { get; internal set; }
 
         /// <summary>
-        /// The network credential user and password
+        /// The network credential user and password.
         /// </summary>
         public NetworkCredential Credentials { get; internal set; } = null;
 
@@ -29,18 +29,29 @@ namespace nanoFramework.WebServer
         /// </summary>
         public string ApiKey { get; internal set; } = null;
 
+        /// <summary>
+        /// Creates an autentication class from a credential.
+        /// </summary>
+        /// <param name="credential">The credentials.</param>
         public Authentication(NetworkCredential credential)
         {
             AuthenticationType = AuthenticationType.Basic;
             Credentials = credential;
         }
 
+        /// <summary>
+        /// Creates an authentication from a key.
+        /// </summary>
+        /// <param name="apiKey">The key.</param>
         public Authentication(string apiKey)
         {
             AuthenticationType = AuthenticationType.ApiKey;
             ApiKey = apiKey;
         }
 
+        /// <summary>
+        /// Creates an empty authenticate.
+        /// </summary>
         public Authentication()
         {
             AuthenticationType = AuthenticationType.None;

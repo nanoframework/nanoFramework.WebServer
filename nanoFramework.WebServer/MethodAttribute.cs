@@ -8,13 +8,20 @@ using System;
 namespace nanoFramework.WebServer
 {
     /// <summary>
-    /// The HTTP Method
+    /// The HTTP Method.
     /// </summary>
     [AttributeUsage(AttributeTargets.Method)]
     public class MethodAttribute : Attribute
     {
+        /// <summary>
+        /// Gets or sets the method.
+        /// </summary>
         public string Method { get; set; }
 
+        /// <summary>
+        /// Creates a method attribute.
+        /// </summary>
+        /// <param name="method">The method.</param>
         public MethodAttribute(string method)
         {
             Method = method;
