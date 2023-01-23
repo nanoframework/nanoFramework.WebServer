@@ -438,26 +438,14 @@ namespace nanoFramework.WebServer
 
             response.ContentType = contentType;
             response.ContentLength64 = fileLength;
-            // Now loops sending all the data.
+            response.SendChunked = true;
 
-            //byte[] buf = new byte[MaxSizeBuffer];
+            byte[] buf = new byte[MaxSizeBuffer];
             using (DataReader dataReader = DataReader.FromBuffer(readBuffer))
             {
-                //for (long bytesSent = 0; bytesSent < fileLength;)
-                //{
-                //    // Determines amount of data left.
-                //    long bytesToRead = fileLength - bytesSent;
-                //    bytesToRead = bytesToRead < MaxSizeBuffer ? bytesToRead : MaxSizeBuffer;
-                //    // Reads the data.
-                //    dataReader.ReadBytes(buf);
-                //    // Writes data to browser
-                //    response.OutputStream.Write(buf, 0, (int)bytesToRead);
-                //    // allow some time to physically send the bits. Can be reduce to 10 or even less if not too much other code running in parallel
-                //    // Updates bytes read.
-                //    bytesSent += bytesToRead;
-                //}
                 byte[] bufFull = new byte[readBuffer.Length];
                 dataReader.ReadBytes(bufFull);
+                // Writes data to output stream
                 response.OutputStream.Write(bufFull, 0, (int)readBuffer.Length);
             }
         }
@@ -474,23 +462,7 @@ namespace nanoFramework.WebServer
             contentType = contentType == "" ? GetContentTypeFromFileName(fileName.Substring(fileName.LastIndexOf('.'))) : contentType;
             response.ContentType = contentType;
             response.ContentLength64 = content.Length;
-
-            // Now loop to send all the data.
-
-            //for (long bytesSent = 0; bytesSent < content.Length;)
-            //{
-            //    // Determines amount of data left
-            //    long bytesToSend = content.Length - bytesSent;
-            //    bytesToSend = bytesToSend < MaxSizeBuffer ? bytesToSend : MaxSizeBuffer;
-
-            //    // Writes data to output stream
-            //    response.OutputStream.Write(content, (int)bytesSent, (int)bytesToSend);
-
-            //    // allow some time to physically send the bits. Can be reduce to 10 or even less if not too much other code running in parallel
-
-            //    // update bytes sent
-            //    bytesSent += bytesToSend;
-            //}
+            response.SendChunked = true;
 
             // Writes data to output stream
             response.OutputStream.Write(content, 0, content.Length);
