@@ -675,57 +675,57 @@ namespace nanoFramework.WebServer
         /// <summary>
         /// Get the MIME-type for a file name.
         /// </summary>
-        /// <param name="fileName">File name to get content type for.</param>
+        /// <param name="fileExt">File extension to get content type for.</param>
         /// <returns>The MIME-type for the file name.</returns>
-        private static string GetContentTypeFromFileName(string fileName)
+        private static string GetContentTypeFromFileName(string fileExt)
         {
             // normalize to lower case to speed comparison
-            fileName = fileName.ToLower();
+            fileExt = fileExt.ToLower();
 
             string contentType = "text/html";
 
             //determine the type of file for the http header
-            if (fileName == "cs" ||
-                fileName == "txt" ||
-                fileName == "csproj")
+            if (fileExt == "cs" ||
+                fileExt == "txt" ||
+                fileExt == "csproj")
             {
                 contentType = "text/plain";
             }
-            else if (fileName == "jpg" ||
-                fileName == "jpeg" ||
-                fileName == "jpe")
+            else if (fileExt == "jpg" ||
+                fileExt == "jpeg" ||
+                fileExt == "jpe")
             {
                 contentType = "image/jpeg";
             }
-            else if (fileName == "bmp" ||
-                fileName == "png" ||
-                fileName == "gif" ||
-                fileName == "ief")
+            else if (fileExt == "bmp" ||
+                fileExt == "png" ||
+                fileExt == "gif" ||
+                fileExt == "ief")
             {
-                contentType = $"image/{fileName}";
+                contentType = $"image/{fileExt}";
             }
-            else if (fileName == "htm" ||
-                fileName == "html")
+            else if (fileExt == "htm" ||
+                fileExt == "html")
             {
                 contentType = "text/html";
             }
-            else if (fileName == "mp3")
+            else if (fileExt == "mp3")
             {
                 contentType = "audio/mpeg";
             }
-            else if (fileName == "css")
+            else if (fileExt == "css")
             {
                 contentType = "text/css";
             }
-            else if (fileName == "ico")
+            else if (fileExt == "ico")
             {
                 contentType = "image/x-icon";
             }
-            else if (fileName == "zip" ||
-                fileName == "json" ||
-                fileName == "pdf")
+            else if (fileExt == "zip" ||
+                fileExt == "json" ||
+                fileExt == "pdf")
             {
-                contentType = $"application/{fileName}";
+                contentType = $"application/{fileExt}";
             }
 
             return contentType;
