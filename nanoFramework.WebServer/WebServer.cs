@@ -371,7 +371,7 @@ namespace nanoFramework.WebServer
         /// <summary>
         /// Restart the server.
         /// </summary>
-        public bool Restart()
+        private bool Restart()
         {
             Stop();
             return Start();
@@ -465,7 +465,7 @@ namespace nanoFramework.WebServer
         /// <param name="response"><see cref="HttpListenerResponse"/> to send the content over.</param>
         /// <param name="fileName">Name of the file to send over <see cref="HttpListenerResponse"/>.</param>
         /// <param name="content">Content of the file to send.</param>
-        /// /// <param name="contentType">The type of file, if empty string, then will use auto detection</param>
+        /// <param name="contentType">The type of file, if empty string, then will use auto detection.</param>
         public static void SendFileOverHTTP(HttpListenerResponse response, string fileName, byte[] content, string contentType = "")
         {
             // If no extension, we will get the full file name
