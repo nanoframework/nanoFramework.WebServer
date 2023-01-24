@@ -438,6 +438,7 @@ namespace nanoFramework.WebServer
 
             response.ContentType = contentType;
             response.ContentLength64 = fileLength;
+            response.SendChunked = true;
             // Now loops sending all the data.
 
             byte[] buf = new byte[MaxSizeBuffer];
@@ -448,11 +449,13 @@ namespace nanoFramework.WebServer
                     // Determines amount of data left.
                     long bytesToRead = fileLength - bytesSent;
                     bytesToRead = bytesToRead < MaxSizeBuffer ? bytesToRead : MaxSizeBuffer;
+
                     // Reads the data.
                     dataReader.ReadBytes(buf);
+
                     // Writes data to browser
                     response.OutputStream.Write(buf, 0, (int)bytesToRead);
-                    // allow some time to physically send the bits. Can be reduce to 10 or even less if not too much other code running in parallel
+
                     // Updates bytes read.
                     bytesSent += bytesToRead;
                 }
@@ -472,7 +475,7 @@ namespace nanoFramework.WebServer
             contentType = contentType == "" ? GetContentTypeFromFileName(fileName.Substring(fileName.LastIndexOf('.') + 1)) : contentType;
             response.ContentType = contentType;
             response.ContentLength64 = content.Length;
-
+            response.SendChunked = true;
             // Now loop to send all the data.
 
             for (long bytesSent = 0; bytesSent < content.Length;)
