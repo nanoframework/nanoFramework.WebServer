@@ -2,7 +2,15 @@
 
 ## [**Changes available only in 'Preview' NuGet packages:**](https://github.com/nanoframework/nanoFramework.WebServer/tree/HEAD)
 
-[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.1.54...HEAD)
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.1.56...HEAD)
+
+**Fixed bugs:**
+
+- Fixing basic MIME types [\#214](https://github.com/nanoframework/nanoFramework.WebServer/pull/214)
+
+## [v1.1.56](https://github.com/nanoframework/nanoFramework.WebServer/tree/v1.1.56) (2022-12-30)
+
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.1.54...v1.1.56)
 
 **Documentation and other chores:**
 
