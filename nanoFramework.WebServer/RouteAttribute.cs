@@ -8,17 +8,20 @@ using System;
 namespace nanoFramework.WebServer
 {
     /// <summary>
-    /// Route custom attribute
+    /// Route custom attribute.
     /// </summary>
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     public class RouteAttribute : Attribute
     {
+        /// <summary>
+        /// Gets or sets the route.
+        /// </summary>
         public string Route { get; set; }
 
         /// <summary>
-        /// A route attribute
+        /// A route attribute.
         /// </summary>
-        /// <param name="route">The route like route/second/third</param>
+        /// <param name="route">The complete route like 'route/second/third'.</param>
         public RouteAttribute(string route)
         {
             Route = route;

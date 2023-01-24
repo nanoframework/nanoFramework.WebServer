@@ -465,10 +465,11 @@ namespace nanoFramework.WebServer
         /// <param name="response"><see cref="HttpListenerResponse"/> to send the content over.</param>
         /// <param name="fileName">Name of the file to send over <see cref="HttpListenerResponse"/>.</param>
         /// <param name="content">Content of the file to send.</param>
-        /// /// <param name="contentType">The type of file, if empty string, then will use auto detection</param>
+        /// <param name="contentType">The type of file, if empty string, then will use auto detection.</param>
         public static void SendFileOverHTTP(HttpListenerResponse response, string fileName, byte[] content, string contentType = "")
         {
-            contentType = contentType == "" ? GetContentTypeFromFileName(fileName.Substring(fileName.LastIndexOf('.'))) : contentType;
+            // If no extension, we will get the full file name
+            contentType = contentType == "" ? GetContentTypeFromFileName(fileName.Substring(fileName.LastIndexOf('.') + 1)) : contentType;
             response.ContentType = contentType;
             response.ContentLength64 = content.Length;
 
@@ -482,8 +483,6 @@ namespace nanoFramework.WebServer
 
                 // Writes data to output stream
                 response.OutputStream.Write(content, (int)bytesSent, (int)bytesToSend);
-
-                // allow some time to physically send the bits. Can be reduce to 10 or even less if not too much other code running in parallel
 
                 // update bytes sent
                 bytesSent += bytesToSend;
@@ -676,48 +675,57 @@ namespace nanoFramework.WebServer
         /// <summary>
         /// Get the MIME-type for a file name.
         /// </summary>
-        /// <param name="fileName">File name to get content type for.</param>
+        /// <param name="fileExt">File extension to get content type for.</param>
         /// <returns>The MIME-type for the file name.</returns>
-        private static string GetContentTypeFromFileName(string fileName)
+        private static string GetContentTypeFromFileName(string fileExt)
         {
             // normalize to lower case to speed comparison
-            fileName = fileName.ToLower();
+            fileExt = fileExt.ToLower();
 
             string contentType = "text/html";
 
             //determine the type of file for the http header
-            if (fileName == ".cs" ||
-                fileName == ".txt" ||
-                fileName == ".csproj"
-            )
+            if (fileExt == "cs" ||
+                fileExt == "txt" ||
+                fileExt == "csproj")
             {
                 contentType = "text/plain";
             }
-            else if (fileName == ".jpg" ||
-                fileName == ".bmp" ||
-                fileName == ".jpeg" ||
-                fileName == ".png"
-              )
+            else if (fileExt == "jpg" ||
+                fileExt == "jpeg" ||
+                fileExt == "jpe")
             {
-                contentType = "image";
+                contentType = "image/jpeg";
             }
-            else if (fileName == ".htm" ||
-                fileName == ".html"
-              )
+            else if (fileExt == "bmp" ||
+                fileExt == "png" ||
+                fileExt == "gif" ||
+                fileExt == "ief")
+            {
+                contentType = $"image/{fileExt}";
+            }
+            else if (fileExt == "htm" ||
+                fileExt == "html")
             {
                 contentType = "text/html";
             }
-            else if (fileName == ".mp3")
+            else if (fileExt == "mp3")
             {
                 contentType = "audio/mpeg";
             }
-            else if (fileName == ".css")
+            else if (fileExt == "css")
             {
                 contentType = "text/css";
             }
-            else if (fileName == ".ico")
+            else if (fileExt == "ico")
             {
                 contentType = "image/x-icon";
+            }
+            else if (fileExt == "zip" ||
+                fileExt == "json" ||
+                fileExt == "pdf")
+            {
+                contentType = $"application/{fileExt}";
             }
 
             return contentType;
