@@ -7,8 +7,8 @@ name: Daily update dependencies
 
 on:
   schedule:
-  # At 00:00 UTC every day.
-  - cron:  '00 00 * * *'
+  # At 00:10 UTC .
+  - cron:  '10 00 * * Wed,Fri'
   repository_dispatch:
     types: update-dependencies
 
@@ -16,7 +16,6 @@ jobs:
   update-dependencies:
     name: nanoFramework
     uses: nanoframework/nf-tools/.github/workflows/update-dependencies.yml@main
+    secrets: inherit
     with:
       solutionsToCheck: 'nanoFramework.WebServer.sln'
-    secrets:
-      githubAuth: ${{ secrets.NFBOT_GITHUB_ACTIONS }}

@@ -21,9 +21,9 @@ Perfect for simple embedded web pages, with Support of file on a storage (USB, S
 Supports both HTTPS and HTTP.</description>
     <tags>http https webserver net netmf nf nanoframework</tags>
     <dependencies>
-      <dependency id="nanoFramework.CoreLibrary" version="1.12.0" />
-      <dependency id="nanoFramework.System.Net.Http.Server" version="1.5.61" />
-      <dependency id="nanoFramework.Windows.Storage" version="1.5.24" />
+      <dependency id="nanoFramework.CoreLibrary" version="1.14.2" />
+      <dependency id="nanoFramework.System.Net.Http.Server" version="1.5.84" />
+      <dependency id="nanoFramework.Windows.Storage" version="1.5.33" />
     </dependencies>
   </metadata>
   <files>

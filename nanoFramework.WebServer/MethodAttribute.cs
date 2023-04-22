@@ -8,7 +8,7 @@ using System;
 namespace nanoFramework.WebServer
 {
     /// <summary>
-    /// This attribute defines which HTTP Method the class method will handle.
+    /// The HTTP Method.
     /// </summary>
     /// <remarks>
     /// No validation is performed if the HTTP method is a valid one.
@@ -18,14 +18,14 @@ namespace nanoFramework.WebServer
     public class MethodAttribute : Attribute
     {
         /// <summary>
-        /// The HTTP Method to use.
+        /// Gets or sets the method.
         /// </summary>
         public string Method { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MethodAttribute"/> class.
+        /// Creates a method attribute.
         /// </summary>
-        /// <param name="method">The HTTP Method to handle./// </param>
+        /// <param name="method">The method.</param>
         public MethodAttribute(string method)
         {
             Method = method;

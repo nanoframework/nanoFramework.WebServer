@@ -20,7 +20,7 @@ namespace nanoFramework.WebServer
         public AuthenticationType AuthenticationType { get; internal set; }
 
         /// <summary>
-        /// Gets or sets the network credentials that are sent to the host and used to authenticate the request.
+        /// The network credential user and password.
         /// </summary>
         public NetworkCredential Credentials { get; internal set; } = null;
 
@@ -30,11 +30,9 @@ namespace nanoFramework.WebServer
         public string ApiKey { get; internal set; } = null;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Authentication"/> class.
+        /// Creates an autentication class from a credential.
         /// </summary>
-        /// <param name="credential">
-        /// The network credential user and password.
-        /// </param>
+        /// <param name="credential">The credentials.</param>
         public Authentication(NetworkCredential credential)
         {
             AuthenticationType = AuthenticationType.Basic;
@@ -42,11 +40,9 @@ namespace nanoFramework.WebServer
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Authentication"/> class.
+        /// Creates an authentication from a key.
         /// </summary>
-        /// <param name="apiKey">
-        /// The API Key.
-        /// </param>
+        /// <param name="apiKey">The key.</param>
         public Authentication(string apiKey)
         {
             AuthenticationType = AuthenticationType.ApiKey;
@@ -54,7 +50,7 @@ namespace nanoFramework.WebServer
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Authentication"/> class.
+        /// Creates an empty authenticate.
         /// </summary>
         public Authentication()
         {
