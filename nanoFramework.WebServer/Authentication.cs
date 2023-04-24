@@ -15,7 +15,7 @@ namespace nanoFramework.WebServer
     public class Authentication
     {
         /// <summary>
-        /// The type of authentication
+        /// The type of authentication.
         /// </summary>
         public AuthenticationType AuthenticationType { get; internal set; }
 
@@ -25,7 +25,7 @@ namespace nanoFramework.WebServer
         public NetworkCredential Credentials { get; internal set; } = null;
 
         /// <summary>
-        /// The API Key
+        /// The API Key to use for authentication.
         /// </summary>
         public string ApiKey { get; internal set; } = null;
 

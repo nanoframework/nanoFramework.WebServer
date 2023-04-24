@@ -10,6 +10,10 @@ namespace nanoFramework.WebServer
     /// <summary>
     /// Route custom attribute.
     /// </summary>
+    /// <remarks>
+    /// For example: test/any.
+    /// For details on how to use, see: https://github.com/nanoframework/nanoFramework.WebServer#usage
+    /// </remarks>
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     public class RouteAttribute : Attribute
     {
@@ -26,6 +30,5 @@ namespace nanoFramework.WebServer
         {
             Route = route;
         }
-
     }
 }
