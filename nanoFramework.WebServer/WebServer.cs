@@ -286,7 +286,7 @@ namespace nanoFramework.WebServer
 
                         var user = strAuth.Substring(sep + 1, space - sep - 1);
                         var password = strAuth.Substring(space + 1);
-                        authentication = new Authentication(new NetworkCredential(user, password, System.Net.AuthenticationType.Basic));
+                        authentication = new Authentication(new NetworkCredential(user, password, (global::System.Net.AuthenticationType)AuthenticationType.Basic));
                     }
                     else
                     {
