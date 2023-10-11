@@ -6,15 +6,13 @@
 using System;
 using System.Collections;
 using System.Diagnostics;
+using System.IO;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
-using Windows.Storage;
-using Windows.Storage.Streams;
-
 
 namespace nanoFramework.WebServer
 {
@@ -386,7 +384,7 @@ namespace nanoFramework.WebServer
             Thread.Sleep(100);
             _serverThread.Abort();
             _serverThread = null;
-            Debug.WriteLine("Stoped server in thread ");
+            Debug.WriteLine("Stopped server in thread ");
         }
 
         /// <summary>
@@ -430,35 +428,32 @@ namespace nanoFramework.WebServer
         /// <param name="response"><see cref="HttpListenerResponse"/> to send the content over.</param>
         /// <param name="strFilePath">The file to send</param>
         /// <param name="contentType">The type of file, if empty string, then will use auto detection</param>
-        public static void SendFileOverHTTP(HttpListenerResponse response, StorageFile strFilePath, string contentType = "")
+        public static void SendFileOverHTTP(HttpListenerResponse response, string strFilePath, string contentType = "")
         {
-            contentType = contentType == "" ? GetContentTypeFromFileName(strFilePath.FileType) : contentType;
-            IBuffer readBuffer = FileIO.ReadBuffer(strFilePath);
-            long fileLength = readBuffer.Length;
+            contentType = contentType == string.Empty ? GetContentTypeFromFileName(strFilePath.Substring(strFilePath.LastIndexOf(".") + 1)) : contentType;
 
+            byte[] buf = new byte[MaxSizeBuffer];
+            using FileStream dataReader = new FileStream(strFilePath, FileMode.Open);
+            
+            long fileLength = dataReader.Length;
             response.ContentType = contentType;
             response.ContentLength64 = fileLength;
             response.SendChunked = true;
             // Now loops sending all the data.
-
-            byte[] buf = new byte[MaxSizeBuffer];
-            using (DataReader dataReader = DataReader.FromBuffer(readBuffer))
+            for (long bytesSent = 0; bytesSent < fileLength;)
             {
-                for (long bytesSent = 0; bytesSent < fileLength;)
-                {
-                    // Determines amount of data left.
-                    long bytesToRead = fileLength - bytesSent;
-                    bytesToRead = bytesToRead < MaxSizeBuffer ? bytesToRead : MaxSizeBuffer;
+                // Determines amount of data left.
+                long bytesToRead = fileLength - bytesSent;
+                bytesToRead = bytesToRead < MaxSizeBuffer ? bytesToRead : MaxSizeBuffer;
 
-                    // Reads the data.
-                    dataReader.ReadBytes(buf);
+                // Reads the data.
+                dataReader.Read(buf);
 
-                    // Writes data to browser
-                    response.OutputStream.Write(buf, 0, (int)bytesToRead);
+                // Writes data to browser
+                response.OutputStream.Write(buf, 0, (int)bytesToRead);
 
-                    // Updates bytes read.
-                    bytesSent += bytesToRead;
-                }
+                // Updates bytes read.
+                bytesSent += bytesToRead;
             }
         }
 

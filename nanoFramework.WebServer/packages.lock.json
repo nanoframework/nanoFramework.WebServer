@@ -50,17 +50,11 @@
         "resolved": "1.1.19",
         "contentHash": "HjnY0DNoFnU+t1GiH8Wgf7pJCD9yMOcLVtAZXVAhstMKisVN/MDj9TvfXxZScRIz7ZDoZYUnb+Ixfl6rqyppvA=="
       },
-      "nanoFramework.Windows.Storage": {
+      "nanoFramework.System.IO.FileSystem": {
         "type": "Direct",
-        "requested": "[1.5.33, 1.5.33]",
-        "resolved": "1.5.33",
-        "contentHash": "9BDmxivx3h/2MfoXcTAUYhZny6iaDN9DwAngx7OrQNvXFgzdbOTMTB17Qcy0iA9EUqTr6HG8TuE2tv2loyNeIA=="
-      },
-      "nanoFramework.Windows.Storage.Streams": {
-        "type": "Direct",
-        "requested": "[1.14.24, 1.14.24]",
-        "resolved": "1.14.24",
-        "contentHash": "dApgYplMFRUTp7izZxvduXgl9B7oqVPqqagkYXFf6cRJRC3Og0y2JZTVJdhGPW/ud0U0+rvjqXOU+1CtEzv88A=="
+        "requested": "[1.1.23, 1.1.23]",
+        "resolved": "1.1.23",
+        "contentHash": "W8HMgL81baCutM9isIqeOHU5SM6J3z1g1XF16quVtK8DARQzKdwLV+fJweXyOUTnpyXV/oEkr9SrkCdGdBPliQ=="
       },
       "Nerdbank.GitVersioning": {
         "type": "Direct",
