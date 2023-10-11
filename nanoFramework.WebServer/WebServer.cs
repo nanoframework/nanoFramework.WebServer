@@ -6,7 +6,9 @@
 using System;
 using System.Collections;
 using System.Diagnostics;
+#if FILESYSTEM
 using System.IO;
+#endif
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Security;
@@ -279,7 +281,7 @@ namespace nanoFramework.WebServer
                         var space = strAuth.IndexOf(' ');
                         if (space < 0)
                         {
-                            throw new ArgumentException($"Authentication attribute Basic should be 'Basic:user passowrd'");
+                            throw new ArgumentException($"Authentication attribute Basic should be 'Basic:user password'");
                         }
 
                         var user = strAuth.Substring(sep + 1, space - sep - 1);
@@ -288,7 +290,7 @@ namespace nanoFramework.WebServer
                     }
                     else
                     {
-                        throw new ArgumentException($"Authentication attribute Basic should be 'Basic:user passowrd'");
+                        throw new ArgumentException($"Authentication attribute Basic should be 'Basic:user password'");
                     }
                 }
             }
@@ -422,6 +424,7 @@ namespace nanoFramework.WebServer
             response.StatusCode = (int)code;
         }
 
+#if FILESYSTEM
         /// <summary>
         /// Return a file from Storage over HTTP response.
         /// </summary>
@@ -456,6 +459,7 @@ namespace nanoFramework.WebServer
                 bytesSent += bytesToRead;
             }
         }
+#endif
 
         /// <summary>
         /// Send file content over HTTP response.
@@ -750,6 +754,6 @@ namespace nanoFramework.WebServer
             }
         }
 
-        #endregion
+#endregion
     }
 }

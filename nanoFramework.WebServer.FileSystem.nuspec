@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
   <metadata>
-    <id>nanoFramework.WebServer</id>
-    <title>nanoFramework.WebServer</title>
+    <id>nanoFramework.WebServer.FileServer</id>
+    <title>nanoFramework.WebServer.FileServer</title>
     <version>$version$</version>
     <authors>Laurent Ellerbach,nanoframework</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
@@ -18,11 +18,12 @@
     <description>This is a simple multithread WebServer supporting simple controller and event based calls.
 Perfect for .NET nanoFramework REST API based project. Support all type of Http Methods.
 Perfect for simple embedded web pages, with Support of file on a storage (USB, SD Card, in Memory).
-Supports both HTTPS and HTTP.</description>
+Supports both HTTPS and HTTP. Use this version if you have support of System.IO.FileSystem.</description>
     <tags>http https webserver net netmf nf nanoframework</tags>
     <dependencies>
       <dependency id="nanoFramework.CoreLibrary" version="1.14.2" />
       <dependency id="nanoFramework.System.Net.Http.Server" version="1.5.104" />
+      <dependency id="nanoFramework.System.IO.FileSystem" version="1.1.23" />
     </dependencies>
   </metadata>
   <files>

@@ -1,6 +1,5 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\Nerdbank.GitVersioning.3.6.133\build\Nerdbank.GitVersioning.props" Condition="Exists('..\packages\Nerdbank.GitVersioning.3.6.133\build\Nerdbank.GitVersioning.props')" />
   <PropertyGroup Label="Globals">
     <NanoFrameworkProjectSystemPath>$(MSBuildExtensionsPath)\nanoFramework\v1.0\</NanoFrameworkProjectSystemPath>
   </PropertyGroup>
@@ -9,7 +8,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectTypeGuids>{11A8DD76-328B-46DF-9F39-F559912D0360};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <ProjectGuid>87aaa5fe-cbb6-497f-97b7-7af21b9a0c4e</ProjectGuid>
+    <ProjectGuid>9d8a2d18-8036-4880-b46b-d5218247257d</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <FileAlignment>512</FileAlignment>
@@ -19,6 +18,7 @@
     <DocumentationFile>bin\$(Configuration)\nanoFramework.WebServer.xml</DocumentationFile>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <RestoreLockedMode Condition="'$(TF_BUILD)' == 'True' or '$(ContinuousIntegrationBuild)' == 'True'">true</RestoreLockedMode>
+    <DefineConstants>FILESYSTEM;</DefineConstants>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
@@ -31,19 +31,43 @@
   </PropertyGroup>
   <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.props" Condition="Exists('$(NanoFrameworkProjectSystemPath)NFProjectSystem.props')" />
   <ItemGroup>
-    <Compile Include="Authentication.cs" />
-    <Compile Include="AuthenticationAttirbute.cs" />
-    <Compile Include="AuthenticationType.cs" />
-    <Compile Include="CallbackRoutes.cs" />
-    <Compile Include="CaseSensitiveAttribute.cs" />
-    <Compile Include="HttpProtocol.cs" />
-    <Compile Include="WebServerEventArgs.cs" />
-    <Compile Include="Header.cs" />
-    <Compile Include="MethodAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RouteAttribute.cs" />
-    <Compile Include="UrlParameter.cs" />
-    <Compile Include="WebServer.cs" />
+    <Compile Include="..\nanoFramework.WebServer\Authentication.cs" >
+      <Link>Authentication.cs</Link>
+    </Compile>
+    <Compile Include="..\nanoFramework.WebServer\AuthenticationAttirbute.cs" >
+      <Link>AuthenticationAttirbute.cs</Link>
+    </Compile>
+    <Compile Include="..\nanoFramework.WebServer\AuthenticationType.cs" >
+      <Link>AuthenticationType.cs</Link>
+    </Compile>
+    <Compile Include="..\nanoFramework.WebServer\CallbackRoutes.cs" >
+      <Link>CallbackRoutes.cs</Link>
+    </Compile>
+    <Compile Include="..\nanoFramework.WebServer\CaseSensitiveAttribute.cs" >
+      <Link>CaseSensitiveAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\nanoFramework.WebServer\HttpProtocol.cs" >
+      <Link>HttpProtocol.cs</Link>
+    </Compile>
+    <Compile Include="..\nanoFramework.WebServer\WebServerEventArgs.cs" >
+      <Link>WebServerEventArgs.cs</Link>
+    </Compile>
+    <Compile Include="..\nanoFramework.WebServer\Header.cs" >
+      <Link>Header.cs</Link>
+    </Compile>
+    <Compile Include="..\nanoFramework.WebServer\MethodAttribute.cs" >
+      <Link>MethodAttribute.cs</Link>
+    </Compile>    
+    <Compile Include="..\nanoFramework.WebServer\RouteAttribute.cs" >
+      <Link>RouteAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\nanoFramework.WebServer\UrlParameter.cs" >
+      <Link>UrlParameter.cs</Link>
+    </Compile>
+    <Compile Include="..\nanoFramework.WebServer\WebServer.cs" >
+      <Link>WebServer.cs</Link>
+    </Compile>
     <None Include="..\key.snk" />
   </ItemGroup>
   <ItemGroup>
@@ -79,6 +103,10 @@
       <HintPath>..\packages\nanoFramework.System.Threading.1.1.19\lib\System.Threading.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.IO">
+      <HintPath>..\packages\nanoFramework.System.IO.FileSystem.1.1.23\lib\System.IO.FileSystem.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -92,7 +120,7 @@
       <ProjectConfigurationsDeclaredAsItems />
     </ProjectCapabilities>
   </ProjectExtensions>
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105.The missing file is {0}.</ErrorText>
     </PropertyGroup>

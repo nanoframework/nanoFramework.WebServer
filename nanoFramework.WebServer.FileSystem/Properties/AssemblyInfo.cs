@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 [assembly: AssemblyTitle("nanoFramework.WebServer")]
 [assembly: AssemblyCompany("nanoFramework Contributors")]
-[assembly: AssemblyProduct("nanoFramework.WebServer")]
+[assembly: AssemblyProduct("nanoFramework.WebServer.FileSystem")]
 [assembly: AssemblyCopyright("Copyright (c) .NET Foundation and Contributors")]
 
 
