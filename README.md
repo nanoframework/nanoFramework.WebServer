@@ -20,7 +20,7 @@ This library was coded by [Laurent Ellerbach](https://github.com/Ellerbach) who 
 This is a simple nanoFramework WebServer. Features:
 
 - Handle multi-thread requests
-- Serve static files on any storage using `nanoFramework.WebServer.FileSystem` nuget with a device supporting storage so having the `System.IO.FileSystem` capability.
+- Serve static files from any storage using [`nanoFramework.WebServer.FileSystem` NuGet](https://www.nuget.org/packages/nanoFramework.WebServer.FileSystem). Requires a target device with support for storage (having `System.IO.FileSystem` capability).
 - Handle parameter in URL
 - Possible to have multiple WebServer running at the same time
 - supports GET/PUT and any other word

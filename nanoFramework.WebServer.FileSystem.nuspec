@@ -18,7 +18,9 @@
     <description>This is a simple multithread WebServer supporting simple controller and event based calls.
 Perfect for .NET nanoFramework REST API based project. Support all type of Http Methods.
 Perfect for simple embedded web pages, with Support of file on a storage (USB, SD Card, in Memory).
-Supports both HTTPS and HTTP. Use this version if you have support of System.IO.FileSystem.</description>
+Supports both HTTPS and HTTP.
+Use this version if you want to serve local files and have support for System.IO.FileSystem on your device.
+Otherwise use 'nanoFramework.WebServer' nuget.</description>
     <tags>http https webserver net netmf nf nanoframework</tags>
     <dependencies>
       <dependency id="nanoFramework.CoreLibrary" version="1.14.2" />
