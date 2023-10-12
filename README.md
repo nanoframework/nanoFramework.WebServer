@@ -11,6 +11,7 @@
 | Component | Build Status | NuGet Package |
 |:-|---|---|
 | nanoFramework.WebServer | [![Build Status](https://dev.azure.com/nanoframework/nanoFramework.WebServer/_apis/build/status/nanoFramework.WebServer?repoName=nanoframework%2FnanoFramework.WebServer&branchName=main)](https://dev.azure.com/nanoframework/nanoFramework.WebServer/_build/latest?definitionId=65&repoName=nanoframework%2FnanoFramework.WebServer&branchName=main) | [![NuGet](https://img.shields.io/nuget/v/nanoFramework.WebServer.svg?label=NuGet&style=flat&logo=nuget)](https://www.nuget.org/packages/nanoFramework.WebServer/) |
+| nanoFramework.WebServer.FileSystem | [![Build Status](https://dev.azure.com/nanoframework/nanoFramework.WebServer/_apis/build/status/nanoFramework.WebServer?repoName=nanoframework%2FnanoFramework.WebServer&branchName=main)](https://dev.azure.com/nanoframework/nanoFramework.WebServer/_build/latest?definitionId=65&repoName=nanoframework%2FnanoFramework.WebServer&branchName=main) | [![NuGet](https://img.shields.io/nuget/v/nanoFramework.WebServer.FileSystem.svg?label=NuGet&style=flat&logo=nuget)](https://www.nuget.org/packages/nanoFramework.WebServer.FileSystem/) |
 
 ## .NET nanoFramework WebServer
 
@@ -19,7 +20,7 @@ This library was coded by [Laurent Ellerbach](https://github.com/Ellerbach) who 
 This is a simple nanoFramework WebServer. Features:
 
 - Handle multi-thread requests
-- Serve static files on any storage
+- Serve static files on any storage using `nanoFramework.WebServer.FileSystem` nuget with a device supporting storage so having the `System.IO.FileSystem` capability.
 - Handle parameter in URL
 - Possible to have multiple WebServer running at the same time
 - supports GET/PUT and any other word
@@ -248,18 +249,41 @@ if (url.ToLower().IndexOf("/param.htm") == 0)
 And server static files:
 
 ```csharp
-var files = storage.GetFiles();
-foreach (var file in files)
+// E = USB storage
+// D = SD Card
+// I = Internal storage
+// Adjust this based on your configuration
+const string DirectoryPath = "I:\\";
+string[] _listFiles;
+
+// Gets the list of all files in a specific directory
+// See the MountExample for more details if you need to mount an SD card and adjust here
+// https://github.com/nanoframework/Samples/blob/main/samples/System.IO.FileSystem/MountExample/Program.cs
+_listFiles = Directory.GetFiles(DirectoryPath);
+// Remove the root directory
+for (int i = 0; i < _listFiles.Length; i++)
 {
-    if (file.Name == url)
+    _listFiles[i] = _listFiles[i].Substring(DirectoryPath.Length);
+}
+
+var fileName = url.Substring(1);
+// Note that the file name is case sensitive
+// Very simple example serving a static file on an SD card                   
+foreach (var file in _listFiles)
+{
+    if (file == fileName)
     {
-        WebServer.SendFileOverHTTP(e.Context.Response, file);
+        WebServer.SendFileOverHTTP(e.Context.Response, DirectoryPath + file);
         return;
     }
 }
 
 WebServer.OutputHttpCode(e.Context.Response, HttpStatusCode.NotFound);
 ```
+
+> [!Important]
+>
+> Serving files requires the `nanoFramework.WebServer.FileSystem` nuget **AND** that the device supports storage so `System.IO.FileSystem`.
 
 And also **REST API** is supported, here is a comprehensive example:
 

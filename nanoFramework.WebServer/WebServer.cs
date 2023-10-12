@@ -436,7 +436,7 @@ namespace nanoFramework.WebServer
             contentType = contentType == string.Empty ? GetContentTypeFromFileName(strFilePath.Substring(strFilePath.LastIndexOf(".") + 1)) : contentType;
 
             byte[] buf = new byte[MaxSizeBuffer];
-            using FileStream dataReader = new FileStream(strFilePath, FileMode.Open);
+            using FileStream dataReader = new FileStream(strFilePath, FileMode.Open, FileAccess.Read);
             
             long fileLength = dataReader.Length;
             response.ContentType = contentType;
@@ -450,7 +450,7 @@ namespace nanoFramework.WebServer
                 bytesToRead = bytesToRead < MaxSizeBuffer ? bytesToRead : MaxSizeBuffer;
 
                 // Reads the data.
-                dataReader.Read(buf);
+                dataReader.Read(buf, 0,(int) bytesToRead);
 
                 // Writes data to browser
                 response.OutputStream.Write(buf, 0, (int)bytesToRead);
@@ -626,8 +626,24 @@ namespace nanoFramework.WebServer
                         }
                         else
                         {
-                            context.Response.Close();
-                            context.Close();
+                            try
+                            {
+                                context.Response.Close();
+                            }
+                            catch
+                            {
+                                // Nothing on purpose
+                            }
+
+                            try
+                            {
+                                context.Close();
+                            }
+                            catch
+                            {
+                                // Nothing on purpose
+                            }
+                            
                         }
                     }
                 }).Start();

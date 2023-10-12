@@ -46,10 +46,46 @@ steps:
 
   # step from template @ nf-tools repo
   # all build, update and publish steps
-  - template: azure-pipelines-templates/class-lib-build.yml@templates
+  - template: azure-pipelines-templates/class-lib-build-only.yml@templates
     parameters:
       sonarCloudProject: 'nanoframework_lib-nanoframework.WebServer'
   
+  # build the 2 libs step
+  - template: azure-pipelines-templates/class-lib-package.yml@templates  
+    parameters:
+      nugetPackageName: 'nanoFramework.WebServer'
+
+  - template: azure-pipelines-templates/class-lib-package.yml@templates  
+    parameters:
+      nugetPackageName: 'nanoFramework.WebServer.FileSystem'
+
+  # publish the 2 libs
+  - template: azure-pipelines-templates/class-lib-publish.yml@templates
+
+  # create GitHub release build from main branch
+  - task: GithubRelease@1
+    condition: >-
+      and(
+        succeeded(),
+        eq(variables['System.PullRequest.PullRequestId'], ''),
+        startsWith(variables['Build.SourceBranch'], 'refs/heads/main'),
+        not(contains(variables['Build.SourceBranch'], 'preview')),
+        eq(variables['StartReleaseCandidate'], false)
+      )
+    displayName: Create/Update GitHub release
+    inputs:
+      action: edit
+      gitHubConnection: 'github.com_nano-$(System.TeamProject)'
+      tagSource: userSpecifiedTag
+      tag: v$(MY_NUGET_VERSION)
+      title: '$(nugetPackageName) Library v$(MY_NUGET_VERSION)'
+      releaseNotesSource: inline
+      releaseNotesInline: 'Check the [changelog]($(Build.Repository.Uri)/blob/$(Build.SourceBranchName)/CHANGELOG.md).<br><br><h4>Install from NuGet</h4><br>The following NuGet packages are available for download from this release:<br>:package: [nanoFramework.WebServer](https://www.nuget.org/packages/$(nugetPackageName)/$(MY_NUGET_VERSION)) v$(MY_NUGET_VERSION).<br>:package: [nanoFramework.WebServer.FileSystem (requires support of storage through System.IO.FileSystem)](https://www.nuget.org/packages/nanoFramework.WebServer.FileSystem/$(MY_NUGET_VERSION)) v$(MY_NUGET_VERSION)'
+      assets: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+      assetUploadMode: replace
+      isPreRelease: false
+      addChangeLog: false
+
   # step from template @ nf-tools repo
   # report error
   - template: azure-pipelines-templates/discord-webhook-task.yml@templates  
