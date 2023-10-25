@@ -20,6 +20,12 @@
         "resolved": "1.5.18",
         "contentHash": "F8FzaUC5D2xd6eQja33EYcknOFqWT+YEcnEn849ILJTGSedVFylUREEuoGULbCrnuuLx417hDzWny+B78Qi67g=="
       },
+      "nanoFramework.System.IO.FileSystem": {
+        "type": "Direct",
+        "requested": "[1.1.23, 1.1.23]",
+        "resolved": "1.1.23",
+        "contentHash": "W8HMgL81baCutM9isIqeOHU5SM6J3z1g1XF16quVtK8DARQzKdwLV+fJweXyOUTnpyXV/oEkr9SrkCdGdBPliQ=="
+      },
       "nanoFramework.System.IO.Streams": {
         "type": "Direct",
         "requested": "[1.1.38, 1.1.38]",

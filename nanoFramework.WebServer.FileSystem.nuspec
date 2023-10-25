@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
   <metadata>
-    <id>nanoFramework.WebServer</id>
-    <title>nanoFramework.WebServer</title>
+    <id>nanoFramework.WebServer.FileServer</id>
+    <title>nanoFramework.WebServer.FileServer</title>
     <version>$version$</version>
     <authors>Laurent Ellerbach,nanoframework</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
@@ -16,13 +16,16 @@
     <repository type="git" url="https://github.com/nanoframework/nanoFramework.WebServer" commit="$commit$" />
     <copyright>Copyright (c) .NET Foundation and Contributors</copyright>
     <description>This is a simple multithread WebServer supporting simple controller and event based calls.
-Perfect for .NET nanoFramework REST API based project. Supports both HTTPS and HTTP.
-If serving files from local storage is a requirement, please use instead the 'nanoFramework.WebServer.FileSystem' nuget.
-</description>
+Perfect for .NET nanoFramework REST API based project. Support all type of Http Methods.
+Perfect for simple embedded web pages, with Support of file on a storage (USB, SD Card, in Memory).
+Supports both HTTPS and HTTP.
+Use this version if you want to serve local files and have support for System.IO.FileSystem on your device.
+Otherwise use 'nanoFramework.WebServer' nuget.</description>
     <tags>http https webserver net netmf nf nanoframework</tags>
     <dependencies>
       <dependency id="nanoFramework.CoreLibrary" version="1.14.2" />
       <dependency id="nanoFramework.System.Net.Http.Server" version="1.5.104" />
+      <dependency id="nanoFramework.System.IO.FileSystem" version="1.1.23" />
     </dependencies>
   </metadata>
   <files>

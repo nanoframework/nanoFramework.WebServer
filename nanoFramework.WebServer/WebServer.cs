@@ -6,15 +6,15 @@
 using System;
 using System.Collections;
 using System.Diagnostics;
+#if FILESYSTEM
+using System.IO;
+#endif
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
-using Windows.Storage;
-using Windows.Storage.Streams;
-
 
 namespace nanoFramework.WebServer
 {
@@ -281,16 +281,16 @@ namespace nanoFramework.WebServer
                         var space = strAuth.IndexOf(' ');
                         if (space < 0)
                         {
-                            throw new ArgumentException($"Authentication attribute Basic should be 'Basic:user passowrd'");
+                            throw new ArgumentException($"Authentication attribute Basic should be 'Basic:user password'");
                         }
 
                         var user = strAuth.Substring(sep + 1, space - sep - 1);
                         var password = strAuth.Substring(space + 1);
-                        authentication = new Authentication(new NetworkCredential(user, password, System.Net.AuthenticationType.Basic));
+                        authentication = new Authentication(new NetworkCredential(user, password, (global::System.Net.AuthenticationType)AuthenticationType.Basic));
                     }
                     else
                     {
-                        throw new ArgumentException($"Authentication attribute Basic should be 'Basic:user passowrd'");
+                        throw new ArgumentException($"Authentication attribute Basic should be 'Basic:user password'");
                     }
                 }
             }
@@ -386,7 +386,7 @@ namespace nanoFramework.WebServer
             Thread.Sleep(100);
             _serverThread.Abort();
             _serverThread = null;
-            Debug.WriteLine("Stoped server in thread ");
+            Debug.WriteLine("Stopped server in thread ");
         }
 
         /// <summary>
@@ -424,43 +424,42 @@ namespace nanoFramework.WebServer
             response.StatusCode = (int)code;
         }
 
+#if FILESYSTEM
         /// <summary>
         /// Return a file from Storage over HTTP response.
         /// </summary>
         /// <param name="response"><see cref="HttpListenerResponse"/> to send the content over.</param>
         /// <param name="strFilePath">The file to send</param>
         /// <param name="contentType">The type of file, if empty string, then will use auto detection</param>
-        public static void SendFileOverHTTP(HttpListenerResponse response, StorageFile strFilePath, string contentType = "")
+        public static void SendFileOverHTTP(HttpListenerResponse response, string strFilePath, string contentType = "")
         {
-            contentType = contentType == "" ? GetContentTypeFromFileName(strFilePath.FileType) : contentType;
-            IBuffer readBuffer = FileIO.ReadBuffer(strFilePath);
-            long fileLength = readBuffer.Length;
+            contentType = contentType == string.Empty ? GetContentTypeFromFileName(strFilePath.Substring(strFilePath.LastIndexOf(".") + 1)) : contentType;
 
+            byte[] buf = new byte[MaxSizeBuffer];
+            using FileStream dataReader = new FileStream(strFilePath, FileMode.Open, FileAccess.Read);
+            
+            long fileLength = dataReader.Length;
             response.ContentType = contentType;
             response.ContentLength64 = fileLength;
             response.SendChunked = true;
             // Now loops sending all the data.
-
-            byte[] buf = new byte[MaxSizeBuffer];
-            using (DataReader dataReader = DataReader.FromBuffer(readBuffer))
+            for (long bytesSent = 0; bytesSent < fileLength;)
             {
-                for (long bytesSent = 0; bytesSent < fileLength;)
-                {
-                    // Determines amount of data left.
-                    long bytesToRead = fileLength - bytesSent;
-                    bytesToRead = bytesToRead < MaxSizeBuffer ? bytesToRead : MaxSizeBuffer;
+                // Determines amount of data left.
+                long bytesToRead = fileLength - bytesSent;
+                bytesToRead = bytesToRead < MaxSizeBuffer ? bytesToRead : MaxSizeBuffer;
 
-                    // Reads the data.
-                    dataReader.ReadBytes(buf);
+                // Reads the data.
+                dataReader.Read(buf, 0,(int) bytesToRead);
 
-                    // Writes data to browser
-                    response.OutputStream.Write(buf, 0, (int)bytesToRead);
+                // Writes data to browser
+                response.OutputStream.Write(buf, 0, (int)bytesToRead);
 
-                    // Updates bytes read.
-                    bytesSent += bytesToRead;
-                }
+                // Updates bytes read.
+                bytesSent += bytesToRead;
             }
         }
+#endif
 
         /// <summary>
         /// Send file content over HTTP response.
@@ -627,8 +626,24 @@ namespace nanoFramework.WebServer
                         }
                         else
                         {
-                            context.Response.Close();
-                            context.Close();
+                            try
+                            {
+                                context.Response.Close();
+                            }
+                            catch
+                            {
+                                // Nothing on purpose
+                            }
+
+                            try
+                            {
+                                context.Close();
+                            }
+                            catch
+                            {
+                                // Nothing on purpose
+                            }
+                            
                         }
                     }
                 }).Start();
@@ -755,6 +770,6 @@ namespace nanoFramework.WebServer
             }
         }
 
-        #endregion
+#endregion
     }
 }
