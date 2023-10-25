@@ -2,7 +2,15 @@
 
 ## [**Changes available only in 'Preview' NuGet packages:**](https://github.com/nanoframework/nanoFramework.WebServer/tree/HEAD)
 
-[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.1.77...HEAD)
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.1.79...HEAD)
+
+**Fixed bugs:**
+
+- Splitting library to remove dependency of Windows.Storage [\#227](https://github.com/nanoframework/nanoFramework.WebServer/pull/227)
+
+## [v1.1.79](https://github.com/nanoframework/nanoFramework.WebServer/tree/v1.1.79) (2023-10-10)
+
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.1.77...v1.1.79)
 
 **Documentation and other chores:**
 
