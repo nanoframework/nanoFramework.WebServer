@@ -29,7 +29,7 @@ Otherwise use 'nanoFramework.WebServer' nuget.</description>
     </dependencies>
   </metadata>
   <files>
-    <file src="nanoFramework.WebServer\bin\Release\nanoFramework.WebServer.*" target="lib" />
+    <file src="nanoFramework.WebServer.FileSystem\bin\Release\nanoFramework.WebServer.*" target="lib" />
     <file src="assets\readme.txt" target="" />
     <file src="README.md" target="docs\" />
     <file src="assets\nf-logo.png" target="images" />
