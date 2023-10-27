@@ -1,8 +1,8 @@
 # Changelog
 
-## [**Changes available only in 'Preview' NuGet packages:**](https://github.com/nanoframework/nanoFramework.WebServer/tree/HEAD)
+## [v1.2.1](https://github.com/nanoframework/nanoFramework.WebServer/tree/v1.2.1) (2023-10-25)
 
-[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.1.79...HEAD)
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.1.79...v1.2.1)
 
 **Fixed bugs:**
 
