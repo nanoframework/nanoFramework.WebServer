@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
   <metadata>
-    <id>nanoFramework.WebServer.FileServer</id>
-    <title>nanoFramework.WebServer.FileServer</title>
+    <id>nanoFramework.WebServer.FileSystem</id>
+    <title>nanoFramework.WebServer.FileSystem</title>
     <version>$version$</version>
     <authors>Laurent Ellerbach,nanoframework</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
