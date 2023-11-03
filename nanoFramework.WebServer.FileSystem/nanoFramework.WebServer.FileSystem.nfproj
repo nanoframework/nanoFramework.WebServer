@@ -32,40 +32,40 @@
   <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.props" Condition="Exists('$(NanoFrameworkProjectSystemPath)NFProjectSystem.props')" />
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="..\nanoFramework.WebServer\Authentication.cs" >
+    <Compile Include="..\nanoFramework.WebServer\Authentication.cs">
       <Link>Authentication.cs</Link>
     </Compile>
-    <Compile Include="..\nanoFramework.WebServer\AuthenticationAttirbute.cs" >
+    <Compile Include="..\nanoFramework.WebServer\AuthenticationAttirbute.cs">
       <Link>AuthenticationAttirbute.cs</Link>
     </Compile>
-    <Compile Include="..\nanoFramework.WebServer\AuthenticationType.cs" >
+    <Compile Include="..\nanoFramework.WebServer\AuthenticationType.cs">
       <Link>AuthenticationType.cs</Link>
     </Compile>
-    <Compile Include="..\nanoFramework.WebServer\CallbackRoutes.cs" >
+    <Compile Include="..\nanoFramework.WebServer\CallbackRoutes.cs">
       <Link>CallbackRoutes.cs</Link>
     </Compile>
-    <Compile Include="..\nanoFramework.WebServer\CaseSensitiveAttribute.cs" >
+    <Compile Include="..\nanoFramework.WebServer\CaseSensitiveAttribute.cs">
       <Link>CaseSensitiveAttribute.cs</Link>
     </Compile>
-    <Compile Include="..\nanoFramework.WebServer\HttpProtocol.cs" >
+    <Compile Include="..\nanoFramework.WebServer\HttpProtocol.cs">
       <Link>HttpProtocol.cs</Link>
     </Compile>
-    <Compile Include="..\nanoFramework.WebServer\WebServerEventArgs.cs" >
+    <Compile Include="..\nanoFramework.WebServer\WebServerEventArgs.cs">
       <Link>WebServerEventArgs.cs</Link>
     </Compile>
-    <Compile Include="..\nanoFramework.WebServer\Header.cs" >
+    <Compile Include="..\nanoFramework.WebServer\Header.cs">
       <Link>Header.cs</Link>
     </Compile>
-    <Compile Include="..\nanoFramework.WebServer\MethodAttribute.cs" >
+    <Compile Include="..\nanoFramework.WebServer\MethodAttribute.cs">
       <Link>MethodAttribute.cs</Link>
-    </Compile>    
-    <Compile Include="..\nanoFramework.WebServer\RouteAttribute.cs" >
+    </Compile>
+    <Compile Include="..\nanoFramework.WebServer\RouteAttribute.cs">
       <Link>RouteAttribute.cs</Link>
     </Compile>
-    <Compile Include="..\nanoFramework.WebServer\UrlParameter.cs" >
+    <Compile Include="..\nanoFramework.WebServer\UrlParameter.cs">
       <Link>UrlParameter.cs</Link>
     </Compile>
-    <Compile Include="..\nanoFramework.WebServer\WebServer.cs" >
+    <Compile Include="..\nanoFramework.WebServer\WebServer.cs">
       <Link>WebServer.cs</Link>
     </Compile>
     <None Include="..\key.snk" />
@@ -95,8 +95,8 @@
       <HintPath>..\packages\nanoFramework.System.Net.1.10.62\lib\System.Net.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="System.Net.Http, Version=1.5.104.0, Culture=neutral, PublicKeyToken=c07d481e9758c731">
-      <HintPath>..\packages\nanoFramework.System.Net.Http.Server.1.5.104\lib\System.Net.Http.dll</HintPath>
+    <Reference Include="System.Net.Http, Version=1.5.106.0, Culture=neutral, PublicKeyToken=c07d481e9758c731">
+      <HintPath>..\packages\nanoFramework.System.Net.Http.Server.1.5.106\lib\System.Net.Http.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Threading, Version=1.1.19.33722, Culture=neutral, PublicKeyToken=c07d481e9758c731">
@@ -120,7 +120,7 @@
       <ProjectConfigurationsDeclaredAsItems />
     </ProjectCapabilities>
   </ProjectExtensions>
-    <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105.The missing file is {0}.</ErrorText>
     </PropertyGroup>
