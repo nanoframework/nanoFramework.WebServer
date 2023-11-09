@@ -23,9 +23,9 @@ Use this version if you want to serve local files and have support for System.IO
 Otherwise use 'nanoFramework.WebServer' nuget.</description>
     <tags>http https webserver net netmf nf nanoframework</tags>
     <dependencies>
-      <dependency id="nanoFramework.CoreLibrary" version="1.14.2" />
-      <dependency id="nanoFramework.System.Net.Http.Server" version="1.5.106" />
-      <dependency id="nanoFramework.System.IO.FileSystem" version="1.1.23" />
+      <dependency id="nanoFramework.CoreLibrary" version="1.15.5" />
+      <dependency id="nanoFramework.System.Net.Http.Server" version="1.5.108" />
+      <dependency id="nanoFramework.System.IO.FileSystem" version="1.1.28" />
     </dependencies>
   </metadata>
   <files>
