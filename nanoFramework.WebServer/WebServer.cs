@@ -177,76 +177,77 @@ namespace nanoFramework.WebServer
         public WebServer(int port, HttpProtocol protocol, Type[] controllers)
         {
             _callbackRoutes = new ArrayList();
-
-            if (controllers != null)
-            {
-                foreach (var controller in controllers)
-                {
-                    var controlAttribs = controller.GetCustomAttributes(true);
-                    Authentication authentication = null;
-                    foreach (var ctrlAttrib in controlAttribs)
-                    {
-                        if (typeof(AuthenticationAttribute) == ctrlAttrib.GetType())
-                        {
-                            var strAuth = ((AuthenticationAttribute)ctrlAttrib).AuthenticationMethod;
-                            // We do support only None, Basic and ApiKey, raising an exception if this doesn't start by any
-                            authentication = ExtractAuthentication(strAuth);
-                        }
-                    }
-
-                    var functions = controller.GetMethods();
-                    foreach (var func in functions)
-                    {
-                        var attributes = func.GetCustomAttributes(true);
-                        CallbackRoutes callbackRoutes = null;
-                        foreach (var attrib in attributes)
-                        {
-                            if (typeof(RouteAttribute) == attrib.GetType())
-                            {
-                                callbackRoutes = new CallbackRoutes();
-                                callbackRoutes.Route = ((RouteAttribute)attrib).Route;
-                                callbackRoutes.CaseSensitive = false;
-                                callbackRoutes.Method = string.Empty;
-                                callbackRoutes.Authentication = authentication;
-
-                                callbackRoutes.Callback = func;
-                                foreach (var otherattrib in attributes)
-                                {
-                                    if (typeof(MethodAttribute) == otherattrib.GetType())
-                                    {
-                                        callbackRoutes.Method = ((MethodAttribute)otherattrib).Method;
-                                    }
-                                    else if (typeof(CaseSensitiveAttribute) == otherattrib.GetType())
-                                    {
-                                        callbackRoutes.CaseSensitive = true;
-                                    }
-                                    else if (typeof(AuthenticationAttribute) == otherattrib.GetType())
-                                    {
-                                        var strAuth = ((AuthenticationAttribute)otherattrib).AuthenticationMethod;
-                                        // A method can have a different authentication than the main class, so we override if any
-                                        callbackRoutes.Authentication = ExtractAuthentication(strAuth);
-                                    }
-                                }
-
-                                _callbackRoutes.Add(callbackRoutes);
-                            }
-                        }
-                    }
-
-                }
-            }
-
-            foreach (var callback in _callbackRoutes)
-            {
-                var cb = (CallbackRoutes)callback;
-                Debug.WriteLine($"{cb.Callback.Name}, {cb.Route}, {cb.Method}, {cb.CaseSensitive}");
-            }
-
+            RegisterControllers(controllers);
             Protocol = protocol;
             Port = port;
             string prefix = Protocol == HttpProtocol.Http ? "http" : "https";
             _listener = new HttpListener(prefix, port);
-            Debug.WriteLine("Web server started on port " + port.ToString());
+        }
+
+        private void RegisterControllers(Type[] controllers)
+        {
+            if (controllers == null)
+            {
+                return;
+            }
+            
+            foreach (var controller in controllers)
+            {
+                var controlAttribs = controller.GetCustomAttributes(true);
+                Authentication authentication = null;
+                foreach (var ctrlAttrib in controlAttribs)
+                {
+                    if (typeof(AuthenticationAttribute) == ctrlAttrib.GetType())
+                    {
+                        var strAuth = ((AuthenticationAttribute)ctrlAttrib).AuthenticationMethod;
+                        // We do support only None, Basic and ApiKey, raising an exception if this doesn't start by any
+                        authentication = ExtractAuthentication(strAuth);
+                    }
+                }
+
+                var functions = controller.GetMethods();
+                foreach (var func in functions)
+                {
+                    var attributes = func.GetCustomAttributes(true);
+                    foreach (var attrib in attributes)
+                    {
+                        if (typeof(RouteAttribute) != attrib.GetType())
+                        {
+                            continue;
+                        }
+                        
+                        var callbackRoutes = new CallbackRoutes
+                        {
+                            Route = ((RouteAttribute)attrib).Route,
+                            CaseSensitive = false,
+                            Method = string.Empty,
+                            Authentication = authentication,
+                            Callback = func
+                        };
+
+                        foreach (var attribute in attributes)
+                        {
+                            if (typeof(MethodAttribute) == attribute.GetType())
+                            {
+                                callbackRoutes.Method = ((MethodAttribute)attribute).Method;
+                            }
+                            else if (typeof(CaseSensitiveAttribute) == attribute.GetType())
+                            {
+                                callbackRoutes.CaseSensitive = true;
+                            }
+                            else if (typeof(AuthenticationAttribute) == attribute.GetType())
+                            {
+                                var strAuth = ((AuthenticationAttribute)attribute).AuthenticationMethod;
+                                // A method can have a different authentication than the main class, so we override if any
+                                callbackRoutes.Authentication = ExtractAuthentication(strAuth);
+                            }
+                        }
+
+                        _callbackRoutes.Add(callbackRoutes);
+                        Log($"{callbackRoutes.Callback.Name}, {callbackRoutes.Route}, {callbackRoutes.Method}, {callbackRoutes.CaseSensitive}");
+                    }
+                }
+            }
         }
 
         private Authentication ExtractAuthentication(string strAuth)
@@ -358,7 +359,8 @@ namespace nanoFramework.WebServer
             {
                 _cancel = false;
                 _serverThread.Start();
-                Debug.WriteLine("Started server in thread " + _serverThread.GetHashCode().ToString());
+                Log("Web server started on port " + Port);
+                Log("Started server in thread " + _serverThread.GetHashCode());
             }
             catch
             {   //if there is a problem, maybe due to the fact we did not wait enough
@@ -366,15 +368,6 @@ namespace nanoFramework.WebServer
                 bStarted = false;
             }
             return bStarted;
-        }
-
-        /// <summary>
-        /// Restart the server.
-        /// </summary>
-        private bool Restart()
-        {
-            Stop();
-            return Start();
         }
 
         /// <summary>
@@ -504,54 +497,24 @@ namespace nanoFramework.WebServer
 
                 new Thread(() =>
                 {
-                    bool isRoute = false;
-                    string rawUrl = context.Request.RawUrl;
-
                     //This is for handling with transitory or bad requests
-                    if (rawUrl == null)
+                    if (context.Request.RawUrl == null)
                     {
                         return;
                     }
 
-                    int urlParam = rawUrl.IndexOf(ParamStart);
-
                     // Variables used only within the "for". They are here for performance reasons
-                    bool isFound;
-                    string routeStr;
-                    int incForSlash;
-                    string toCompare;
                     bool mustAuthenticate;
                     bool isAuthOk;
-                    //
+                    bool isRoute = false;
 
-                    foreach (var rt in _callbackRoutes)
+                    foreach (CallbackRoutes route in _callbackRoutes)
                     {
-                        CallbackRoutes route = (CallbackRoutes)rt;
-
-                        routeStr = route.Route;
-                        incForSlash = routeStr.IndexOf('/') == 0 ? 0 : 1;
-                        toCompare = route.CaseSensitive ? rawUrl : rawUrl.ToLower();
-
-                        if (urlParam > 0)
-                        {
-                            isFound = urlParam == routeStr.Length + incForSlash;
-                        }
-                        else
-                        {
-                            isFound = toCompare.Length == routeStr.Length + incForSlash;
-                        }
-
-                        // Matching the route name
-                        // Matching the method type
-                        if (!isFound ||
-                            (toCompare.IndexOf(routeStr) != incForSlash) ||
-                            (route.Method != string.Empty && context.Request.HttpMethod != route.Method)
-                            )
+                        if (!IsRouteMatch(route, context.Request.HttpMethod, context.Request.RawUrl))
                         {
                             continue;
                         }
 
-                        // Starting a new thread to be able to handle a new request in parallel
                         isRoute = true;
 
                         // Check auth first
@@ -579,31 +542,23 @@ namespace nanoFramework.WebServer
                             }
                         }
 
-                        if (isAuthOk)
+                        if (!isAuthOk)
                         {
-                            InvokeRoute(route, context);
-                        }
-                        else
-                        {
-                            if (route.Authentication != null && route.Authentication.AuthenticationType == AuthenticationType.Basic)
+                            if (route.Authentication != null &&
+                                route.Authentication.AuthenticationType == AuthenticationType.Basic)
                             {
-                                context.Response.Headers.Add("WWW-Authenticate", $"Basic realm=\"Access to {routeStr}\"");
+                                context.Response.Headers.Add("WWW-Authenticate",
+                                    $"Basic realm=\"Access to {route.Route}\"");
                             }
 
                             context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                             context.Response.ContentLength64 = 0;
+
+                            HandleContextResponse(context);
+                            return;
                         }
 
-                        // When context has been handed over to WebsocketServer, it will be null at this point
-                        if (context.Response == null)
-                        {
-                            //do nothing this is a websocket that is managed by a websocketserver that is responsible for the context now. 
-                        }
-                        else
-                        {
-                            context.Response.Close();
-                            context.Close();
-                        }
+                        InvokeRoute(route, context);
                     }
 
                     if (!isRoute)
@@ -615,36 +570,11 @@ namespace nanoFramework.WebServer
                         }
                         else
                         {
-                            context.Response.StatusCode = 404;
+                            context.Response.StatusCode = (int)HttpStatusCode.NotFound;
                             context.Response.ContentLength64 = 0;
                         }
 
-                        // When context has been handed over to WebsocketServer, it will be null at this point
-                        if (context.Response == null)
-                        {
-                            //do nothing this is a websocket that is managed by a websocketserver that is responsible for the context now. 
-                        }
-                        else
-                        {
-                            try
-                            {
-                                context.Response.Close();
-                            }
-                            catch
-                            {
-                                // Nothing on purpose
-                            }
-
-                            try
-                            {
-                                context.Close();
-                            }
-                            catch
-                            {
-                                // Nothing on purpose
-                            }
-                            
-                        }
+                        HandleContextResponse(context);
                     }
                 }).Start();
 
@@ -653,6 +583,52 @@ namespace nanoFramework.WebServer
             {
                 _listener.Stop();
             }
+        }
+        
+        /// <summary>
+        /// Checks if route matches called resource.
+        /// For internal use only.
+        /// </summary>
+        /// <param name="route">Route to check.</param>
+        /// <param name="method">Invoked resource method.</param>
+        /// <param name="rawUrl">Invoked resource URL.</param>
+        /// <returns></returns>
+        public static bool IsRouteMatch(CallbackRoutes route, string method, string rawUrl)
+        {
+            if (route.Method == string.Empty)
+            {
+                return false;
+            }
+            
+            if (method != route.Method)
+            {
+                return false;
+            }
+            
+            var urlParam = rawUrl.IndexOf(ParamStart);
+            var incForSlash = route.Route.IndexOf('/') == 0 ? 0 : 1;
+            var rawUrlToCompare = route.CaseSensitive ? rawUrl : rawUrl.ToLower();
+            var routeToCompare = route.CaseSensitive ? route.Route : route.Route.ToLower();
+            bool isFound;
+            
+            if (urlParam > 0 )
+            {
+                isFound = urlParam == routeToCompare.Length + incForSlash;
+            }
+            else
+            {
+                isFound = rawUrlToCompare.Length == routeToCompare.Length + incForSlash;
+            }
+
+            // Matching the route name
+            // Matching the method type
+            if (!isFound ||
+                (rawUrlToCompare.IndexOf(routeToCompare) != incForSlash))
+            {
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -663,6 +639,43 @@ namespace nanoFramework.WebServer
         protected virtual void InvokeRoute(CallbackRoutes route, HttpListenerContext context)
         {
             route.Callback.Invoke(null, new object[] { new WebServerEventArgs(context) });
+        }
+
+        /// <summary>
+        /// Logs a message.
+        /// </summary>
+        /// <param name="message">The message to be logged.</param>
+        protected virtual void Log(string message)
+        {
+            Debug.WriteLine(message);
+        }
+
+        private static void HandleContextResponse(HttpListenerContext context)
+        {
+            // When context has been handed over to WebsocketServer, it will be null at this point
+            // Do nothing this is a websocket that is managed by a websocketserver that is responsible for the context now. 
+            if (context.Response == null)
+            {
+                return;
+            }
+
+            try
+            {
+                context.Response.Close();
+            }
+            catch
+            {
+                // Nothing on purpose
+            }
+
+            try
+            {
+                context.Close();
+            }
+            catch
+            {
+                // Nothing on purpose
+            }
         }
 
         private string GetApiKeyFromHeaders(WebHeaderCollection headers)
@@ -683,10 +696,10 @@ namespace nanoFramework.WebServer
         private void ListInterfaces()
         {
             NetworkInterface[] ifaces = NetworkInterface.GetAllNetworkInterfaces();
-            Debug.WriteLine("Number of Interfaces: " + ifaces.Length.ToString());
+            Log("Number of Interfaces: " + ifaces.Length);
             foreach (NetworkInterface iface in ifaces)
             {
-                Debug.WriteLine("IP:  " + iface.IPv4Address + "/" + iface.IPv4SubnetMask);
+                Log("IP:  " + iface.IPv4Address + "/" + iface.IPv4SubnetMask);
             }
         }
 
