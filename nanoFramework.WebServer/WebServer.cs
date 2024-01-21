@@ -244,7 +244,7 @@ namespace nanoFramework.WebServer
                         }
 
                         _callbackRoutes.Add(callbackRoutes);
-                        Log($"{callbackRoutes.Callback.Name}, {callbackRoutes.Route}, {callbackRoutes.Method}, {callbackRoutes.CaseSensitive}");
+                        Debug.WriteLine($"{callbackRoutes.Callback.Name}, {callbackRoutes.Route}, {callbackRoutes.Method}, {callbackRoutes.CaseSensitive}");
                     }
                 }
             }
@@ -359,8 +359,8 @@ namespace nanoFramework.WebServer
             {
                 _cancel = false;
                 _serverThread.Start();
-                Log("Web server started on port " + Port);
-                Log("Started server in thread " + _serverThread.GetHashCode());
+                Debug.WriteLine("Web server started on port " + Port);
+                Debug.WriteLine("Started server in thread " + _serverThread.GetHashCode());
             }
             catch
             {   //if there is a problem, maybe due to the fact we did not wait enough
@@ -641,15 +641,6 @@ namespace nanoFramework.WebServer
             route.Callback.Invoke(null, new object[] { new WebServerEventArgs(context) });
         }
 
-        /// <summary>
-        /// Logs a message.
-        /// </summary>
-        /// <param name="message">The message to be logged.</param>
-        protected virtual void Log(string message)
-        {
-            Debug.WriteLine(message);
-        }
-
         private static void HandleContextResponse(HttpListenerContext context)
         {
             // When context has been handed over to WebsocketServer, it will be null at this point
@@ -696,10 +687,10 @@ namespace nanoFramework.WebServer
         private void ListInterfaces()
         {
             NetworkInterface[] ifaces = NetworkInterface.GetAllNetworkInterfaces();
-            Log("Number of Interfaces: " + ifaces.Length);
+            Debug.WriteLine("Number of Interfaces: " + ifaces.Length);
             foreach (NetworkInterface iface in ifaces)
             {
-                Log("IP:  " + iface.IPv4Address + "/" + iface.IPv4SubnetMask);
+                Debug.WriteLine("IP:  " + iface.IPv4Address + "/" + iface.IPv4SubnetMask);
             }
         }
 
