@@ -1,3 +1,8 @@
+//
+// Copyright (c) 2020 Laurent Ellerbach and the project contributors
+// See LICENSE file in the project root for full license information.
+//
+
 using nanoFramework.TestFramework;
 using System;
 
@@ -6,9 +11,6 @@ namespace nanoFramework.WebServer.Tests
     [TestClass]
     public class WebServerTests
     {
-        // IsRouteMatch GET, POST, PUT, DELETE, PATCH
-        // IsRouteMatch CaseSensitive true/false
-
         [TestMethod]
         public void IsRouteMatch_Should_ReturnFalseForEmptyMethod()
         {
@@ -59,8 +61,16 @@ namespace nanoFramework.WebServer.Tests
         [DataRow("PUT", "/api/test", "/API/TEST")]
         [DataRow("PATCH", "/api/test", "/API/TEST")]
         [DataRow("DELETE", "/api/test", "/API/TEST")]
+        [DataRow("GET", "/api/test", "/api/test?id=1234")]
+        [DataRow("GET", "/api/test", "/api/test?id=")]
+        [DataRow("GET", "/api/test/resource/name", "/api/test/resource/name")]
+        [DataRow("GET", "/api/test/resource/name", "/api/test/resource/name?id=1234")]
+        [DataRow("GET", "/api/test/resource/name", "/api/test/resource/name?test=")]
+        [DataRow("GET", "/api/test/resource/name", "/api/test/resource/name?")]
+        [DataRow("GET", "/api/test/resource/name", "/api/test/resource/name?test=&id=123&app=something")]
         public void IsRouteMatch_Should_ReturnTrueForMatchingMethodAndRoute(string method, string url, string invokedUrl)
         {
+            Console.WriteLine(invokedUrl);
             // Arrange
             var route = new CallbackRoutes()
             {
@@ -75,5 +85,7 @@ namespace nanoFramework.WebServer.Tests
             // Assert
             Assert.IsTrue(result);
         }
+
+        // TODO: Case sensitive tests
     }
 }
