@@ -18,9 +18,9 @@ namespace nanoFramework.WebServer
     public class MethodAttribute : Attribute
     {
         /// <summary>
-        /// Gets or sets the method.
+        /// Gets the method.
         /// </summary>
-        public string Method { get; set; }
+        public string Method { get; }
 
         /// <summary>
         /// Creates a method attribute.
