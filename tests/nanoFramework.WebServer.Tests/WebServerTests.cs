@@ -12,23 +12,6 @@ namespace nanoFramework.WebServer.Tests
     public class WebServerTests
     {
         [TestMethod]
-        public void IsRouteMatch_Should_ReturnFalseForEmptyMethod()
-        {
-            // Arrange
-            var route = new CallbackRoutes()
-            {
-                Method = "GET",
-                Route = "/api/test"
-            };
-
-            // Act
-            var result = WebServer.IsRouteMatch(route, "", "/api/test");
-
-            // Assert
-            Assert.IsFalse(result);
-        }
-        
-        [TestMethod]
         public void IsRouteMatch_Should_ReturnFalseForNotMatchingMethod()
         {
             // Arrange
@@ -46,41 +29,42 @@ namespace nanoFramework.WebServer.Tests
         }
 
         [TestMethod]
-        [DataRow("GET", "/api/test", "/api/test")]
-        [DataRow("POST", "/api/test", "/api/test")]
-        [DataRow("PUT", "/api/test", "/api/test")]
-        [DataRow("PATCH", "/api/test", "/api/test")]
-        [DataRow("DELETE", "/api/test", "/api/test")]
-        [DataRow("GET", "/API/TEST", "/api/test")]
-        [DataRow("POST", "/API/TEST", "/api/test")]
-        [DataRow("PUT", "/API/TEST", "/api/test")]
-        [DataRow("PATCH", "/API/TEST", "/api/test")]
-        [DataRow("DELETE", "/API/TEST", "/api/test")]
-        [DataRow("GET", "/api/test", "/API/TEST")]
-        [DataRow("POST", "/api/test", "/api/test")]
-        [DataRow("PUT", "/api/test", "/API/TEST")]
-        [DataRow("PATCH", "/api/test", "/API/TEST")]
-        [DataRow("DELETE", "/api/test", "/API/TEST")]
-        [DataRow("GET", "/api/test", "/api/test?id=1234")]
-        [DataRow("GET", "/api/test", "/api/test?id=")]
-        [DataRow("GET", "/api/test/resource/name", "/api/test/resource/name")]
-        [DataRow("GET", "/api/test/resource/name", "/api/test/resource/name?id=1234")]
-        [DataRow("GET", "/api/test/resource/name", "/api/test/resource/name?test=")]
-        [DataRow("GET", "/api/test/resource/name", "/api/test/resource/name?")]
-        [DataRow("GET", "/api/test/resource/name", "/api/test/resource/name?test=&id=123&app=something")]
-        public void IsRouteMatch_Should_ReturnTrueForMatchingMethodAndRoute(string method, string url, string invokedUrl)
+        [DataRow("GET", "/api/test", "GET", "/api/test")]
+        [DataRow("", "/api/test", "GET", "/api/test")]
+        [DataRow("POST", "/api/test", "POST", "/api/test")]
+        [DataRow("PUT", "/api/test", "PUT", "/api/test")]
+        [DataRow("PATCH", "/api/test", "PATCH", "/api/test")]
+        [DataRow("DELETE", "/api/test", "DELETE", "/api/test")]
+        [DataRow("GET", "/API/TEST", "GET", "/api/test")]
+        [DataRow("POST", "/API/TEST", "POST", "/api/test")]
+        [DataRow("PUT", "/API/TEST", "PUT", "/api/test")]
+        [DataRow("PATCH", "/API/TEST", "PATCH", "/api/test")]
+        [DataRow("DELETE", "/API/TEST", "DELETE", "/api/test")]
+        [DataRow("GET", "/api/test", "GET", "/API/TEST")]
+        [DataRow("POST", "/api/test", "POST", "/api/test")]
+        [DataRow("PUT", "/api/test", "PUT", "/API/TEST")]
+        [DataRow("PATCH", "/api/test", "PATCH", "/API/TEST")]
+        [DataRow("DELETE", "/api/test", "DELETE", "/API/TEST")]
+        [DataRow("GET", "/api/test", "GET", "/api/test?id=1234")]
+        [DataRow("GET", "/api/test", "GET", "/api/test?id=")]
+        [DataRow("GET", "/api/test/resource/name", "GET", "/api/test/resource/name")]
+        [DataRow("GET", "/api/test/resource/name", "GET", "/api/test/resource/name?id=1234")]
+        [DataRow("GET", "/api/test/resource/name", "GET", "/api/test/resource/name?test=")]
+        [DataRow("GET", "/api/test/resource/name", "GET", "/api/test/resource/name?")]
+        [DataRow("GET", "/api/test/resource/name", "GET", "/api/test/resource/name?test=&id=123&app=something")]
+        public void IsRouteMatch_Should_ReturnTrueForMatchingMethodAndRoute(string routeMethod, string routeUrl, string invokedMethod, string invokedUrl)
         {
-            Console.WriteLine(invokedUrl);
+            Console.WriteLine($"Params: routeMethod: {routeMethod} routeUrl: {routeUrl} invokedMethod: {invokedMethod} invokedUrl: {invokedUrl}");
             // Arrange
             var route = new CallbackRoutes()
             {
-                Method = method,
-                Route = url,
+                Method = routeMethod,
+                Route = routeUrl,
                 CaseSensitive = false
             };
 
             // Act
-            var result = WebServer.IsRouteMatch(route, method, invokedUrl);
+            var result = WebServer.IsRouteMatch(route, invokedMethod, invokedUrl);
 
             // Assert
             Assert.IsTrue(result);

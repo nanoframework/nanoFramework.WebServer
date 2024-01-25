@@ -39,6 +39,7 @@ namespace nanoFramework.WebServer
         public const char ParamEqual = '=';
 
         private const int MaxSizeBuffer = 1024;
+        private const string DefaultRouteMethod = "GET";
 
         #region internal objects
 
@@ -595,12 +596,7 @@ namespace nanoFramework.WebServer
         /// <returns></returns>
         public static bool IsRouteMatch(CallbackRoutes route, string method, string rawUrl)
         {
-            if (route.Method == string.Empty)
-            {
-                return false;
-            }
-            
-            if (method != route.Method)
+            if (method != (string.IsNullOrEmpty(route.Method) ? DefaultRouteMethod : route.Method))
             {
                 return false;
             }
