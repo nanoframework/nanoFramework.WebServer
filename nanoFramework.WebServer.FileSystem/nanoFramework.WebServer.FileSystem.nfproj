@@ -68,6 +68,12 @@
     <Compile Include="..\nanoFramework.WebServer\WebServer.cs">
       <Link>WebServer.cs</Link>
     </Compile>
+    <Compile Include="..\nanoFramework.WebServer\WebServerStatus.cs">
+      <Link>WebServerStatus.cs</Link>
+    </Compile>
+    <Compile Include="..\nanoFramework.WebServer\WebServerStatusEventArgs.cs">
+      <Link>WebServerStatusEventArgs.cs</Link>
+    </Compile>
     <None Include="..\key.snk" />
   </ItemGroup>
   <ItemGroup>
