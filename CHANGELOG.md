@@ -2,7 +2,15 @@
 
 ## [**Changes available only in 'Preview' NuGet packages:**](https://github.com/nanoframework/nanoFramework.WebServer/tree/HEAD)
 
-[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.2.14...HEAD)
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.2.17...HEAD)
+
+**Fixed bugs:**
+
+- Fix routes resolving for empty method [\#239](https://github.com/nanoframework/nanoFramework.WebServer/pull/239)
+
+## [v1.2.17](https://github.com/nanoframework/nanoFramework.WebServer/tree/v1.2.17) (2024-01-24)
+
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.2.14...v1.2.17)
 
 **Implemented enhancements:**
 
