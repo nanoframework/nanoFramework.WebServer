@@ -104,7 +104,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Net">
-      <HintPath>..\packages\nanoFramework.System.Net.1.10.68\lib\System.Net.dll</HintPath>
+      <HintPath>..\packages\nanoFramework.System.Net.1.10.70\lib\System.Net.dll</HintPath>
     </Reference>
     <Reference Include="System.Net.Http">
       <HintPath>..\packages\nanoFramework.System.Net.Http.Server.1.5.118\lib\System.Net.Http.dll</HintPath>
