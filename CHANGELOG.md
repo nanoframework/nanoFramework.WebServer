@@ -2,7 +2,15 @@
 
 ## [**Changes available only in 'Preview' NuGet packages:**](https://github.com/nanoframework/nanoFramework.WebServer/tree/HEAD)
 
-[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.2.17...HEAD)
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.2.19...HEAD)
+
+**Fixed bugs:**
+
+- Adding E2E test application and fixing OutputHttpCode when no content [\#240](https://github.com/nanoframework/nanoFramework.WebServer/pull/240)
+
+## [v1.2.19](https://github.com/nanoframework/nanoFramework.WebServer/tree/v1.2.19) (2024-01-26)
+
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.2.17...v1.2.19)
 
 **Fixed bugs:**
 
