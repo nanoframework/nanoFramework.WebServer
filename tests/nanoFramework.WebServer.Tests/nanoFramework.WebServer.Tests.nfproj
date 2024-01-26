@@ -56,7 +56,7 @@
       <HintPath>..\..\packages\nanoFramework.System.Net.1.10.68\lib\System.Net.dll</HintPath>
     </Reference>
     <Reference Include="System.Net.Http">
-      <HintPath>..\..\packages\nanoFramework.System.Net.Http.Server.1.5.113\lib\System.Net.Http.dll</HintPath>
+      <HintPath>..\..\packages\nanoFramework.System.Net.Http.Server.1.5.118\lib\System.Net.Http.dll</HintPath>
     </Reference>
     <Reference Include="System.Threading">
       <HintPath>..\..\packages\nanoFramework.System.Threading.1.1.32\lib\System.Threading.dll</HintPath>
@@ -68,6 +68,9 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\nanoFramework.WebServer\nanoFramework.WebServer.nfproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="packages.lock.json" />
   </ItemGroup>
   <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.CSharp.targets" Condition="Exists('$(NanoFrameworkProjectSystemPath)NFProjectSystem.CSharp.targets')" />
 </Project>
