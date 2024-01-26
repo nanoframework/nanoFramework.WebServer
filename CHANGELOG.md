@@ -2,7 +2,15 @@
 
 ## [**Changes available only in 'Preview' NuGet packages:**](https://github.com/nanoframework/nanoFramework.WebServer/tree/HEAD)
 
-[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.2.19...HEAD)
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.2.21...HEAD)
+
+**Implemented enhancements:**
+
+- Add WebServer status event [\#241](https://github.com/nanoframework/nanoFramework.WebServer/pull/241)
+
+## [v1.2.21](https://github.com/nanoframework/nanoFramework.WebServer/tree/v1.2.21) (2024-01-26)
+
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.2.19...v1.2.21)
 
 **Fixed bugs:**
 
