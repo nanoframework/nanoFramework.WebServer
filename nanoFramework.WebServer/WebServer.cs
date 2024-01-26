@@ -560,6 +560,7 @@ namespace nanoFramework.WebServer
                         }
 
                         InvokeRoute(route, context);
+                        HandleContextResponse(context);
                     }
 
                     if (!isRoute)
