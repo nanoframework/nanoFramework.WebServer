@@ -36,6 +36,7 @@ namespace WebServerE2ETests
             _server.Credential = new NetworkCredential("topuser", "topPassword");
             // Add a handler for commands that are received by the server.
             _server.CommandReceived += ServerCommandReceived;
+            _server.WebServerStatusChanged += WebServerStatusChanged;
 
             // Start the server.
             _server.Start();
@@ -45,6 +46,11 @@ namespace WebServerE2ETests
             // Browse our samples repository: https://github.com/nanoframework/samples
             // Check our documentation online: https://docs.nanoframework.net/
             // Join our lively Discord community: https://discord.gg/gCyBu8T
+        }
+
+        private static void WebServerStatusChanged(object obj, WebServerStatusEventArgs e)
+        {
+            Debug.WriteLine($"The web server is now {(e.Status == WebServerStatus.Running ? "running" : "stopped" )}");
         }
 
         private static void ServerCommandReceived(object obj, WebServerEventArgs e)

@@ -196,7 +196,6 @@ With the previous example the following happens:
 
 All up, this is an example to show how to use authentication, it's been defined to allow flexibility.
 
-
 ## Managing incoming queries thru events
 
 Very basic usage is the following:
@@ -393,6 +392,20 @@ using (WebServer server = new WebServer(443, HttpProtocol.Https)
 > Because the certificate above is not issued from a Certificate Authority it won't be recognized as a valid certificate. If you want to access the nanoFramework device with your browser, for example, you'll have to add the [CRT file](WebServer.Sample\webserver-cert.crt) as a trusted one. On Windows, you just have to double click on the CRT file and then click "Install Certificate...".
 
 You can of course use the routes as defined earlier. Both will work, event or route with the notion of controller.
+
+## WebServer status
+
+It is possible to subscribe to an event to get the WebServer status. That can be useful to restart the server, put in place a retry mechanism or equivalent.
+
+```csharp
+server.WebServerStatusChanged += WebServerStatusChanged;
+
+private static void WebServerStatusChanged(object obj, WebServerStatusEventArgs e)
+{
+    // Do whatever you need like restarting the server
+    Debug.WriteLine($"The web server is now {(e.Status == WebServerStatus.Running ? "running" : "stopped" )}");
+}
+```
 
 ## Feedback and documentation
 

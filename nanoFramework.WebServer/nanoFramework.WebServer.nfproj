@@ -37,6 +37,8 @@
     <Compile Include="CallbackRoutes.cs" />
     <Compile Include="CaseSensitiveAttribute.cs" />
     <Compile Include="HttpProtocol.cs" />
+    <Compile Include="WebServerStatus.cs" />
+    <Compile Include="WebServerStatusEventArgs.cs" />
     <Compile Include="WebServerEventArgs.cs" />
     <Compile Include="Header.cs" />
     <Compile Include="MethodAttribute.cs" />

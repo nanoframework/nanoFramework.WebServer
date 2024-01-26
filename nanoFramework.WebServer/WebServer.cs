@@ -43,7 +43,7 @@ namespace nanoFramework.WebServer
 
         #region internal objects
 
-        private bool _cancel = false;
+        private bool _cancel = true;
         private Thread _serverThread = null;
         private readonly ArrayList _callbackRoutes;
         private readonly HttpListener _listener;
@@ -91,6 +91,11 @@ namespace nanoFramework.WebServer
         /// Default APiKey to be used for authentication when no key is specified in the attribute
         /// </summary>
         public string ApiKey { get; set; }
+
+        /// <summary>
+        /// Gets a value indicating whether the web server is running.
+        /// </summary>
+        public bool IsRunning => !_cancel;
 
         #endregion
 
@@ -191,7 +196,7 @@ namespace nanoFramework.WebServer
             {
                 return;
             }
-            
+
             foreach (var controller in controllers)
             {
                 var controlAttribs = controller.GetCustomAttributes(true);
@@ -216,7 +221,7 @@ namespace nanoFramework.WebServer
                         {
                             continue;
                         }
-                        
+
                         var callbackRoutes = new CallbackRoutes
                         {
                             Route = ((RouteAttribute)attrib).Route,
@@ -330,6 +335,8 @@ namespace nanoFramework.WebServer
         /// <summary>
         /// Delegate for the CommandReceived event.
         /// </summary>
+        /// <param name="obj">The source of the event.</param>
+        /// <param name="e">A WebServerEventArgs that contains the event data.</param>
         public delegate void GetRequestHandler(object obj, WebServerEventArgs e);
 
         /// <summary>
@@ -337,6 +344,18 @@ namespace nanoFramework.WebServer
         /// Valid commands are defined in the AllowedCommands property.
         /// </summary>
         public event GetRequestHandler CommandReceived;
+
+        /// <summary>
+        /// Represents the method that will handle the WebServerStatusChanged event of a WebServer.
+        /// </summary>
+        /// <param name="obj">The source of the event.</param>
+        /// <param name="e">A WebServerStatusEventArgs that contains the event data.</param>
+        public delegate void WebServerStatusHandler(object obj, WebServerStatusEventArgs e);
+
+        /// <summary>
+        /// Occurs when the status of the WebServer changes.
+        /// </summary>
+        public event WebServerStatusHandler WebServerStatusChanged;
 
         #endregion
 
@@ -353,8 +372,10 @@ namespace nanoFramework.WebServer
             }
 
             bool bStarted = true;
+#if DEBUG
             // List Ethernet interfaces, so we can determine the server's address
             ListInterfaces();
+#endif
             // start server           
             try
             {
@@ -368,6 +389,12 @@ namespace nanoFramework.WebServer
                 _cancel = true;
                 bStarted = false;
             }
+
+            if (bStarted)
+            {
+                WebServerStatusChanged?.Invoke(this, new WebServerStatusEventArgs(WebServerStatus.Running));
+            }
+
             return bStarted;
         }
 
@@ -380,7 +407,8 @@ namespace nanoFramework.WebServer
             Thread.Sleep(100);
             _serverThread.Abort();
             _serverThread = null;
-            Debug.WriteLine("Stopped server in thread ");
+            // Event is generate in the running thread
+            Debug.WriteLine("Stopped server in thread ");            
         }
 
         /// <summary>
@@ -487,106 +515,117 @@ namespace nanoFramework.WebServer
 
         private void StartListener()
         {
-            _listener.Start();
-            while (!_cancel)
+            try
             {
-                HttpListenerContext context = _listener.GetContext();
-                if (context == null)
+                _listener.Start();
+                while (!_cancel)
                 {
-                    return;
-                }
-
-                new Thread(() =>
-                {
-                    //This is for handling with transitory or bad requests
-                    if (context.Request.RawUrl == null)
+                    HttpListenerContext context = _listener.GetContext();
+                    if (context == null)
                     {
                         return;
                     }
 
-                    // Variables used only within the "for". They are here for performance reasons
-                    bool mustAuthenticate;
-                    bool isAuthOk;
-                    bool isRoute = false;
-
-                    foreach (CallbackRoutes route in _callbackRoutes)
+                    new Thread(() =>
                     {
-                        if (!IsRouteMatch(route, context.Request.HttpMethod, context.Request.RawUrl))
+                        //This is for handling with transitory or bad requests
+                        if (context.Request.RawUrl == null)
                         {
-                            continue;
-                        }
-
-                        isRoute = true;
-
-                        // Check auth first
-                        mustAuthenticate = route.Authentication != null && route.Authentication.AuthenticationType != AuthenticationType.None;
-                        isAuthOk = !mustAuthenticate;
-
-                        if (mustAuthenticate)
-                        {
-                            if (route.Authentication.AuthenticationType == AuthenticationType.Basic)
-                            {
-                                var credSite = route.Authentication.Credentials ?? Credential;
-                                var credReq = context.Request.Credentials;
-
-                                isAuthOk = credReq != null
-                                    && (credSite.UserName == credReq.UserName)
-                                    && (credSite.Password == credReq.Password);
-                            }
-                            else if (route.Authentication.AuthenticationType == AuthenticationType.ApiKey)
-                            {
-                                var apikeySite = route.Authentication.ApiKey ?? ApiKey;
-                                var apikeyReq = GetApiKeyFromHeaders(context.Request.Headers);
-
-                                isAuthOk = apikeyReq != null
-                                    && apikeyReq == apikeySite;
-                            }
-                        }
-
-                        if (!isAuthOk)
-                        {
-                            if (route.Authentication != null &&
-                                route.Authentication.AuthenticationType == AuthenticationType.Basic)
-                            {
-                                context.Response.Headers.Add("WWW-Authenticate",
-                                    $"Basic realm=\"Access to {route.Route}\"");
-                            }
-
-                            context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                            context.Response.ContentLength64 = 0;
-
-                            HandleContextResponse(context);
                             return;
                         }
 
-                        InvokeRoute(route, context);
-                        HandleContextResponse(context);
-                    }
+                        // Variables used only within the "for". They are here for performance reasons
+                        bool mustAuthenticate;
+                        bool isAuthOk;
+                        bool isRoute = false;
 
-                    if (!isRoute)
-                    {
-                        if (CommandReceived != null)
+                        foreach (CallbackRoutes route in _callbackRoutes)
                         {
-                            // Starting a new thread to be able to handle a new request in parallel
-                            CommandReceived.Invoke(this, new WebServerEventArgs(context));
+                            if (!IsRouteMatch(route, context.Request.HttpMethod, context.Request.RawUrl))
+                            {
+                                continue;
+                            }
+
+                            isRoute = true;
+
+                            // Check auth first
+                            mustAuthenticate = route.Authentication != null && route.Authentication.AuthenticationType != AuthenticationType.None;
+                            isAuthOk = !mustAuthenticate;
+
+                            if (mustAuthenticate)
+                            {
+                                if (route.Authentication.AuthenticationType == AuthenticationType.Basic)
+                                {
+                                    var credSite = route.Authentication.Credentials ?? Credential;
+                                    var credReq = context.Request.Credentials;
+
+                                    isAuthOk = credReq != null
+                                        && (credSite.UserName == credReq.UserName)
+                                        && (credSite.Password == credReq.Password);
+                                }
+                                else if (route.Authentication.AuthenticationType == AuthenticationType.ApiKey)
+                                {
+                                    var apikeySite = route.Authentication.ApiKey ?? ApiKey;
+                                    var apikeyReq = GetApiKeyFromHeaders(context.Request.Headers);
+
+                                    isAuthOk = apikeyReq != null
+                                        && apikeyReq == apikeySite;
+                                }
+                            }
+
+                            if (!isAuthOk)
+                            {
+                                if (route.Authentication != null &&
+                                    route.Authentication.AuthenticationType == AuthenticationType.Basic)
+                                {
+                                    context.Response.Headers.Add("WWW-Authenticate",
+                                        $"Basic realm=\"Access to {route.Route}\"");
+                                }
+
+                                context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                                context.Response.ContentLength64 = 0;
+
+                                HandleContextResponse(context);
+                                return;
+                            }
+
+                            InvokeRoute(route, context);
+                            HandleContextResponse(context);
                         }
-                        else
+
+                        if (!isRoute)
                         {
-                            context.Response.StatusCode = (int)HttpStatusCode.NotFound;
-                            context.Response.ContentLength64 = 0;
+                            if (CommandReceived != null)
+                            {
+                                // Starting a new thread to be able to handle a new request in parallel
+                                CommandReceived.Invoke(this, new WebServerEventArgs(context));
+                            }
+                            else
+                            {
+                                context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+                                context.Response.ContentLength64 = 0;
+                            }
+
+                            HandleContextResponse(context);
                         }
+                    }).Start();
 
-                        HandleContextResponse(context);
-                    }
-                }).Start();
+                }
 
+                if (_listener.IsListening)
+                {
+                    _listener.Stop();
+                }
             }
-            if (_listener.IsListening)
+            catch
             {
-                _listener.Stop();
-            }
+                // If we are here then set the server state to not running
+                _cancel = true;
+            }            
+
+            WebServerStatusChanged?.Invoke(this, new WebServerStatusEventArgs(WebServerStatus.Stopped));
         }
-        
+
         /// <summary>
         /// Checks if route matches called resource.
         /// For internal use only.
@@ -601,14 +640,14 @@ namespace nanoFramework.WebServer
             {
                 return false;
             }
-            
+
             var urlParam = rawUrl.IndexOf(ParamStart);
             var incForSlash = route.Route.IndexOf('/') == 0 ? 0 : 1;
             var rawUrlToCompare = route.CaseSensitive ? rawUrl : rawUrl.ToLower();
             var routeToCompare = route.CaseSensitive ? route.Route : route.Route.ToLower();
             bool isFound;
-            
-            if (urlParam > 0 )
+
+            if (urlParam > 0)
             {
                 isFound = urlParam == routeToCompare.Length + incForSlash;
             }
@@ -771,6 +810,6 @@ namespace nanoFramework.WebServer
             }
         }
 
-#endregion
+        #endregion
     }
 }
