@@ -43,7 +43,7 @@ namespace nanoFramework.WebServer
 
         #region internal objects
 
-        private bool _cancel = false;
+        private bool _cancel = true;
         private Thread _serverThread = null;
         private readonly ArrayList _callbackRoutes;
         private readonly HttpListener _listener;
