@@ -350,12 +350,12 @@ namespace nanoFramework.WebServer
         /// </summary>
         /// <param name="obj">The source of the event.</param>
         /// <param name="e">A WebServerStatusEventArgs that contains the event data.</param>
-        public delegate void WebServerStatusHangler(object obj, WebServerStatusEventArgs e);
+        public delegate void WebServerStatusHandler(object obj, WebServerStatusEventArgs e);
 
         /// <summary>
         /// Occurs when the status of the WebServer changes.
         /// </summary>
-        public event WebServerStatusHangler WebServerStatusChanged;
+        public event WebServerStatusHandler WebServerStatusChanged;
 
         #endregion
 
