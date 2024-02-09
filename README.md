@@ -407,6 +407,13 @@ private static void WebServerStatusChanged(object obj, WebServerStatusEventArgs 
 }
 ```
 
+## E2E tests
+There is a collection of postman tests `nanoFramework WebServer E2E Tests.postman_collection.json` in WebServerE2ETests which should be used for testing WebServer in real world scenario. Usage is simple:
+- Import json file into Postman
+- Deploy WebServerE2ETests to your device - copy IP
+- Set the `base_url` variable to match your device IP address 
+- Choose request you want to test or run whole collection and check tests results.
+
 ## Feedback and documentation
 
 For documentation, providing feedback, issues and finding out how to contribute please refer to the [Home repo](https://github.com/nanoframework/Home).
