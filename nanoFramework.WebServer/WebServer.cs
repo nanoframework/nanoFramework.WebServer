@@ -463,7 +463,7 @@ namespace nanoFramework.WebServer
             long fileLength = dataReader.Length;
             response.ContentType = contentType;
             response.ContentLength64 = fileLength;
-            response.SendChunked = true;
+            response.SendChunked = false;
             // Now loops sending all the data.
             for (long bytesSent = 0; bytesSent < fileLength;)
             {
@@ -496,7 +496,7 @@ namespace nanoFramework.WebServer
             contentType = contentType == "" ? GetContentTypeFromFileName(fileName.Substring(fileName.LastIndexOf('.') + 1)) : contentType;
             response.ContentType = contentType;
             response.ContentLength64 = content.Length;
-            response.SendChunked = true;
+            response.SendChunked = false;
             // Now loop to send all the data.
 
             for (long bytesSent = 0; bytesSent < content.Length;)
@@ -559,7 +559,7 @@ namespace nanoFramework.WebServer
                                     var credSite = route.Authentication.Credentials ?? Credential;
                                     var credReq = context.Request.Credentials;
 
-                                    isAuthOk = credReq != null
+                                    isAuthOk = credReq != null && credSite != null
                                         && (credSite.UserName == credReq.UserName)
                                         && (credSite.Password == credReq.Password);
                                 }
