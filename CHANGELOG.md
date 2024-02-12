@@ -2,7 +2,15 @@
 
 ## [**Changes available only in 'Preview' NuGet packages:**](https://github.com/nanoframework/nanoFramework.WebServer/tree/HEAD)
 
-[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.2.21...HEAD)
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.2.23...HEAD)
+
+**Fixed bugs:**
+
+- Fixing bugs in sending files and adjusting to add more tests [\#243](https://github.com/nanoframework/nanoFramework.WebServer/pull/243)
+
+## [v1.2.23](https://github.com/nanoframework/nanoFramework.WebServer/tree/v1.2.23) (2024-01-26)
+
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.2.21...v1.2.23)
 
 **Implemented enhancements:**
 
