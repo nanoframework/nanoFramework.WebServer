@@ -53,10 +53,10 @@
       <HintPath>..\..\packages\nanoFramework.System.IO.Streams.1.1.52\lib\System.IO.Streams.dll</HintPath>
     </Reference>
     <Reference Include="System.Net">
-      <HintPath>..\..\packages\nanoFramework.System.Net.1.10.70\lib\System.Net.dll</HintPath>
+      <HintPath>..\..\packages\nanoFramework.System.Net.1.10.72\lib\System.Net.dll</HintPath>
     </Reference>
     <Reference Include="System.Net.Http">
-      <HintPath>..\..\packages\nanoFramework.System.Net.Http.Server.1.5.118\lib\System.Net.Http.dll</HintPath>
+      <HintPath>..\..\packages\nanoFramework.System.Net.Http.Server.1.5.125\lib\System.Net.Http.dll</HintPath>
     </Reference>
     <Reference Include="System.Threading">
       <HintPath>..\..\packages\nanoFramework.System.Threading.1.1.32\lib\System.Threading.dll</HintPath>
