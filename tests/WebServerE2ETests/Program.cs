@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.NetworkInformation;
+using System.Text;
 using System.Threading;
 
 namespace WebServerE2ETests
@@ -86,9 +87,15 @@ namespace WebServerE2ETests
                     return;
                 }
             }
+            else if (url.IndexOf("/Text2.txt") == 0)
+            {
+                WebServer.SendFileOverHTTP(e.Context.Response, "Text2.txt", Encoding.UTF8.GetBytes("This is a test file for WebServer"));
+                return;
+            }
             else if (url.ToLower().IndexOf("/useinternal") == 0)
             {
                 File.WriteAllText(FileName, "This is a test file for WebServer");
+                return;
             }
             else
             {
