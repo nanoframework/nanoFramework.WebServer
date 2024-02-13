@@ -70,6 +70,29 @@ namespace nanoFramework.WebServer.Tests
             Assert.IsTrue(result);
         }
 
-        // TODO: Case sensitive tests
+        [TestMethod]
+        public void IsRouteMatch_Should_ReturnTrueForMatchingMethodAndRouteCaseSensitive()
+        {
+            // Arrange
+            var routeMethod = "POST";
+            var routeUrl = "/api/test";
+            var invokedMethod = "POST";
+            var invokedUrlMatch = "/api/test";
+            var invokedUrlNotMatch = "/API/TEST";
+            var route = new CallbackRoutes()
+            {
+                Method = routeMethod,
+                Route = routeUrl,
+                CaseSensitive = true
+            };
+
+            // Act
+            var resultMatch = WebServer.IsRouteMatch(route, invokedMethod, invokedUrlMatch);
+            var resultNotMatch = WebServer.IsRouteMatch(route, invokedMethod, invokedUrlNotMatch);
+
+            // Assert
+            Assert.IsTrue(resultMatch);
+            Assert.IsFalse(resultNotMatch);
+        }
     }
 }
