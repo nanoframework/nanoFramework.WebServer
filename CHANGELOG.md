@@ -2,7 +2,15 @@
 
 ## [**Changes available only in 'Preview' NuGet packages:**](https://github.com/nanoframework/nanoFramework.WebServer/tree/HEAD)
 
-[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.2.23...HEAD)
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.2.25...HEAD)
+
+**Documentation and other chores:**
+
+- E2E postman tests [\#242](https://github.com/nanoframework/nanoFramework.WebServer/pull/242)
+
+## [v1.2.25](https://github.com/nanoframework/nanoFramework.WebServer/tree/v1.2.25) (2024-02-12)
+
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.2.23...v1.2.25)
 
 **Fixed bugs:**
 
