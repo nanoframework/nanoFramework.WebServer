@@ -659,7 +659,7 @@ namespace nanoFramework.WebServer
             // Matching the route name
             // Matching the method type
             if (!isFound ||
-                (rawUrlToCompare.IndexOf(routeToCompare) != incForSlash))
+                (!string.IsNullOrEmpty(routeToCompare) && rawUrlToCompare.IndexOf(routeToCompare) != incForSlash))
             {
                 return false;
             }

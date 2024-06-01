@@ -52,6 +52,7 @@ namespace nanoFramework.WebServer.Tests
         [DataRow("GET", "/api/test/resource/name", "GET", "/api/test/resource/name?test=")]
         [DataRow("GET", "/api/test/resource/name", "GET", "/api/test/resource/name?")]
         [DataRow("GET", "/api/test/resource/name", "GET", "/api/test/resource/name?test=&id=123&app=something")]
+        [DataRow("", "", "GET", "/")]
         public void IsRouteMatch_Should_ReturnTrueForMatchingMethodAndRoute(string routeMethod, string routeUrl, string invokedMethod, string invokedUrl)
         {
             Console.WriteLine($"Params: routeMethod: {routeMethod} routeUrl: {routeUrl} invokedMethod: {invokedMethod} invokedUrl: {invokedUrl}");
