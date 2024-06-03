@@ -2,7 +2,20 @@
 
 ## [**Changes available only in 'Preview' NuGet packages:**](https://github.com/nanoframework/nanoFramework.WebServer/tree/HEAD)
 
-[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.2.45...HEAD)
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.2.48...HEAD)
+
+**Fixed bugs:**
+
+- Fix "/" path for controllers [\#259](https://github.com/nanoframework/nanoFramework.WebServer/pull/259)
+
+**Documentation and other chores:**
+
+- Update 1 NuGet dependencies [\#257](https://github.com/nanoframework/nanoFramework.WebServer/pull/257)
+- Update 1 NuGet dependencies [\#256](https://github.com/nanoframework/nanoFramework.WebServer/pull/256)
+
+## [v1.2.48](https://github.com/nanoframework/nanoFramework.WebServer/tree/v1.2.48) (2024-05-17)
+
+[Full Changelog](https://github.com/nanoframework/nanoFramework.WebServer/compare/v1.2.45...v1.2.48)
 
 **Documentation and other chores:**
 
