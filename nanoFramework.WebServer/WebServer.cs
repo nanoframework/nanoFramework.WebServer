@@ -1,7 +1,5 @@
-//
-// Copyright (c) 2020 Laurent Ellerbach and the project contributors
-// See LICENSE file in the project root for full license information.
-//
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
@@ -15,7 +13,6 @@ using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
-
 namespace nanoFramework.WebServer
 {
     /// <summary>
@@ -408,7 +405,7 @@ namespace nanoFramework.WebServer
             _serverThread.Abort();
             _serverThread = null;
             // Event is generate in the running thread
-            Debug.WriteLine("Stopped server in thread ");            
+            Debug.WriteLine("Stopped server in thread ");
         }
 
         /// <summary>
@@ -459,7 +456,7 @@ namespace nanoFramework.WebServer
 
             byte[] buf = new byte[MaxSizeBuffer];
             using FileStream dataReader = new FileStream(strFilePath, FileMode.Open, FileAccess.Read);
-            
+
             long fileLength = dataReader.Length;
             response.ContentType = contentType;
             response.ContentLength64 = fileLength;
@@ -472,7 +469,7 @@ namespace nanoFramework.WebServer
                 bytesToRead = bytesToRead < MaxSizeBuffer ? bytesToRead : MaxSizeBuffer;
 
                 // Reads the data.
-                dataReader.Read(buf, 0,(int) bytesToRead);
+                dataReader.Read(buf, 0, (int)bytesToRead);
 
                 // Writes data to browser
                 response.OutputStream.Write(buf, 0, (int)bytesToRead);
@@ -537,7 +534,8 @@ namespace nanoFramework.WebServer
                         // Variables used only within the "for". They are here for performance reasons
                         bool mustAuthenticate;
                         bool isAuthOk;
-                        bool isRoute = false;
+                        CallbackRoutes selectedRoute = null;
+                        string multipleCallback = null;
 
                         foreach (CallbackRoutes route in _callbackRoutes)
                         {
@@ -545,55 +543,26 @@ namespace nanoFramework.WebServer
                             {
                                 continue;
                             }
-
-                            isRoute = true;
-
-                            // Check auth first
-                            mustAuthenticate = route.Authentication != null && route.Authentication.AuthenticationType != AuthenticationType.None;
-                            isAuthOk = !mustAuthenticate;
-
-                            if (mustAuthenticate)
+                            if (selectedRoute is null)
                             {
-                                if (route.Authentication.AuthenticationType == AuthenticationType.Basic)
-                                {
-                                    var credSite = route.Authentication.Credentials ?? Credential;
-                                    var credReq = context.Request.Credentials;
-
-                                    isAuthOk = credReq != null && credSite != null
-                                        && (credSite.UserName == credReq.UserName)
-                                        && (credSite.Password == credReq.Password);
-                                }
-                                else if (route.Authentication.AuthenticationType == AuthenticationType.ApiKey)
-                                {
-                                    var apikeySite = route.Authentication.ApiKey ?? ApiKey;
-                                    var apikeyReq = GetApiKeyFromHeaders(context.Request.Headers);
-
-                                    isAuthOk = apikeyReq != null
-                                        && apikeyReq == apikeySite;
-                                }
+                                selectedRoute = route;
                             }
-
-                            if (!isAuthOk)
+                            else
                             {
-                                if (route.Authentication != null &&
-                                    route.Authentication.AuthenticationType == AuthenticationType.Basic)
-                                {
-                                    context.Response.Headers.Add("WWW-Authenticate",
-                                        $"Basic realm=\"Access to {route.Route}\"");
-                                }
-
-                                context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                                context.Response.ContentLength64 = 0;
-
-                                HandleContextResponse(context);
-                                return;
+                                multipleCallback ??= $"Multiple matching callbacks: {selectedRoute.Callback.DeclaringType.FullName}.{selectedRoute.Callback.Name}";
+                                multipleCallback += $", {route.Callback.DeclaringType.FullName}.{route.Callback.Name}";
                             }
-
-                            InvokeRoute(route, context);
-                            HandleContextResponse(context);
                         }
 
-                        if (!isRoute)
+                        if (multipleCallback is not null)
+                        {
+                            multipleCallback += ".";
+                            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                            OutPutStream(context.Response, multipleCallback);
+
+                            HandleContextResponse(context);
+                        }
+                        else if (selectedRoute is null)
                         {
                             if (CommandReceived != null)
                             {
@@ -606,6 +575,52 @@ namespace nanoFramework.WebServer
                                 context.Response.ContentLength64 = 0;
                             }
 
+                            HandleContextResponse(context);
+                        }
+                        else
+                        {
+                            // Check auth first
+                            mustAuthenticate = selectedRoute.Authentication != null && selectedRoute.Authentication.AuthenticationType != AuthenticationType.None;
+                            isAuthOk = !mustAuthenticate;
+
+                            if (mustAuthenticate)
+                            {
+                                if (selectedRoute.Authentication.AuthenticationType == AuthenticationType.Basic)
+                                {
+                                    var credSite = selectedRoute.Authentication.Credentials ?? Credential;
+                                    var credReq = context.Request.Credentials;
+
+                                    isAuthOk = credReq != null && credSite != null
+                                        && (credSite.UserName == credReq.UserName)
+                                        && (credSite.Password == credReq.Password);
+                                }
+                                else if (selectedRoute.Authentication.AuthenticationType == AuthenticationType.ApiKey)
+                                {
+                                    var apikeySite = selectedRoute.Authentication.ApiKey ?? ApiKey;
+                                    var apikeyReq = GetApiKeyFromHeaders(context.Request.Headers);
+
+                                    isAuthOk = apikeyReq != null
+                                        && apikeyReq == apikeySite;
+                                }
+                            }
+
+                            if (!isAuthOk)
+                            {
+                                if (selectedRoute.Authentication != null &&
+                                    selectedRoute.Authentication.AuthenticationType == AuthenticationType.Basic)
+                                {
+                                    context.Response.Headers.Add("WWW-Authenticate",
+                                        $"Basic realm=\"Access to {selectedRoute.Route}\"");
+                                }
+
+                                context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                                context.Response.ContentLength64 = 0;
+
+                                HandleContextResponse(context);
+                                return;
+                            }
+
+                            InvokeRoute(selectedRoute, context);
                             HandleContextResponse(context);
                         }
                     }).Start();
@@ -621,7 +636,7 @@ namespace nanoFramework.WebServer
             {
                 // If we are here then set the server state to not running
                 _cancel = true;
-            }            
+            }
 
             WebServerStatusChanged?.Invoke(this, new WebServerStatusEventArgs(WebServerStatus.Stopped));
         }

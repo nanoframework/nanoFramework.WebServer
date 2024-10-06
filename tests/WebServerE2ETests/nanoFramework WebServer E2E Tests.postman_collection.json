@@ -215,6 +215,37 @@
 			"response": []
 		},
 		{
+			"name": "SimpleRouteController_MultipleCallback",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status 500 and message\", function () {\r",
+							"    pm.response.to.have.status(500);\r",
+							"    pm.response.to.have.body(\"Multiple matching callbacks: WebServerE2ETests.SimpleRouteController.FirstOfMultipleCallback, WebServerE2ETests.SimpleRouteController.SecondOfMultipleCallback.\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/multiplecallback",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"multiplecallback"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "SimpleRouteController_OutputWithNotFoundCode",
 			"event": [
 				{
