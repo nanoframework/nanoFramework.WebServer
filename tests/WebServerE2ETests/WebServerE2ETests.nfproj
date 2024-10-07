@@ -73,4 +73,10 @@
       <ProjectConfigurationsDeclaredAsItems />
     </ProjectCapabilities>
   </ProjectExtensions>
+  <Target Name="CopyWiFiTemplate" Condition="!Exists('$(MSBuildProjectDirectory)\WiFi.cs')" BeforeTargets="BeforeBuild">
+	<ItemGroup>
+		<WIFI_TEMPLATE Include="$(MSBuildProjectDirectory)\Template\WiFi.cs"/>
+	</ItemGroup>
+    <Copy SourceFiles="@(WIFI_TEMPLATE)" DestinationFolder="$(MSBuildProjectDirectory)" />
+  </Target>
 </Project>
