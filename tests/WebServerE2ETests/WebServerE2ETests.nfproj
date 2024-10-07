@@ -18,10 +18,12 @@
   </PropertyGroup>
   <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.props" Condition="Exists('$(NanoFrameworkProjectSystemPath)NFProjectSystem.props')" />
   <ItemGroup>
+    <Compile Include="MixedController.cs" />
     <Compile Include="AuthController.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SimpleRouteController.cs" />
+    <Compile Include="WiFi.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\nanoFramework.WebServer.FileSystem\nanoFramework.WebServer.FileSystem.nfproj" />
