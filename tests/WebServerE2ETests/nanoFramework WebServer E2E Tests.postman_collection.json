@@ -905,6 +905,498 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "MixedController_ApiKeyPublic_ApiKey",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status 200 Body ApiKey\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"    pm.response.to.have.body(\"ApiKey+Public: ApiKey\")\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "apikey",
+					"apikey": [
+						{
+							"key": "value",
+							"value": "{{auth_apikey}}",
+							"type": "string"
+						},
+						{
+							"key": "key",
+							"value": "ApiKey",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/authapikeyandpublic",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"authapikeyandpublic"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "MixedController_ApiKeyPublic_Public",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status 200 Body Public\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"    pm.response.to.have.body(\"ApiKey+Public: Public\")\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/authapikeyandpublic",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"authapikeyandpublic"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "MixedController_BasicPublic_Basic",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status 200 Body Basic\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"    pm.response.to.have.body(\"Basic+Public: Basic\")\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "{{auth_basic_password}}",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "{{auth_basic_username}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/authbasicandpublic",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"authbasicandpublic"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "MixedController_BasicPublic_Public",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status 200 Body Public\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"    pm.response.to.have.body(\"Basic+Public: Public\")\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/authbasicandpublic",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"authbasicandpublic"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "MixedController_ApiKeyBasicPublic_ApiKey",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status 200 Body ApiKey\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"    pm.response.to.have.body(\"ApiKey+Basic+Public: ApiKey\")\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "apikey",
+					"apikey": [
+						{
+							"key": "value",
+							"value": "{{auth_apikey}}",
+							"type": "string"
+						},
+						{
+							"key": "key",
+							"value": "ApiKey",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/authapikeybasicandpublic",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"authapikeybasicandpublic"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "MixedController_ApiKeyBasicPublic_ApiKey2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status 200 Body ApiKey\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"    pm.response.to.have.body(\"ApiKey+Basic+Public: ApiKey 2\")\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "apikey",
+					"apikey": [
+						{
+							"key": "value",
+							"value": "{{auth_apikey2}}",
+							"type": "string"
+						},
+						{
+							"key": "key",
+							"value": "ApiKey",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/authapikeybasicandpublic",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"authapikeybasicandpublic"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "MixedController_ApiKeyBasicPublic_Basic",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status 200 Body Basic\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"    pm.response.to.have.body(\"ApiKey+Basic+Public: Basic user2\")\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "{{auth_basic_password}}",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "{{auth_basic_username}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/authapikeybasicandpublic",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"authapikeybasicandpublic"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "MixedController_ApiKeyBasicPublic_Basic2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status 200 Body Basic\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"    pm.response.to.have.body(\"ApiKey+Basic+Public: Basic user3\")\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "{{auth_basic_password}}",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "{{auth_basic_username2}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/authapikeybasicandpublic",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"authapikeybasicandpublic"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "MixedController_ApiKeyBasicPublic_Public",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status 200 Body Public\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"    pm.response.to.have.body(\"ApiKey+Basic+Public: Public\")\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/authapikeybasicandpublic",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"authapikeybasicandpublic"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "MixedController_MultipleCallbacks_ApiKey",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status 500 Body ApiKey\", function () {\r",
+							"    pm.response.to.have.status(500);\r",
+							"    pm.response.to.have.body(\"Multiple matching callbacks: WebServerE2ETests.MixedController.MultipleApiKey1, WebServerE2ETests.MixedController.MultipleApiKey2.\")\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "apikey",
+					"apikey": [
+						{
+							"key": "value",
+							"value": "{{auth_apikey}}",
+							"type": "string"
+						},
+						{
+							"key": "key",
+							"value": "ApiKey",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/authmultiple",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"authmultiple"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "MixedController_MultipleCallbacks_Basic",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status 500 Body Basic\", function () {\r",
+							"    pm.response.to.have.status(500);\r",
+							"    pm.response.to.have.body(\"Multiple matching callbacks: WebServerE2ETests.MixedController.MultipleBasic1, WebServerE2ETests.MixedController.MultipleBasic2.\")\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "{{auth_basic_password}}",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "{{auth_basic_username}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/authmultiple",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"authmultiple"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "MixedController_MultipleCallbacks_Public",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status 500 Body Public\", function () {\r",
+							"    pm.response.to.have.status(500);\r",
+							"    pm.response.to.have.body(\"Multiple matching callbacks: WebServerE2ETests.MixedController.MultiplePublic1, WebServerE2ETests.MixedController.MultiplePublic2.\")\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/authmultiple",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"authmultiple"
+					]
+				}
+			},
+			"response": []
 		}
 	],
 	"event": [
@@ -938,6 +1430,11 @@
 			"type": "string"
 		},
 		{
+			"key": "auth_basic_username2",
+			"value": "user3",
+			"type": "string"
+		},
+		{
 			"key": "auth_basic_password",
 			"value": "password",
 			"type": "string"
@@ -945,6 +1442,11 @@
 		{
 			"key": "auth_apikey",
 			"value": "superKey1234",
+			"type": "string"
+		},
+		{
+			"key": "auth_apikey2",
+			"value": "superKey42",
 			"type": "string"
 		}
 	]
