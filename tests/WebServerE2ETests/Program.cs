@@ -13,10 +13,8 @@ using System.Threading;
 
 namespace WebServerE2ETests
 {
-    public class Program
+    public partial class Program
     {
-        private const string Ssid = "yourSSID";
-        private const string Password = "YourPAssword";
         private static WebServer _server;
 
         public static void Main()
