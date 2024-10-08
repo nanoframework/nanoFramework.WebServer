@@ -1,9 +1,9 @@
-﻿// Copyright (c) 2020 Laurent Ellerbach and the project contributors
-// See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using nanoFramework.WebServer;
 using System.Diagnostics;
 using System.Net;
+using nanoFramework.WebServer;
 
 namespace WebServerE2ETests
 {
@@ -15,7 +15,7 @@ namespace WebServerE2ETests
             Debug.WriteLine($"{nameof(OutputWithOKCode)} {e.Context.Request.HttpMethod} {e.Context.Request.RawUrl}");
             WebServer.OutputHttpCode(e.Context.Response, HttpStatusCode.OK);
         }
-        
+
         [Route("notfoundcode")]
         public void OutputWithNotFoundCode(WebServerEventArgs e)
         {
@@ -44,6 +44,20 @@ namespace WebServerE2ETests
         public void RouteAnyTest(WebServerEventArgs e)
         {
             WebServer.OutputHttpCode(e.Context.Response, HttpStatusCode.OK);
+        }
+
+        [Route("multiplecallback")]
+        public void FirstOfMultipleCallback(WebServerEventArgs e)
+        {
+            Debug.WriteLine($"{nameof(FirstOfMultipleCallback)} {e.Context.Request.HttpMethod} {e.Context.Request.RawUrl}");
+            WebServer.OutPutStream(e.Context.Response, nameof(FirstOfMultipleCallback));
+        }
+
+        [Route("multiplecallback")]
+        public void SecondOfMultipleCallback(WebServerEventArgs e)
+        {
+            Debug.WriteLine($"{nameof(SecondOfMultipleCallback)} {e.Context.Request.HttpMethod} {e.Context.Request.RawUrl}");
+            WebServer.OutPutStream(e.Context.Response, nameof(SecondOfMultipleCallback));
         }
     }
 }

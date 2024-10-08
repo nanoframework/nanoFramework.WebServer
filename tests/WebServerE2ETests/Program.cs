@@ -1,8 +1,6 @@
-// Copyright (c) 2020 Laurent Ellerbach and the project contributors
-// See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using nanoFramework.Networking;
-using nanoFramework.WebServer;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -10,6 +8,8 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading;
+using nanoFramework.Networking;
+using nanoFramework.WebServer;
 
 namespace WebServerE2ETests
 {
@@ -29,7 +29,7 @@ namespace WebServerE2ETests
             }
 
             Debug.WriteLine($"Connected with wifi credentials. IP Address: {GetCurrentIPAddress()}");
-            _server = new WebServer(80, HttpProtocol.Http, new Type[] { typeof(SimpleRouteController), typeof(AuthController) });
+            _server = new WebServer(80, HttpProtocol.Http, new Type[] { typeof(SimpleRouteController), typeof(AuthController), typeof(MixedController) });
             // To test authentication with various scenarios
             _server.ApiKey = "ATopSecretAPIKey1234";
             _server.Credential = new NetworkCredential("topuser", "topPassword");
@@ -49,7 +49,7 @@ namespace WebServerE2ETests
 
         private static void WebServerStatusChanged(object obj, WebServerStatusEventArgs e)
         {
-            Debug.WriteLine($"The web server is now {(e.Status == WebServerStatus.Running ? "running" : "stopped" )}");
+            Debug.WriteLine($"The web server is now {(e.Status == WebServerStatus.Running ? "running" : "stopped")}");
         }
 
         private static void ServerCommandReceived(object obj, WebServerEventArgs e)

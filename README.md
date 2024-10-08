@@ -196,6 +196,53 @@ With the previous example the following happens:
 
 All up, this is an example to show how to use authentication, it's been defined to allow flexibility.
 
+The webserver supports having multiple authentication methods or credentials for the same route. Each pair of authentication method plus credentials should have its own method in the controller:
+
+```csharp
+class MixedController
+{
+
+    [Route("sameroute")]
+    [Authentication("Basic")]
+    public void Basic(WebServerEventArgs e)
+    {
+        WebServer.OutPutStream(e.Context.Response, "sameroute: Basic");
+    }
+
+    [Authentication("ApiKey:superKey1234")]
+    [Route("sameroute")]
+    public void Key(WebServerEventArgs e)
+    {
+        WebServer.OutPutStream(e.Context.Response, "sameroute: API key #1");
+    }
+
+    [Authentication("ApiKey:superKey5678")]
+    [Route("sameroute")]
+    public void Key2(WebServerEventArgs e)
+    {
+        WebServer.OutPutStream(e.Context.Response, "sameroute: API key #2");
+    }
+
+    [Route("sameroute")]
+    public void None(WebServerEventArgs e)
+    {
+        WebServer.OutPutStream(e.Context.Response, "sameroute: Public");
+    }
+}
+```
+
+The webserver selects the route for a request:
+
+- If there are no matching methods, a not-found response (404) is returned.
+- If authentication information is passed in the header of the request, then only methods that require authentication are considered. If one of the method's credentials matches the credentials passed in the request, that method is called. Otherwise a non-authorized response (401) will be returned.
+- If no authentication information is passed in the header of the request:
+	- If one of the methods does not require authentication, that method is called.
+	- Otherwise a non-authorized response (401) will be returned. If one of the methods requires basic authentication, the `WWW-Authenticate` header is included to request credentials.
+
+The webserver does not support more than one matching method. Calling multiple methods most likely results in an exception as a subsequent method tries to modify a response that is already processed by the first method. The webserver does not know what to do and returns an internal server error (500). The body of the response lists the matching methods.
+
+Having multiple matching methods is considered a programming error. One way this occurs is if two methods in a controller accidentally have the same route. Returning an internal server error with the names of the methods makes it easy to discover the error. It is expected that the error is discovered and fixed in testing. Then the internal error will not occur in the application that is deployed to a device. 
+
 ## Managing incoming queries thru events
 
 Very basic usage is the following:
