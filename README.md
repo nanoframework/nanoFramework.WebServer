@@ -459,6 +459,8 @@ There is a collection of postman tests `nanoFramework WebServer E2E Tests.postma
 - Set the `base_url` variable to match your device IP address 
 - Choose request you want to test or run whole collection and check tests results.
 
+The WebServerE2ETests project requires the name and credentials for the WiFi access point. That is stored in the WiFi.cs file that is not part of the git repository. Build the WebServerE2ETests to create a template for that file, then change the SSID and credentials. Your credentials will not be part of a commit.
+
 ## Feedback and documentation
 
 For documentation, providing feedback, issues and finding out how to contribute please refer to the [Home repo](https://github.com/nanoframework/Home).
