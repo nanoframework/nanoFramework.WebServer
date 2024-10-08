@@ -230,6 +230,7 @@ class MixedController
     }
 }
 ```
+
 The webserver selects the route for a request:
 
 - If there are no matching methods, a not-found response (404) is returned.
@@ -238,7 +239,9 @@ The webserver selects the route for a request:
 	- If one of the methods does not require authentication, that method is called.
 	- Otherwise a non-authorized response (401) will be returned. If one of the methods requires basic authentication, the `WWW-Authenticate` header is included to request credentials.
 
-If two or more methods match the authentication method and credentials of the request, an internal server error is returned with a list of the methods. 
+The webserver does not support more than one matching method. Calling multiple methods most likely results in an exception as a subsequent method tries to modify a response that is already processed by the first method. The webserver does not know what to do and returns an internal server error (500). The body of the response lists the matching methods.
+
+Having multiple matching methods is considered a programming error. One way this occurs is if two methods in a controller accidentally have the same route. Returning an internal server error with the names of the methods makes it easy to discover the error. It is expected that the error is discovered and fixed in testing. Then the internal error will not occur in the application that is deployed to a device. 
 
 ## Managing incoming queries thru events
 
