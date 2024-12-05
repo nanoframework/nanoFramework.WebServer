@@ -45,6 +45,7 @@
     <Compile Include="..\nanoFramework.WebServer\HttpMultipartParser\LineBuffer.cs" Link="HttpMultipartParser\LineBuffer.cs" />
     <Compile Include="..\nanoFramework.WebServer\HttpMultipartParser\LineReader.cs" Link="HttpMultipartParser\LineReader.cs" />
     <Compile Include="..\nanoFramework.WebServer\HttpMultipartParser\MultipartFormDataParser.cs" Link="HttpMultipartParser\MultipartFormDataParser.cs" />
+    <Compile Include="..\nanoFramework.WebServer\HttpMultipartParser\MultipartFormDataParserException.cs" Link="HttpMultipartParser\MultipartFormDataParserException.cs" />
     <Compile Include="..\nanoFramework.WebServer\HttpMultipartParser\ParameterPart.cs" Link="HttpMultipartParser\ParameterPart.cs" />
     <Compile Include="..\nanoFramework.WebServer\HttpProtocol.cs" Link="HttpProtocol.cs" />
     <Compile Include="..\nanoFramework.WebServer\MethodAttribute.cs" Link="MethodAttribute.cs" />

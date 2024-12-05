@@ -64,7 +64,7 @@ namespace nanoFramework.WebServer.HttpMultipartParser
             _boundary = DetectBoundary(reader);
             _boundaryBinary = Encoding.UTF8.GetBytes(_boundary);
 
-            //we have read until we encountered the boundary so we should be at the first section => parse it!
+            // we have read until we encountered the boundary so we should be at the first section => parse it!
             while (!_readEndBoundary)
             {
                 ParseSection(reader);
@@ -81,12 +81,12 @@ namespace nanoFramework.WebServer.HttpMultipartParser
 
             if (string.IsNullOrEmpty(line))
             {
-                //EMF001: Unable to determine boundary: either the stream is empty or we reached the end of the stream
+                // EMF001: Unable to determine boundary: either the stream is empty or we reached the end of the stream
                 throw new MultipartFormDataParserException("EMF001");
             }
             else if (!line.StartsWith("--"))
             {
-                //EMF002: Unable to determine boundary: content does not start with a valid multipart boundary
+                // EMF002: Unable to determine boundary: content does not start with a valid multipart boundary
                 throw new MultipartFormDataParserException("EMF002");
             }
 
@@ -102,7 +102,7 @@ namespace nanoFramework.WebServer.HttpMultipartParser
             {
                 if (line == null || line.StartsWith(_boundary))
                 {
-                    //EMF003: Unexpected end of section
+                    // EMF003: Unexpected end of section
                     throw new MultipartFormDataParserException("EMF003");
                 }
 
@@ -125,10 +125,10 @@ namespace nanoFramework.WebServer.HttpMultipartParser
             }
             else
             {
-                //EMF004: Unable to determine the section type. Some possible reasons include:
-                //- section is malformed
-                //- required parameters such as 'name', 'content-type' or 'filename' are missing
-                //- section contains nothing but empty lines.
+                // EMF004: Unable to determine the section type. Some possible reasons include:
+                // - section is malformed
+                // - required parameters such as 'name', 'content-type' or 'filename' are missing
+                // - section contains nothing but empty lines.
                 throw new MultipartFormDataParserException("EMF004");
             }
         }
@@ -258,7 +258,7 @@ namespace nanoFramework.WebServer.HttpMultipartParser
                 }
             }
 
-            //if we get here we have a boundary, check if it is the endboundary
+            // if we get here we have a boundary, check if it is the endboundary
             if (line.Length >= length + 2 && line[length] == '-' && line[length + 1] == '-')
             {
                 _readEndBoundary = true;
@@ -274,20 +274,6 @@ namespace nanoFramework.WebServer.HttpMultipartParser
             foreach (string parameter in wellKnownParameters)
                 if (parameters.Contains(parameter))
                     parameters.Remove(parameter);
-        }
-    }
-
-    /// <summary>
-    /// Specific exception while parsing a multipart form
-    /// </summary>
-    public class MultipartFormDataParserException : Exception
-    {
-        /// <summary>
-        /// Initializes a MultipartFormDataParserException
-        /// </summary>
-        /// <param name="message"></param>
-        public MultipartFormDataParserException(string message) : base(message)
-        {
         }
     }
 }

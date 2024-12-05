@@ -35,9 +35,9 @@ namespace nanoFramework.WebServer
 
             while (true)
             {
-                //The stream is (should be) a NetworkStream which might still be receiving data while
-                //we're already processing. Give the stream a chance to receive more data or we might
-                //end up with "zero bytes read" too soon...
+                // The stream is (should be) a NetworkStream which might still be receiving data while
+                // we're already processing. Give the stream a chance to receive more data or we might
+                // end up with "zero bytes read" too soon...
                 Thread.Sleep(1);
 
                 long length = stream.Length;

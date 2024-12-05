@@ -43,7 +43,7 @@ namespace nanoFramework.WebServer.HttpMultipartParser
                 {
                     if (_buffer[i] == '\n')
                     {
-                        //newline found, time to return the line
+                        // newline found, time to return the line
                         int length = GetLength(excludeNewLine, i);
 
                         byte[] line = GetLine(length);
@@ -54,15 +54,15 @@ namespace nanoFramework.WebServer.HttpMultipartParser
                     }
                 }
 
-                //if we get here, no newline found in current buffer
-                //store what we have left in the buffer into the lineBuffer
+                // if we get here, no newline found in current buffer
+                // store what we have left in the buffer into the lineBuffer
                 _lineBuffer.Write(_buffer, _position, _availableBytes - _position);
                 _position = _availableBytes;
             }
 
-#pragma warning disable S1168 //null and empty do have meaning
-            //no more bytes available, return what's in the lineBuffer
-            //if lineBuffer is empty, we're truly done, return null!
+#pragma warning disable S1168 // null and empty do have meaning
+            // no more bytes available, return what's in the lineBuffer
+            // if lineBuffer is empty, we're truly done, return null!
             return _lineBuffer.Length == 0 ? null : _lineBuffer.ToArray(true);
 #pragma warning restore S1168
         }
@@ -100,9 +100,9 @@ namespace nanoFramework.WebServer.HttpMultipartParser
         {
             if (_position >= _availableBytes)
             {
-                //The stream is (should be) a NetworkStream which might still be receiving data while
-                //we're already processing. Give the stream a chance to receive more data or we might
-                //end up with "zero bytes read" too soon...
+                // The stream is (should be) a NetworkStream which might still be receiving data while
+                // we're already processing. Give the stream a chance to receive more data or we might
+                // end up with "zero bytes read" too soon...
                 Thread.Sleep(1);
 
                 long streamLength = _stream.Length;

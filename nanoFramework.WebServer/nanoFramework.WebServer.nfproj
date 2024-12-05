@@ -43,6 +43,7 @@
     <Compile Include="HttpMultipartParser\LineBuffer.cs" />
     <Compile Include="HttpMultipartParser\LineReader.cs" />
     <Compile Include="HttpMultipartParser\MultipartFormDataParser.cs" />
+    <Compile Include="HttpMultipartParser\MultipartFormDataParserException.cs" />
     <Compile Include="HttpMultipartParser\ParameterPart.cs" />
     <Compile Include="HttpProtocol.cs" />
     <Compile Include="WebServerStatus.cs" />
