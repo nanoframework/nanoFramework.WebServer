@@ -404,6 +404,7 @@ This API example is basic but as you get the method, you can choose what to do.
 As you get the url, you can check for a specific controller called. And you have the parameters and the content payload!
 
 Notice the extension methods to read the body of the request:
+
 - ReadBody will read the data from the InputStream while the data is flowing in which might be in multiple passes depending on the size of the body
 - ReadForm allows to read a multipart/form-data form and returns the text key/value pairs as well as any files in the request
 
