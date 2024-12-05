@@ -37,53 +37,16 @@ namespace nanoFramework.WebServer.HttpMultipartParser
         /// <returns>The byte[] containing the line or null if end of stream.</returns>
         public byte[] ReadByteLine(bool excludeNewLine = true)
         {
-            while (true)
+            while (ReadFromStream() > 0)
             {
-                if (_position >= _availableBytes)
-                {
-                    //The stream is (should be) a NetworkStream which might still be receiving data while
-                    //we're already processing. Give the stream a chance to receive more data or we might
-                    //end up with "zero bytes read" too soon...
-                    Thread.Sleep(1);
-
-                    long streamLength = _stream.Length;
-
-                    if(streamLength > _buffer.Length)
-                    {
-                        streamLength = _buffer.Length;
-                    }
-
-                    _availableBytes = _stream.Read(_buffer, 0, (int)streamLength);
-
-                    if (_availableBytes == 0) break;
-
-                    _position = 0;
-                }
-
                 for (int i = _position; i < _availableBytes; i++)
                 {
                     if (_buffer[i] == '\n')
                     {
                         //newline found, time to return the line
-                        byte[] line;
+                        int length = GetLength(excludeNewLine, i);
 
-                        int length = i - _position + 1;
-
-                        if (excludeNewLine)
-                        {
-                            length -= i > 0 && _buffer[i - 1] == '\r' ? 2 : 1;
-                        }
-
-                        if (_lineBuffer.Length > 0)
-                        {
-                            _lineBuffer.Write(_buffer, _position, length);
-                            line = _lineBuffer.ToArray(true);
-                        }
-                        else
-                        {
-                            line = new byte[length];
-                            Array.Copy(_buffer, _position, line, 0, length);
-                        }
+                        byte[] line = GetLine(length);
 
                         _position = i + 1;
 
@@ -102,6 +65,58 @@ namespace nanoFramework.WebServer.HttpMultipartParser
             //if lineBuffer is empty, we're truly done, return null!
             return _lineBuffer.Length == 0 ? null : _lineBuffer.ToArray(true);
 #pragma warning restore S1168
+        }
+
+        private byte[] GetLine(int length)
+        {
+            byte[] line;
+            if (_lineBuffer.Length > 0)
+            {
+                _lineBuffer.Write(_buffer, _position, length);
+                line = _lineBuffer.ToArray(true);
+            }
+            else
+            {
+                line = new byte[length];
+                Array.Copy(_buffer, _position, line, 0, length);
+            }
+
+            return line;
+        }
+
+        private int GetLength(bool excludeNewLine, int currentPosition)
+        {
+            int length = currentPosition - _position + 1;
+
+            if (excludeNewLine)
+            {
+                length -= currentPosition > 0 && _buffer[currentPosition - 1] == '\r' ? 2 : 1;
+            }
+
+            return length;
+        }
+
+        private int ReadFromStream()
+        {
+            if (_position >= _availableBytes)
+            {
+                //The stream is (should be) a NetworkStream which might still be receiving data while
+                //we're already processing. Give the stream a chance to receive more data or we might
+                //end up with "zero bytes read" too soon...
+                Thread.Sleep(1);
+
+                long streamLength = _stream.Length;
+
+                if (streamLength > _buffer.Length)
+                {
+                    streamLength = _buffer.Length;
+                }
+
+                _availableBytes = _stream.Read(_buffer, 0, (int)streamLength);
+                _position = 0;
+            }
+
+            return _availableBytes;
         }
 
         /// <summary>
