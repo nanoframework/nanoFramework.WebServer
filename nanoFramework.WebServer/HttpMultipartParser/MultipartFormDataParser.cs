@@ -16,7 +16,7 @@ namespace nanoFramework.WebServer.HttpMultipartParser
     ///     stream into it's parameters and file data.
     /// </summary>
     public class MultipartFormDataParser
-	{
+    {
         private const int defaultBufferSize = 4096;
 
         private readonly bool _ignoreInvalidParts;
@@ -29,15 +29,15 @@ namespace nanoFramework.WebServer.HttpMultipartParser
         private readonly ArrayList _parameters = new();
 
         /// <summary>Initializes a new instance of the <see cref="MultipartFormDataParser" /> class</summary>
-		/// <param name="stream">The stream containing the multipart data.</param>
-		/// <param name="binaryBufferSize">The size of the buffer to use for parsing the multipart form data.</param>
+        /// <param name="stream">The stream containing the multipart data.</param>
+        /// <param name="binaryBufferSize">The size of the buffer to use for parsing the multipart form data.</param>
         /// <param name="ignoreInvalidParts">By default the parser will throw an exception if it encounters an invalid part. Set this to true to ignore invalid parts.</param>
         public MultipartFormDataParser(Stream stream, int binaryBufferSize = defaultBufferSize, bool ignoreInvalidParts = false)
-		{
+        {
             _stream = stream ?? throw new ArgumentNullException(nameof(stream));
             _binaryBufferSize = binaryBufferSize;
             _ignoreInvalidParts = ignoreInvalidParts;
-		}
+        }
 
         /// <summary>Gets the mapping of parameters parsed files. The name of a given field maps to the parsed file data.</summary>
         public FilePart[] Files => _files.ToArray(typeof(FilePart)) as FilePart[];
@@ -46,14 +46,14 @@ namespace nanoFramework.WebServer.HttpMultipartParser
         public ParameterPart[] Parameters => _parameters.ToArray(typeof(ParameterPart)) as ParameterPart[];
 
         /// <summary>Parse the stream into a new instance of the <see cref="MultipartFormDataParser" /> class</summary>
-		/// <param name="stream">The stream containing the multipart data.</param>
-		/// <param name="binaryBufferSize">The size of the buffer to use for parsing the multipart form data.</param>
+        /// <param name="stream">The stream containing the multipart data.</param>
+        /// <param name="binaryBufferSize">The size of the buffer to use for parsing the multipart form data.</param>
         /// <param name="ignoreInvalidParts">By default the parser will throw an exception if it encounters an invalid part. Set this to true to ignore invalid parts.</param>
         /// <returns>A new instance of the <see cref="MultipartFormDataParser"/> class.</returns>
         public static MultipartFormDataParser Parse(Stream stream, int binaryBufferSize = defaultBufferSize, bool ignoreInvalidParts = false)
         {
             var parser = new MultipartFormDataParser(stream, binaryBufferSize, ignoreInvalidParts);
-			parser.Run();
+            parser.Run();
             return parser;
         }
 
@@ -72,12 +72,12 @@ namespace nanoFramework.WebServer.HttpMultipartParser
         }
 
         private static string DetectBoundary(LineReader reader)
-		{
+        {
             string line = string.Empty;
-			while (line == string.Empty)
-			{
-				line = reader.ReadLine();
-			}
+            while (line == string.Empty)
+            {
+                line = reader.ReadLine();
+            }
 
             if (string.IsNullOrEmpty(line))
             {
@@ -91,7 +91,7 @@ namespace nanoFramework.WebServer.HttpMultipartParser
             }
 
             return line.EndsWith("--") ? line.Substring(0, line.Length - 2) : line;
-		}
+        }
 
         private void ParseSection(LineReader reader)
         {
@@ -139,23 +139,23 @@ namespace nanoFramework.WebServer.HttpMultipartParser
 
         private bool IsParameterPart(Hashtable parameters) => parameters.Contains("name");
 
-		private void ParseFilePart(Hashtable parameters, LineReader reader)
-		{
-			// Read the parameters
-			parameters.TryGetValue("name", out string name);
-			parameters.TryGetValue("filename", out string filename);
-			parameters.TryGetValue("content-type", out string contentType);
-			parameters.TryGetValue("content-disposition", out string contentDisposition);
+        private void ParseFilePart(Hashtable parameters, LineReader reader)
+        {
+            // Read the parameters
+            parameters.TryGetValue("name", out string name);
+            parameters.TryGetValue("filename", out string filename);
+            parameters.TryGetValue("content-type", out string contentType);
+            parameters.TryGetValue("content-disposition", out string contentDisposition);
 
-			RemoveWellKnownParameters(parameters);
+            RemoveWellKnownParameters(parameters);
 
-			// Default values if expected parameters are missing
-			contentType ??= "text/plain";
-			contentDisposition ??= "form-data";
+            // Default values if expected parameters are missing
+            contentType ??= "text/plain";
+            contentDisposition ??= "form-data";
 
             MemoryStream stream = new();
 
-			while(true)
+            while (true)
             {
                 byte[] line = reader.ReadByteLine(false);
 
@@ -208,7 +208,7 @@ namespace nanoFramework.WebServer.HttpMultipartParser
         }
 
         private void ParseParameterPart(Hashtable parameters, LineReader reader)
-		{
+        {
             StringBuilder sb = new();
 
             while (true)
@@ -221,12 +221,12 @@ namespace nanoFramework.WebServer.HttpMultipartParser
                     break;
                 }
 
-				sb.Append(Encoding.UTF8.GetString(line, 0, line.Length));
+                sb.Append(Encoding.UTF8.GetString(line, 0, line.Length));
             }
-		}
+        }
 
-		private void SkipPart(LineReader reader)
-		{
+        private void SkipPart(LineReader reader)
+        {
             while (true)
             {
                 byte[] line = reader.ReadByteLine();
@@ -268,12 +268,12 @@ namespace nanoFramework.WebServer.HttpMultipartParser
         }
 
         private void RemoveWellKnownParameters(Hashtable parameters)
-		{
+        {
             string[] wellKnownParameters = new[] { "name", "filename", "filename*", "content-type", "content-disposition" };
 
-			foreach (string parameter in wellKnownParameters)
-				if(parameters.Contains(parameter))
-					parameters.Remove(parameter);
-		}
-	}
+            foreach (string parameter in wellKnownParameters)
+                if (parameters.Contains(parameter))
+                    parameters.Remove(parameter);
+        }
+    }
 }
