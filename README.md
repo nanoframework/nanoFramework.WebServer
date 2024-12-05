@@ -373,12 +373,24 @@ if (url.ToLower().IndexOf("/api/") == 0)
     {
 
         ret += $"Size of content: {e.Context.Request.ContentLength64}\r\n";
-        byte[] buff = new byte[e.Context.Request.ContentLength64];
-        e.Context.Request.InputStream.Read(buff, 0, buff.Length);
-        ret += $"Hex string representation:\r\n";
-        for (int i = 0; i < buff.Length; i++)
+
+        var contentTypes = e.Context.Request.Headers?.GetValues("Content-Type");
+        var isMultipartForm = contentTypes != null && contentTypes.Length > 0 && contentTypes[0].StartsWith("multipart/form-data;");
+
+        if(isMultipartForm)
         {
-            ret += buff[i].ToString("X") + " ";
+            var form = e.Context.Request.ReadForm();
+            ret += $"Received a form with {form.Parameters.Length} parameters and {form.Files.Length} files.";
+        }
+        else 
+        {
+            var body = e.Context.Request.ReadBody();
+
+            ret += $"Request body hex string representation:\r\n";
+            for (int i = 0; i < body.Length; i++)
+            {
+                ret += body[i].ToString("X") + " ";
+            }
         }
 
     }
@@ -390,6 +402,11 @@ if (url.ToLower().IndexOf("/api/") == 0)
 This API example is basic but as you get the method, you can choose what to do.
 
 As you get the url, you can check for a specific controller called. And you have the parameters and the content payload!
+
+Notice the extension methods to read the body of the request:
+
+- ReadBody will read the data from the InputStream while the data is flowing in which might be in multiple passes depending on the size of the body
+- ReadForm allows to read a multipart/form-data form and returns the text key/value pairs as well as any files in the request
 
 Example of a result with call:
 

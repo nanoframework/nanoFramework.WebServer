@@ -32,10 +32,19 @@
   <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.props" Condition="Exists('$(NanoFrameworkProjectSystemPath)NFProjectSystem.props')" />
   <ItemGroup>
     <Compile Include="Authentication.cs" />
-    <Compile Include="AuthenticationAttirbute.cs" />
+    <Compile Include="AuthenticationAttribute.cs" />
     <Compile Include="AuthenticationType.cs" />
     <Compile Include="CallbackRoutes.cs" />
     <Compile Include="CaseSensitiveAttribute.cs" />
+    <Compile Include="HttpListenerRequestExtensions.cs" />
+    <Compile Include="HttpMultipartParser\FilePart.cs" />
+    <Compile Include="HttpMultipartParser\HashtableUtility.cs" />
+    <Compile Include="HttpMultipartParser\HeaderUtility.cs" />
+    <Compile Include="HttpMultipartParser\LineBuffer.cs" />
+    <Compile Include="HttpMultipartParser\LineReader.cs" />
+    <Compile Include="HttpMultipartParser\MultipartFormDataParser.cs" />
+    <Compile Include="HttpMultipartParser\MultipartFormDataParserException.cs" />
+    <Compile Include="HttpMultipartParser\ParameterPart.cs" />
     <Compile Include="HttpProtocol.cs" />
     <Compile Include="WebServerStatus.cs" />
     <Compile Include="WebServerStatusEventArgs.cs" />

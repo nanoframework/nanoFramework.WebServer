@@ -32,49 +32,30 @@
   </PropertyGroup>
   <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.props" Condition="Exists('$(NanoFrameworkProjectSystemPath)NFProjectSystem.props')" />
   <ItemGroup>
+    <Compile Include="..\nanoFramework.WebServer\Authentication.cs" Link="Authentication.cs" />
+    <Compile Include="..\nanoFramework.WebServer\AuthenticationAttribute.cs" Link="AuthenticationAttribute.cs" />
+    <Compile Include="..\nanoFramework.WebServer\AuthenticationType.cs" Link="AuthenticationType.cs" />
+    <Compile Include="..\nanoFramework.WebServer\CallbackRoutes.cs" Link="CallbackRoutes.cs" />
+    <Compile Include="..\nanoFramework.WebServer\CaseSensitiveAttribute.cs" Link="CaseSensitiveAttribute.cs" />
+    <Compile Include="..\nanoFramework.WebServer\Header.cs" Link="Header.cs" />
+    <Compile Include="..\nanoFramework.WebServer\HttpListenerRequestExtensions.cs" Link="HttpListenerRequestExtensions.cs" />
+    <Compile Include="..\nanoFramework.WebServer\HttpMultipartParser\FilePart.cs" Link="HttpMultipartParser\FilePart.cs" />
+    <Compile Include="..\nanoFramework.WebServer\HttpMultipartParser\HashtableUtility.cs" Link="HttpMultipartParser\HashtableUtility.cs" />
+    <Compile Include="..\nanoFramework.WebServer\HttpMultipartParser\HeaderUtility.cs" Link="HttpMultipartParser\HeaderUtility.cs" />
+    <Compile Include="..\nanoFramework.WebServer\HttpMultipartParser\LineBuffer.cs" Link="HttpMultipartParser\LineBuffer.cs" />
+    <Compile Include="..\nanoFramework.WebServer\HttpMultipartParser\LineReader.cs" Link="HttpMultipartParser\LineReader.cs" />
+    <Compile Include="..\nanoFramework.WebServer\HttpMultipartParser\MultipartFormDataParser.cs" Link="HttpMultipartParser\MultipartFormDataParser.cs" />
+    <Compile Include="..\nanoFramework.WebServer\HttpMultipartParser\MultipartFormDataParserException.cs" Link="HttpMultipartParser\MultipartFormDataParserException.cs" />
+    <Compile Include="..\nanoFramework.WebServer\HttpMultipartParser\ParameterPart.cs" Link="HttpMultipartParser\ParameterPart.cs" />
+    <Compile Include="..\nanoFramework.WebServer\HttpProtocol.cs" Link="HttpProtocol.cs" />
+    <Compile Include="..\nanoFramework.WebServer\MethodAttribute.cs" Link="MethodAttribute.cs" />
+    <Compile Include="..\nanoFramework.WebServer\RouteAttribute.cs" Link="RouteAttribute.cs" />
+    <Compile Include="..\nanoFramework.WebServer\UrlParameter.cs" Link="UrlParameter.cs" />
+    <Compile Include="..\nanoFramework.WebServer\WebServer.cs" Link="WebServer.cs" />
+    <Compile Include="..\nanoFramework.WebServer\WebServerEventArgs.cs" Link="WebServerEventArgs.cs" />
+    <Compile Include="..\nanoFramework.WebServer\WebServerStatus.cs" Link="WebServerStatus.cs" />
+    <Compile Include="..\nanoFramework.WebServer\WebServerStatusEventArgs.cs" Link="WebServerStatusEventArgs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="..\nanoFramework.WebServer\Authentication.cs">
-      <Link>Authentication.cs</Link>
-    </Compile>
-    <Compile Include="..\nanoFramework.WebServer\AuthenticationAttirbute.cs">
-      <Link>AuthenticationAttirbute.cs</Link>
-    </Compile>
-    <Compile Include="..\nanoFramework.WebServer\AuthenticationType.cs">
-      <Link>AuthenticationType.cs</Link>
-    </Compile>
-    <Compile Include="..\nanoFramework.WebServer\CallbackRoutes.cs">
-      <Link>CallbackRoutes.cs</Link>
-    </Compile>
-    <Compile Include="..\nanoFramework.WebServer\CaseSensitiveAttribute.cs">
-      <Link>CaseSensitiveAttribute.cs</Link>
-    </Compile>
-    <Compile Include="..\nanoFramework.WebServer\HttpProtocol.cs">
-      <Link>HttpProtocol.cs</Link>
-    </Compile>
-    <Compile Include="..\nanoFramework.WebServer\WebServerEventArgs.cs">
-      <Link>WebServerEventArgs.cs</Link>
-    </Compile>
-    <Compile Include="..\nanoFramework.WebServer\Header.cs">
-      <Link>Header.cs</Link>
-    </Compile>
-    <Compile Include="..\nanoFramework.WebServer\MethodAttribute.cs">
-      <Link>MethodAttribute.cs</Link>
-    </Compile>
-    <Compile Include="..\nanoFramework.WebServer\RouteAttribute.cs">
-      <Link>RouteAttribute.cs</Link>
-    </Compile>
-    <Compile Include="..\nanoFramework.WebServer\UrlParameter.cs">
-      <Link>UrlParameter.cs</Link>
-    </Compile>
-    <Compile Include="..\nanoFramework.WebServer\WebServer.cs">
-      <Link>WebServer.cs</Link>
-    </Compile>
-    <Compile Include="..\nanoFramework.WebServer\WebServerStatus.cs">
-      <Link>WebServerStatus.cs</Link>
-    </Compile>
-    <Compile Include="..\nanoFramework.WebServer\WebServerStatusEventArgs.cs">
-      <Link>WebServerStatusEventArgs.cs</Link>
-    </Compile>
     <None Include="..\key.snk" />
   </ItemGroup>
   <ItemGroup>
@@ -117,6 +98,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.lock.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="HttpMultipartParser\" />
   </ItemGroup>
   <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.CSharp.targets" Condition="Exists('$(NanoFrameworkProjectSystemPath)NFProjectSystem.CSharp.targets')" />
   <ProjectExtensions>
