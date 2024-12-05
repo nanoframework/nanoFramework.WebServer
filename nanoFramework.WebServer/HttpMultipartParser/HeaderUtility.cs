@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections;
+using System.Text;
 
 namespace nanoFramework.WebServer.HttpMultipartParser
 {
@@ -25,8 +26,8 @@ namespace nanoFramework.WebServer.HttpMultipartParser
         {
             bool inQuotes = false;
             bool inKey = true;
-            string key = string.Empty;
-            string value = string.Empty;
+            StringBuilder key = new();
+            StringBuilder value = new();
 
             foreach (char c in text)
             {
@@ -36,36 +37,35 @@ namespace nanoFramework.WebServer.HttpMultipartParser
                 }
                 else if (inQuotes)
                 {
-                    value += c;
+                    value.Append(c);
                 }
                 else if (c == ';')
                 {
-                    headers[key.ToLower()] = value;
-                    key = string.Empty;
+                    headers[key.ToString().ToLower()] = value.ToString();
+                    key.Clear();
                     inKey = true;
                 }
                 else if (c == '=' || c == ':')
                 {
-                    value = string.Empty;
+                    value = value.Clear();
                     inKey = false;
                 }
-                else if (c == ' ')
+                else if (c != ' ')
                 {
-                    continue;
-                }
-                else if (inKey)
-                {
-                    key += c;
-                }
-                else
-                {
-                    value += c;
+                    if (inKey)
+                    {
+                        key.Append(c);
+                    }
+                    else
+                    {
+                        value.Append(c);
+                    }
                 }
             }
 
-            if (!string.IsNullOrEmpty(key))
+            if (key.Length > 0)
             {
-                headers.Add(key.ToLower(), value);
+                headers.Add(key.ToString().ToLower(), value.ToString());
             }
         }
     }
