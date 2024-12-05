@@ -97,9 +97,11 @@ namespace nanoFramework.WebServer.HttpMultipartParser
                 _position = _availableBytes;
             }
 
+#pragma warning disable S1168 //null and empty do have meaning
             //no more bytes available, return what's in the lineBuffer
             //if lineBuffer is empty, we're truly done, return null!
             return _lineBuffer.Length == 0 ? null : _lineBuffer.ToArray(true);
+#pragma warning restore S1168
         }
 
         /// <summary>
