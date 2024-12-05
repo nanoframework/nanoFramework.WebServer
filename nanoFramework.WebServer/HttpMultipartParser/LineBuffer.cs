@@ -8,7 +8,7 @@ namespace nanoFramework.WebServer.HttpMultipartParser
 {
     internal class LineBuffer : IDisposable
     {
-        private readonly Hashtable _data = new();
+        private readonly ArrayList _data = new();
 
         public void Dispose() => _data.Clear();
 
@@ -18,7 +18,7 @@ namespace nanoFramework.WebServer.HttpMultipartParser
 
             Array.Copy(bytes, offset, chunk, 0, count);
             
-            _data.Add(_data.Count, chunk);
+            _data.Add(chunk);
             Length += count;
         }
 
@@ -29,10 +29,8 @@ namespace nanoFramework.WebServer.HttpMultipartParser
             byte[] result = new byte[Length];
             int pos = 0;
 
-            for (int i = 0; i < _data.Count; i++)
+            foreach (object data in _data)
             {
-                object data = _data[i];
-
                 if (data is byte b)
                 {
                     result[pos++] = b;
@@ -42,7 +40,6 @@ namespace nanoFramework.WebServer.HttpMultipartParser
                     Array.Copy(array, 0, result, pos, array.Length);
                     pos += array.Length;
                 }
-                _data[i] = null;
             }
 
             if (clear)
