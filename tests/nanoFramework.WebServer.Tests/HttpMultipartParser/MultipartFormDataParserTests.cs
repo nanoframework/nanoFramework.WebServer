@@ -116,7 +116,7 @@ namespace nanoFramework.WebServer.Tests
             MultipartFormDataParser parser = MultipartFormDataParser.Parse(stream, ignoreInvalidParts: true);
             Assert.IsNotNull(parser);
 
-            Assert.ThrowsException(typeof(Exception), () => MultipartFormDataParser.Parse(stream));
+            Assert.ThrowsException(typeof(MultipartFormDataParserException), () => MultipartFormDataParser.Parse(stream));
         }
 
         [TestMethod]
@@ -127,7 +127,7 @@ namespace nanoFramework.WebServer.Tests
             MultipartFormDataParser parser = MultipartFormDataParser.Parse(stream, ignoreInvalidParts: true);
             Assert.IsNotNull(parser);
 
-            Assert.ThrowsException(typeof(Exception), () => MultipartFormDataParser.Parse(stream));
+            Assert.ThrowsException(typeof(MultipartFormDataParserException), () => MultipartFormDataParser.Parse(stream));
         }
 
         private void ValidateFile(FilePart file, string filename, string personName, int personAge)

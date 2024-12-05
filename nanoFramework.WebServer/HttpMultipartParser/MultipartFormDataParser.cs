@@ -82,12 +82,12 @@ namespace nanoFramework.WebServer.HttpMultipartParser
             if (string.IsNullOrEmpty(line))
             {
                 //EMF001: Unable to determine boundary: either the stream is empty or we reached the end of the stream
-                throw new Exception("EMF001");
+                throw new MultipartFormDataParserException("EMF001");
             }
             else if (!line.StartsWith("--"))
             {
                 //EMF002: Unable to determine boundary: content does not start with a valid multipart boundary
-                throw new Exception("EMF002");
+                throw new MultipartFormDataParserException("EMF002");
             }
 
             return line.EndsWith("--") ? line.Substring(0, line.Length - 2) : line;
@@ -103,7 +103,7 @@ namespace nanoFramework.WebServer.HttpMultipartParser
                 if (line == null || line.StartsWith(_boundary))
                 {
                     //EMF003: Unexpected end of section
-                    throw new Exception("EMF003");
+                    throw new MultipartFormDataParserException("EMF003");
                 }
 
                 HeaderUtility.ParseHeaders(line, parameters);
@@ -129,7 +129,7 @@ namespace nanoFramework.WebServer.HttpMultipartParser
                 //- section is malformed
                 //- required parameters such as 'name', 'content-type' or 'filename' are missing
                 //- section contains nothing but empty lines.
-                throw new Exception("EMF004");
+                throw new MultipartFormDataParserException("EMF004");
             }
         }
 
@@ -274,6 +274,20 @@ namespace nanoFramework.WebServer.HttpMultipartParser
             foreach (string parameter in wellKnownParameters)
                 if (parameters.Contains(parameter))
                     parameters.Remove(parameter);
+        }
+    }
+
+    /// <summary>
+    /// Specific exception while parsing a multipart form
+    /// </summary>
+    public class MultipartFormDataParserException : Exception
+    {
+        /// <summary>
+        /// Initializes a MultipartFormDataParserException
+        /// </summary>
+        /// <param name="message"></param>
+        public MultipartFormDataParserException(string message) : base(message)
+        {
         }
     }
 }
