@@ -12,14 +12,10 @@ namespace nanoFramework.WebServer.HttpMultipartParser
 
         public void Dispose() => _data.Clear();
 
-        public void Write(byte[] bytes, int offset, int count)
+        public void Write(SpanByte spanByte)
         {
-            byte[] chunk = new byte[count];
-
-            Array.Copy(bytes, offset, chunk, 0, count);
-            
-            _data.Add(chunk);
-            Length += count;
+            _data.Add(spanByte.ToArray());
+            Length += spanByte.Length;
         }
 
         public int Length { get; private set; } = 0;

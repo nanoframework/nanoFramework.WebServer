@@ -56,7 +56,7 @@ namespace nanoFramework.WebServer.HttpMultipartParser
 
                 // if we get here, no newline found in current buffer
                 // store what we have left in the buffer into the lineBuffer
-                _lineBuffer.Write(_buffer, _position, _availableBytes - _position);
+                _lineBuffer.Write(new SpanByte(_buffer, _position, _availableBytes - _position));
                 _position = _availableBytes;
             }
 
@@ -72,7 +72,7 @@ namespace nanoFramework.WebServer.HttpMultipartParser
             byte[] line;
             if (_lineBuffer.Length > 0)
             {
-                _lineBuffer.Write(_buffer, _position, length);
+                _lineBuffer.Write(new SpanByte(_buffer, _position, length));
                 line = _lineBuffer.ToArray(true);
             }
             else
