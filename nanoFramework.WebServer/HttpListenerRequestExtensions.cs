@@ -49,7 +49,10 @@ namespace nanoFramework.WebServer
 
                 int bytesRead = stream.Read(buffer, 0, (int)length);
 
-                if (bytesRead == 0) break;
+                if (bytesRead == 0)
+                {
+                    break;
+                }
 
                 Array.Copy(buffer, 0, body, position, bytesRead);
 

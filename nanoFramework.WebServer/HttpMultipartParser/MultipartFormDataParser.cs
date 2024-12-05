@@ -175,7 +175,10 @@ namespace nanoFramework.WebServer.HttpMultipartParser
 
         private static void TrimEndline(MemoryStream stream)
         {
-            if (stream.Length == 0) return;
+            if (stream.Length == 0)
+            {
+                return;
+            }
 
             stream.Position = stream.Length - 1;
 
