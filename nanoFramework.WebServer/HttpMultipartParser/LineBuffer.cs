@@ -6,7 +6,7 @@ using System.Collections;
 
 namespace nanoFramework.WebServer.HttpMultipartParser
 {
-    internal class LineBuffer : IDisposable
+    internal sealed class LineBuffer : IDisposable
     {
         private readonly ArrayList _data = new();
 
