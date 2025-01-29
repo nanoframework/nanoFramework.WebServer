@@ -37,7 +37,7 @@
     <Reference Include="mscorlib">
       <HintPath>..\..\packages\nanoFramework.CoreLibrary.1.15.5\lib\mscorlib.dll</HintPath>
     </Reference>
-    <Reference Include="nanoFramework.Json, Version=2.2.160.0, Culture=neutral, PublicKeyToken=c07d481e9758c731">
+    <Reference Include="nanoFramework.Json">
       <HintPath>..\..\packages\nanoFramework.Json.2.2.160\lib\nanoFramework.Json.dll</HintPath>
     </Reference>
     <Reference Include="nanoFramework.Runtime.Events, Version=1.11.18.0, Culture=neutral, PublicKeyToken=c07d481e9758c731">
@@ -58,13 +58,13 @@
     <Reference Include="nanoFramework.UnitTestLauncher, Version=0.0.0.0, Culture=neutral, PublicKeyToken=c07d481e9758c731">
       <HintPath>..\..\packages\nanoFramework.TestFramework.3.0.49\lib\nanoFramework.UnitTestLauncher.exe</HintPath>
     </Reference>
-    <Reference Include="System.IO.Streams, Version=1.1.77.0, Culture=neutral, PublicKeyToken=c07d481e9758c731">
+    <Reference Include="System.IO.Streams">
       <HintPath>..\..\packages\nanoFramework.System.IO.Streams.1.1.77\lib\System.IO.Streams.dll</HintPath>
     </Reference>
-    <Reference Include="System.Net, Version=1.11.17.0, Culture=neutral, PublicKeyToken=c07d481e9758c731">
+    <Reference Include="System.Net">
       <HintPath>..\..\packages\nanoFramework.System.Net.1.11.17\lib\System.Net.dll</HintPath>
     </Reference>
-    <Reference Include="System.Net.Http, Version=1.5.165.0, Culture=neutral, PublicKeyToken=c07d481e9758c731">
+    <Reference Include="System.Net.Http">
       <HintPath>..\..\packages\nanoFramework.System.Net.Http.Server.1.5.165\lib\System.Net.Http.dll</HintPath>
     </Reference>
     <Reference Include="System.Threading">
