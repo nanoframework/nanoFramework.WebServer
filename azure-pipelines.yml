@@ -9,13 +9,15 @@ trigger:
       - release-*
   paths:
     exclude:
+      - .github/*
       - .gitignore
       - CHANGELOG.md
       - LICENSE.md
       - README.md
       - NuGet.Config
       - assets/*
-      - .github/*
+      - template.vssettings
+      - spelling_exclusion.dic
 
 # PR always trigger build
 pr:
