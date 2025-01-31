@@ -25,7 +25,7 @@ Otherwise use 'nanoFramework.WebServer' nuget.</description>
     <dependencies>
       <dependency id="nanoFramework.CoreLibrary" version="1.16.1" />
       <dependency id="nanoFramework.System.Net.Http.Server" version="1.5.172" />
-      <dependency id="nanoFramework.System.IO.FileSystem" version="1.1.69" />
+      <dependency id="nanoFramework.System.IO.FileSystem" version="1.1.74" />
     </dependencies>
   </metadata>
   <files>
