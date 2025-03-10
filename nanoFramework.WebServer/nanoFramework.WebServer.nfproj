@@ -73,11 +73,11 @@
     <Reference Include="System.IO.Streams, Version=1.1.91.0, Culture=neutral, PublicKeyToken=c07d481e9758c731">
       <HintPath>..\packages\nanoFramework.System.IO.Streams.1.1.91\lib\System.IO.Streams.dll</HintPath>
     </Reference>
-    <Reference Include="System.Net, Version=1.11.36.0, Culture=neutral, PublicKeyToken=c07d481e9758c731">
-      <HintPath>..\packages\nanoFramework.System.Net.1.11.36\lib\System.Net.dll</HintPath>
+    <Reference Include="System.Net, Version=1.11.37.0, Culture=neutral, PublicKeyToken=c07d481e9758c731">
+      <HintPath>..\packages\nanoFramework.System.Net.1.11.37\lib\System.Net.dll</HintPath>
     </Reference>
-    <Reference Include="System.Net.Http, Version=1.5.187.0, Culture=neutral, PublicKeyToken=c07d481e9758c731">
-      <HintPath>..\packages\nanoFramework.System.Net.Http.Server.1.5.187\lib\System.Net.Http.dll</HintPath>
+    <Reference Include="System.Net.Http, Version=1.5.188.0, Culture=neutral, PublicKeyToken=c07d481e9758c731">
+      <HintPath>..\packages\nanoFramework.System.Net.Http.Server.1.5.188\lib\System.Net.Http.dll</HintPath>
     </Reference>
     <Reference Include="System.Threading, Version=1.1.50.48563, Culture=neutral, PublicKeyToken=c07d481e9758c731">
       <HintPath>..\packages\nanoFramework.System.Threading.1.1.50\lib\System.Threading.dll</HintPath>
