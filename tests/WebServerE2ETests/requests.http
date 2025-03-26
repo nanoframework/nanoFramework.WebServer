@@ -1,0 +1,65 @@
+# This file is a collection of requests that can be executed with the REST Client extension for Visual Studio Code
+# https://marketplace.visualstudio.com/items?itemName=humao.rest-client
+# adjust your host here
+@host=192.168.1.86:80
+
+###
+
+POST http://{{host}}/post?someparams=1&others=2 HTTP/1.1 
+Content-Type: text/plain
+
+This is a test with post
+
+###
+
+PUT http://{{host}}/put HTTP/1.1
+Content-Type: text/plain
+
+This is another test with put
+
+###
+
+GET http://{{host}}/get?someparams=1&others=2 HTTP/1.1
+
+###
+
+# This request will fail with 401 Unauthorized
+GET http://{{host}}/authbasic HTTP/1.1
+
+###
+
+# this one will succeed
+GET http://topuser:topPassword@{{host}}/authbasic HTTP/1.1
+
+###
+
+# This request will fail with 401 Unauthorized
+GET http://{{host}}/authapi HTTP/1.1
+
+###
+
+# this one will succeed
+GET http://{{host}}/authapi HTTP/1.1
+ApiKey: superKey1234
+
+###
+
+# This request will fail with 401 Unauthorized
+GET http://{{host}}/authdefaultapi HTTP/1.1
+
+###
+
+# this one will succeed
+GET http://{{host}}/authdefaultapi HTTP/1.1
+ApiKey: ATopSecretAPIKey1234
+
+
+###
+
+# this one will succeed with the public route
+GET http://{{host}}/authapikeybasicandpublic HTTP/1.1
+
+###
+
+# this one will succeed with user 3
+GET http://user3:password@{{host}}/authapikeybasicandpublic HTTP/1.1

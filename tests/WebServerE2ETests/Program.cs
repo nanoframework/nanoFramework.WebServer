@@ -29,7 +29,7 @@ namespace WebServerE2ETests
             }
 
             Debug.WriteLine($"Connected with wifi credentials. IP Address: {GetCurrentIPAddress()}");
-            _server = new WebServer(80, HttpProtocol.Http, new Type[] { typeof(SimpleRouteController), typeof(AuthController), typeof(MixedController) });
+            _server = new WebServer(80, HttpProtocol.Http, new Type[] { typeof(SimpleRouteController), typeof(AuthController), typeof(MixedController), typeof(PostPutController) });
             // To test authentication with various scenarios
             _server.ApiKey = "ATopSecretAPIKey1234";
             _server.Credential = new NetworkCredential("topuser", "topPassword");
