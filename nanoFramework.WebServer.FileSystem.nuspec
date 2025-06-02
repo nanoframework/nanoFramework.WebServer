@@ -24,7 +24,7 @@ Otherwise use 'nanoFramework.WebServer' nuget.</description>
     <tags>http https webserver net netmf nf nanoframework</tags>
     <dependencies>
       <dependency id="nanoFramework.CoreLibrary" version="1.17.11" />
-      <dependency id="nanoFramework.System.Net.Http.Server" version="1.5.195" />
+      <dependency id="nanoFramework.System.Net.Http.Server" version="1.5.196" />
       <dependency id="nanoFramework.System.IO.FileSystem" version="1.1.87" />
     </dependencies>
   </metadata>
