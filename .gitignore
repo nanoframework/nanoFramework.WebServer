@@ -258,3 +258,5 @@ paket-files/
 
 #VSCode
 .vscode
+tests/McpEndToEndTest/WiFi.cs
+**/.env

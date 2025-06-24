@@ -7,21 +7,119 @@ using System.Text;
 
 namespace nanoFramework.WebServer.Mcp
 {
+    /// <summary>
+    /// Provides utility methods for generating JSON schemas that describe the input and output parameters of tools.
+    /// </summary>
+    /// <remarks>This class includes methods for creating JSON representations of input and output schemas,
+    /// including parameter names, types, and descriptions. It is designed to assist in dynamically generating metadata
+    /// for tools or APIs.</remarks>
     public static class McpToolJsonHelper
     {
+        /// <summary>
+        /// Generates a JSON array describing the input parameters for a tool, including their names, types, and descriptions.
+        /// </summary>
+        /// <param name="inputType">An array of <see cref="Type"/> objects representing the input parameter types.</param>
+        /// <returns>A JSON string representing the input parameters schema.</returns>
         public static string GenerateInputJson(Type inputType)
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("[");
-            AppendPropertiesJson(sb, inputType, true);
-            sb.Append("]");
+            sb.Append("{\"type\":\"object\",\"properties\":{");
+            AppendInputPropertiesJson(sb, inputType, true);
+            sb.Append("},\"required\":[]}");
             return sb.ToString();
         }
 
-        private static void AppendPropertiesJson(StringBuilder sb, Type type, bool isFirst)
+        /// <summary>
+        /// Generates a JSON object describing the output schema for a tool, including type, description, and nested properties if applicable.
+        /// </summary>
+        /// <param name="outputType">The <see cref="Type"/> of the output object.</param>
+        /// <param name="description">A description of the output.</param>
+        /// <returns>A JSON string representing the output schema.</returns>
+        public static string GenerateOutputJson(Type outputType, string description)
+        {
+            StringBuilder sb = new StringBuilder();
+            AppendOutputJson(sb, outputType, description);
+            return sb.ToString();
+        }
+
+        private static void AppendOutputJson(StringBuilder sb, Type type, string description)
+        {
+            string mappedType = MapType(type);
+
+            sb.Append("{");
+            sb.Append("\"type\":\"").Append(mappedType).Append("\"");
+
+            bool hasDescription = !string.IsNullOrEmpty(description);
+            if (hasDescription)
+            {
+                sb.Append(",\"description\":\"").Append(description).Append("\"");
+            }
+
+            if (mappedType == "object")
+            {
+                sb.Append(",\"properties\":{");
+                AppendOutputPropertiesJson(sb, type, true);
+                sb.Append("}");
+            }
+            sb.Append("}");
+        }
+
+        private static void AppendOutputPropertiesJson(StringBuilder sb, Type type, bool isFirst)
         {
             MethodInfo[] methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance);
-            // Find all property names by looking for get_ methods
+            for (int i = 0; i < methods.Length; i++)
+            {
+                MethodInfo method = methods[i];
+                if (method.Name.StartsWith("get_") && method.GetParameters().Length == 0)
+                {
+                    string propName = method.Name.Substring(4);
+
+                    Type propType = method.ReturnType;
+                    string mappedType = MapType(propType);
+
+                    if (!isFirst)
+                    {
+                        sb.Append(",");
+                    }
+
+                    isFirst = false;
+
+                    sb.Append("\"").Append(propName).Append("\":");
+                    if (mappedType == "object")
+                    {
+                        AppendOutputJson(sb, propType, GetTypeDescription(method, propName));
+                    }
+                    else
+                    {
+                        sb.Append("{");
+                        sb.Append("\"type\":\"").Append(mappedType).Append("\",");
+                        sb.Append("\"description\":\"").Append(GetTypeDescription(method, propName)).Append("\"");
+                        sb.Append("}");
+                    }
+                }
+            }
+        }
+
+        private static string GetTypeDescription(MethodInfo method, string propName)
+        {
+            var atibs = method.GetCustomAttributes(false);
+            string desc = propName;
+            for (int j = 0; j < atibs.Length; j++)
+            {
+                if (atibs[j] is DescriptionAttribute descAttrib)
+                {
+                    desc = descAttrib.Description;
+                    break;
+                }
+            }
+
+            return desc;
+        }
+
+        private static void AppendInputPropertiesJson(StringBuilder sb, Type type, bool isFirst)
+        {
+            MethodInfo[] methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance);
+
             for (int i = 0; i < methods.Length; i++)
             {
                 MethodInfo method = methods[i];
@@ -30,20 +128,23 @@ namespace nanoFramework.WebServer.Mcp
                     string propName = method.Name.Substring(4);
                     Type propType = method.ReturnType;
 
-                    if (!isFirst) sb.Append(",");
-                    isFirst = false;
+                    if (!isFirst)
+                    {
+                        sb.Append(",");
+                    }
 
-                    sb.Append("{");
-                    sb.Append("\"name\":\"").Append(propName).Append("\",");
+                    isFirst = false;
+                    sb.Append($"\"{propName}\":{{");
                     string mappedType = MapType(propType);
                     sb.Append("\"type\":\"").Append(mappedType).Append("\",");
-                    sb.Append("\"description\":\"").Append(propName).Append("\"");
+                    sb.Append("\"description\":\"").Append(GetTypeDescription(method, propName)).Append("\"");
                     if (mappedType == "object")
                     {
-                        sb.Append(",\"properties\":[");
-                        AppendPropertiesJson(sb, propType, true);
-                        sb.Append("]");
+                        sb.Append(",\"properties\":{");
+                        AppendInputPropertiesJson(sb, propType, true);
+                        sb.Append("}");
                     }
+
                     sb.Append("}");
                 }
             }

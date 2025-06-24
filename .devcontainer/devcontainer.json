@@ -1,0 +1,17 @@
+{
+  "name": "C# .NET 10 Preview",
+  "image": "mcr.microsoft.com/devcontainers/dotnet:dev-10.0-preview-noble",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-dotnettools.csharp",
+        "editorconfig.editorconfig",
+        "GitHub.copilot-chat"
+      ]
+    }
+  },
+  "postCreateCommand": "dotnet --version"
+}

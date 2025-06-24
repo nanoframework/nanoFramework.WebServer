@@ -26,6 +26,12 @@
         "resolved": "1.5.67",
         "contentHash": "MjSipUB70vrxjqTm1KfKTUqqjd0wbweiNyYFXONi0XClrH6HXsuX2lhDqXM8NWuYnWyYOqx8y20sXbvsH+4brg=="
       },
+      "nanoFramework.System.Device.Wifi": {
+        "type": "Direct",
+        "requested": "[1.5.133, 1.5.133]",
+        "resolved": "1.5.133",
+        "contentHash": "0AyJ6I7C+UWz8A2c+ChfYl/tdAroVZDxl7cVstQ9kbN0Ts8MEwD368Uoe8+pOpcJmjamTmg5iUDD9SMrW1nCuw=="
+      },
       "nanoFramework.System.IO.Streams": {
         "type": "Direct",
         "requested": "[1.1.96, 1.1.96]",

@@ -24,7 +24,7 @@ namespace McpServerTests
 
     public class McpTools
     {
-        [McpTool("process_person", "Processes a person object.", null, null, typeof(Person))]
+        [McpServerTool("process_person", "Processes a person object.")]
         public static string ProcessPerson(Person person)
         {
             return $"Processed: {person.Name} {person.Surname}, Age: {person.Age}, Location: {person.Address.City}, {person.Address.Country}";
