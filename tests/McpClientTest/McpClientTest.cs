@@ -45,7 +45,7 @@ Console.WriteLine("// --");
 
 // Load them as AI functions in the kernel
 #pragma warning disable SKEXP0001
-kernel.Plugins.AddFromFunctions("MyComputerToolbox", tools.Select(aiFunction => aiFunction.AsKernelFunction()));
+kernel.Plugins.AddFromFunctions("nanoFramework", tools.Select(aiFunction => aiFunction.AsKernelFunction()));
 // --
 
 var history = new ChatHistory();

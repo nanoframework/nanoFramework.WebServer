@@ -42,6 +42,11 @@ namespace nanoFramework.WebServer.Mcp
         public MethodInfo Method { get; set; }
 
         /// <summary>
+        /// Gets or sets the type of the method associated with the tool.
+        /// </summary>
+        public Type MethodType { get; set; }
+
+        /// <summary>
         /// Returns a JSON string representation of the tool metadata.
         /// </summary>
         /// <returns>A JSON string containing the tool's name, description, input, and output schema.</returns>

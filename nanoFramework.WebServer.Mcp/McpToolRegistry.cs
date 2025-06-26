@@ -28,7 +28,8 @@ namespace nanoFramework.WebServer.Mcp
         {
             if (isInitialized)
             {
-                return; // Tools already discovered
+                // Tools already discovered
+                return;
             }
 
             foreach (Type mcpTool in mcpTools)
@@ -51,9 +52,14 @@ namespace nanoFramework.WebServer.Mcp
                             {
                                 var parameters = method.GetParameters();
                                 string inputType = string.Empty;
-                                if (parameters.Length > 0)
+                                // We only support either no parameters or one parameter for now
+                                if (parameters.Length == 1)
                                 {
                                     inputType = McpToolJsonHelper.GenerateInputJson(parameters[0].ParameterType);
+                                }
+                                else if (parameters.Length > 1)
+                                {
+                                    continue;
                                 }
 
                                 tools.Add(attribute.Name, new ToolMetadata
@@ -62,7 +68,8 @@ namespace nanoFramework.WebServer.Mcp
                                     Description = attribute.Description,
                                     InputType = inputType,
                                     OutputType = McpToolJsonHelper.GenerateOutputJson(method.ReturnType, attribute.OutputDescription),
-                                    Method = method
+                                    Method = method,
+                                    MethodType = parameters.Length > 0 ? parameters[0].ParameterType : null,
                                 });
                             }
                         }
@@ -99,28 +106,11 @@ namespace nanoFramework.WebServer.Mcp
                 sb.Remove(sb.Length - 1, 1);
                 sb.Append("],\"nextCursor\":null");
                 return sb.ToString();
-
             }
             catch (Exception)
             {
                 throw new Exception("Impossible to build tools list.");
             }
-        }
-
-        private static bool IsPrimitiveType(Type type)
-        {
-            return type == typeof(bool) ||
-                   type == typeof(byte) ||
-                   type == typeof(sbyte) ||
-                   type == typeof(char) ||
-                   type == typeof(double) ||
-                   type == typeof(float) ||
-                   type == typeof(int) ||
-                   type == typeof(uint) ||
-                   type == typeof(long) ||
-                   type == typeof(ulong) ||
-                   type == typeof(short) ||
-                   type == typeof(ushort);
         }
 
         private static object CreateInstance(Type type)
@@ -133,6 +123,97 @@ namespace nanoFramework.WebServer.Mcp
             }
 
             return constructor.Invoke(new object[0]);
+        }
+
+        /// <summary>
+        /// Converts a value to the specified primitive type with appropriate type conversion and error handling.
+        /// </summary>
+        /// <param name="value">The value to convert.</param>
+        /// <param name="targetType">The target primitive type to convert to.</param>
+        /// <returns>The converted value as the target type.</returns>
+        private static object ConvertToPrimitiveType(object value, Type targetType)
+        {
+            if (value == null)
+            {
+                return null;
+            }
+
+            if (targetType == typeof(string))
+            {
+                return value.ToString();
+            }
+            else if (targetType == typeof(int))
+            {
+                return Convert.ToInt32(value.ToString());
+            }
+            else if (targetType == typeof(double))
+            {
+                return Convert.ToDouble(value.ToString());
+            }
+            else if (targetType == typeof(bool))
+            {
+                // If it's a 0 or a 1
+                if (value.ToString().Length == 1)
+                {
+                    try
+                    {
+                        return Convert.ToBoolean(Convert.ToByte(value.ToString()));
+                    }
+                    catch (Exception)
+                    {
+                        // Nothing on purpose, we will handle it below
+                    }
+                }
+
+                // Then it's a tex
+                return value.ToString().ToLower() == "true";
+            }
+            else if (targetType == typeof(long))
+            {
+                return Convert.ToInt64(value.ToString());
+            }
+            else if (targetType == typeof(float))
+            {
+                return Convert.ToSingle(value.ToString());
+            }
+            else if (targetType == typeof(byte))
+            {
+                return Convert.ToByte(value.ToString());
+            }
+            else if (targetType == typeof(short))
+            {
+                return Convert.ToInt16(value.ToString());
+            }
+            else if (targetType == typeof(char))
+            {
+                try
+                {
+                    return Convert.ToChar(Convert.ToUInt16(value.ToString()));
+                }
+                catch (Exception)
+                {
+                    return string.IsNullOrEmpty(value.ToString()) ? '\0' : value.ToString()[0];
+                }
+            }
+            else if (targetType == typeof(uint))
+            {
+                return Convert.ToUInt32(value.ToString());
+            }
+            else if (targetType == typeof(ulong))
+            {
+                return Convert.ToUInt64(value.ToString());
+            }
+            else if (targetType == typeof(ushort))
+            {
+                return Convert.ToUInt16(value.ToString());
+            }
+            else if (targetType == typeof(sbyte))
+            {
+                return Convert.ToSByte(value.ToString());
+            }
+
+            // Fallback - return the original value
+            return value;
         }
 
         /// <summary>
@@ -149,7 +230,7 @@ namespace nanoFramework.WebServer.Mcp
             }
 
             // For primitive types and strings, try direct conversion
-            if (IsPrimitiveType(targetType) || targetType == typeof(string))
+            if (McpToolJsonHelper.IsPrimitiveType(targetType) || targetType == typeof(string))
             {
                 // This shouldn't happen in our context, but handle it gracefully
                 return hashtable;
@@ -187,62 +268,12 @@ namespace nanoFramework.WebServer.Mcp
                 try
                 {
                     // Get the parameter type of the setter method (which is the property type)
-                    Type propertyType = method.GetParameters()[0].ParameterType;
-
-                    // Handle primitive types and strings
-                    if (IsPrimitiveType(propertyType) || propertyType == typeof(string))
+                    Type propertyType = method.GetParameters()[0].ParameterType;                    // Handle primitive types and strings
+                    if (McpToolJsonHelper.IsPrimitiveType(propertyType) || propertyType == typeof(string))
                     {
-                        // Direct assignment for primitive types and strings
-                        if (propertyType == typeof(string))
-                        {
-                            method.Invoke(instance, new object[] { value.ToString() });
-                        }
-                        else if (propertyType == typeof(int))
-                        {
-                            method.Invoke(instance, new object[] { Convert.ToInt32(value.ToString()) });
-                        }
-                        else if (propertyType == typeof(double))
-                        {
-                            method.Invoke(instance, new object[] { Convert.ToDouble(value.ToString()) });
-                        }
-                        else if (propertyType == typeof(bool))
-                        {
-                            try
-                            {
-                                method.Invoke(instance, new object[] { Convert.ToBoolean(Convert.ToByte(value.ToString())) });
-                            }
-                            catch (Exception)
-                            {
-                                method.Invoke(instance, new object[] { value.ToString().ToLower() == "true" ? true : false });
-                            }
-                        }
-                        else if (propertyType == typeof(long))
-                        {
-                            method.Invoke(instance, new object[] { Convert.ToInt64(value.ToString()) });
-                        }
-                        else if (propertyType == typeof(float))
-                        {
-                            method.Invoke(instance, new object[] { Convert.ToSingle(value.ToString()) });
-                        }
-                        else if (propertyType == typeof(byte))
-                        {
-                            method.Invoke(instance, new object[] { Convert.ToByte(value.ToString()) });
-                        }
-                        else if (propertyType == typeof(short))
-                        {
-                            method.Invoke(instance, new object[] { Convert.ToInt16(value.ToString()) });
-                        }
-                        else if (propertyType == typeof(char))
-                        {
-                            try
-                            {
-                                method.Invoke(instance, new object[] { Convert.ToChar(Convert.ToUInt16(value.ToString())) });
-                            }
-                            catch (Exception)
-                            {
-                                method.Invoke(instance, new object[] { string.IsNullOrEmpty(value.ToString()) ? '\0' : value.ToString()[0] });
-                            }
-                        }
+                        // Use the centralized conversion function
+                        object convertedValue = ConvertToPrimitiveType(value, propertyType);
+                        method.Invoke(instance, new object[] { convertedValue });
                     }
                     else
                     {
@@ -286,24 +317,20 @@ namespace nanoFramework.WebServer.Mcp
                 ToolMetadata toolMetadata = (ToolMetadata)tools[toolName];
                 MethodInfo method = toolMetadata.Method;
                 Debug.WriteLine($"Tool name: {toolName}, method: {method.Name}");
-                ParameterInfo[] parametersInfo = method.GetParameters();
-#if DEBUG
-                foreach(ParameterInfo parameterInfo in parametersInfo)
-                {
-                    Debug.WriteLine($"method type: {parameterInfo.ParameterType.FullName}");
-                }
-#endif
 
                 object[] methodParams = null;
-                if (parametersInfo.Length > 0)
+                if (toolMetadata.MethodType != null)
                 {
-                    methodParams = new object[parametersInfo.Length];
-                    Type paramType = parametersInfo[0].ParameterType;
-
-                    if (IsPrimitiveType(paramType) || paramType == typeof(string))
+                    methodParams = new object[1];
+                    Type paramType = toolMetadata.MethodType;
+                    if (McpToolJsonHelper.IsPrimitiveType(paramType) || paramType == typeof(string))
                     {
-                        // For primitive types, use direct assignment
-                        methodParams[0] = parameter;
+                        // For primitive types, extract the "value" key and convert to target type
+                        object value = parameter["value"];
+                        if (value != null)
+                        {
+                            methodParams[0] = ConvertToPrimitiveType(value, paramType);
+                        }
                     }
                     else
                     {
@@ -313,7 +340,28 @@ namespace nanoFramework.WebServer.Mcp
                 }
 
                 object result = method.Invoke(null, methodParams);
-                return JsonConvert.SerializeObject(result);
+
+                // Handle serialization based on return type
+                if (result == null)
+                {
+                    return "null";
+                }
+
+                Type resultType = result.GetType();
+
+                // For strings, return as-is with quotes
+                // For primitive types, convert to string and add quotes
+                if (McpToolJsonHelper.IsPrimitiveType(resultType) || resultType == typeof(string))
+                {
+                    var stringResult = result.GetType() == typeof(bool) ? result.ToString().ToLower() : result.ToString();
+                    return "\"" + stringResult + "\"";
+                }
+                // For complex objects, serialize to JSON and add quotes around the entire JSON
+                else
+                {
+                    string jsonResult = JsonConvert.SerializeObject(result);
+                    return JsonConvert.SerializeObject(jsonResult);
+                }
             }
 
             throw new Exception("Tool not found");

@@ -23,10 +23,33 @@ namespace nanoFramework.WebServer.Mcp
         public static string GenerateInputJson(Type inputType)
         {
             StringBuilder sb = new StringBuilder();
+
             sb.Append("{\"type\":\"object\",\"properties\":{");
             AppendInputPropertiesJson(sb, inputType, true);
             sb.Append("},\"required\":[]}");
+
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// Checks if the specified <see cref="Type"/> is a primitive type.
+        /// </summary>
+        /// <param name="type">The <see cref="Type"/> to check.</param>
+        /// <returns><c>true</c> if the type is a primitive type; otherwise, <c>false</c>.</returns> <summary>
+        public static bool IsPrimitiveType(Type type)
+        {
+            return type == typeof(bool) ||
+                   type == typeof(byte) ||
+                   type == typeof(sbyte) ||
+                   type == typeof(char) ||
+                   type == typeof(double) ||
+                   type == typeof(float) ||
+                   type == typeof(int) ||
+                   type == typeof(uint) ||
+                   type == typeof(long) ||
+                   type == typeof(ulong) ||
+                   type == typeof(short) ||
+                   type == typeof(ushort);
         }
 
         /// <summary>
@@ -118,6 +141,23 @@ namespace nanoFramework.WebServer.Mcp
 
         private static void AppendInputPropertiesJson(StringBuilder sb, Type type, bool isFirst)
         {
+            // If it's a primitive type or string, create a single property entry
+            if (IsPrimitiveType(type) || type == typeof(string))
+            {
+                string mappedType = MapType(type);
+                if (!isFirst)
+                {
+                    sb.Append(",");
+                }
+                
+                sb.Append("\"value\":{");
+                sb.Append("\"type\":\"").Append(mappedType).Append("\",");
+                sb.Append("\"description\":\"Input parameter of type ").Append(type.Name).Append("\"");
+                sb.Append("}");
+                return;
+            }
+
+            // For complex types, analyze methods to find properties
             MethodInfo[] methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance);
 
             for (int i = 0; i < methods.Length; i++)

@@ -4,7 +4,7 @@
 
 -----
 
-### Welcome to the .NET **nanoFramework** WebServer repository
+### Welcome to the .NET **nanoFramework** WebServer repository including Model Context Protocol (MCP)
 
 ## Build status
 
@@ -12,8 +12,9 @@
 |:-|---|---|
 | nanoFramework.WebServer | [![Build Status](https://dev.azure.com/nanoframework/nanoFramework.WebServer/_apis/build/status/nanoFramework.WebServer?repoName=nanoframework%2FnanoFramework.WebServer&branchName=main)](https://dev.azure.com/nanoframework/nanoFramework.WebServer/_build/latest?definitionId=65&repoName=nanoframework%2FnanoFramework.WebServer&branchName=main) | [![NuGet](https://img.shields.io/nuget/v/nanoFramework.WebServer.svg?label=NuGet&style=flat&logo=nuget)](https://www.nuget.org/packages/nanoFramework.WebServer/) |
 | nanoFramework.WebServer.FileSystem | [![Build Status](https://dev.azure.com/nanoframework/nanoFramework.WebServer/_apis/build/status/nanoFramework.WebServer?repoName=nanoframework%2FnanoFramework.WebServer&branchName=main)](https://dev.azure.com/nanoframework/nanoFramework.WebServer/_build/latest?definitionId=65&repoName=nanoframework%2FnanoFramework.WebServer&branchName=main) | [![NuGet](https://img.shields.io/nuget/v/nanoFramework.WebServer.FileSystem.svg?label=NuGet&style=flat&logo=nuget)](https://www.nuget.org/packages/nanoFramework.WebServer.FileSystem/) |
+| nanoFramework.WebServer.Mcp | [![Build Status](https://dev.azure.com/nanoframework/nanoFramework.WebServer/_apis/build/status/nanoFramework.WebServer?repoName=nanoframework%2FnanoFramework.WebServer&branchName=main)](https://dev.azure.com/nanoframework/nanoFramework.WebServer/_build/latest?definitionId=65&repoName=nanoframework%2FnanoFramework.WebServer&branchName=main) | [![NuGet](https://img.shields.io/nuget/v/nanoFramework.WebServer.Mcp.svg?label=NuGet&style=flat&logo=nuget)](https://www.nuget.org/packages/nanoFramework.WebServer.Mcp/) |
 
-## .NET nanoFramework WebServer
+## .NET nanoFramework WebServer and Model Context Protocol (MCP) extension
 
 This library was coded by [Laurent Ellerbach](https://github.com/Ellerbach) who generously offered it to the .NET **nanoFramework** project.
 
@@ -30,6 +31,7 @@ This is a simple nanoFramework WebServer. Features:
 - Helpers to return error code directly facilitating REST API
 - HTTPS support
 - [URL decode/encode](https://github.com/nanoframework/lib-nanoFramework.System.Net.Http/blob/develop/nanoFramework.System.Net.Http/Http/System.Net.HttpUtility.cs)
+- **Model Context Protocol (MCP) support** for AI agent integration with automatic tool discovery and invocation. [MCP](https://github.com/modelcontextprotocol/) is a protocol specifically designed for a smooth integration with generative AI agents. The protocol is based over HTTP and this implementation is a minimal one allowing you an easy and working implementation with any kind of agent supporting MCP! More details in [this implementation here](#model-context-protocol-mcp-support).
 
 Limitations:
 
@@ -480,6 +482,347 @@ There is a collection of postman tests `nanoFramework WebServer E2E Tests.postma
 - Choose request you want to test or run whole collection and check tests results.
 
 The WebServerE2ETests project requires the name and credentials for the WiFi access point. That is stored in the WiFi.cs file that is not part of the git repository. Build the WebServerE2ETests to create a template for that file, then change the SSID and credentials. Your credentials will not be part of a commit.
+
+
+## Model Context Protocol (MCP) Support
+
+The nanoFramework WebServer provides comprehensive support for the Model Context Protocol (MCP), enabling AI agents and language models to directly interact with your embedded devices. MCP allows AI systems to discover, invoke, and receive responses from tools running on your nanoFramework device.
+
+### Overview
+
+The MCP implementation in nanoFramework WebServer includes:
+
+- **Automatic tool discovery** through reflection and attributes
+- **JSON-RPC 2.0 compliant** request/response handling
+- **Type-safe parameter handling** with automatic deserialization from JSON to .NET objects
+- **Flexible authentication** options (none, basic auth, API key)
+- **Complex object support** for both input parameters and return values
+- **Robust error handling** and validation
+
+The supported version is [2025-03-26](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/schema/2025-03-26/schema.json). Only Server features are implemented. And there is no notification neither Server Sent Events (SSE) support. The returned type is only string.
+
+### Defining MCP Tools
+
+MCP tools are defined using the `[McpServerTool]` attribute on static or instance methods. The attribute accepts a tool name, description, and optional output description:
+
+```csharp
+public class McpTools
+{
+    // Simple tool with primitive parameter and return type
+    [McpServerTool("echo", "Echoes the input string back to the caller")]
+    public static string Echo(string input) => input;
+
+    // Tool with numeric parameters
+    [McpServerTool("calculate_square", "Calculates the square of a number minus 1")]
+    public static float CalculateSquare(float number) => number * number - 1;
+
+    // Tool with complex object parameter
+    [McpServerTool("process_person", "Processes a person object and returns a summary", "A formatted string with person details")]
+    public static string ProcessPerson(Person person)
+    {
+        return $"Processed: {person.Name} {person.Surname}, Age: {person.Age}, Location: {person.Address.City}, {person.Address.Country}";
+    }
+
+    // Tool returning complex objects
+    [McpServerTool("get_default_person", "Returns a default person object", "A person object with default values")]
+    public Person GetDefaultPerson()
+    {
+        return new Person
+        {
+            Name = "John",
+            Surname = "Doe",
+            Age = "30",
+            Address = new Address
+            {
+                Street = "123 Main St",
+                City = "Anytown",
+                PostalCode = "12345",
+                Country = "USA"
+            }
+        };
+    }
+}
+```
+
+> [!Important]
+> Only none or 1 parameter is supported for the tools. .NET nanoFramework in the relection does not support names in functions, only types are available. And the AI Agent won't necessarily send in order the paramters. It means, it's not technically possible to know which parameter is which. If you need more than one parameter, create a class. Complex types as shown in the examples are supported.
+
+### Complex Object Definitions
+
+You can use complex objects as parameters and return types. Use the `[Description]` attribute to provide schema documentation:
+
+```csharp
+public class Person
+{
+    [Description("The person's first name")]
+    public string Name { get; set; }
+    
+    public string Surname { get; set; }
+    
+    [Description("The person's age in years")]
+    public int Age { get; set; } = 30;
+    
+    public Address Address { get; set; } = new Address();
+}
+
+public class Address
+{
+    public string Street { get; set; } = "Unknown";
+    public string City { get; set; } = "Unknown";
+    public string PostalCode { get; set; } = "00000";
+    public string Country { get; set; } = "Unknown";
+}
+```
+
+### Setting Up MCP Server
+
+To enable MCP support in your WebServer, follow these steps:
+
+```csharp
+public static void Main()
+{
+    // Connect to WiFi (device-specific code)
+    var connected = WifiNetworkHelper.ConnectDhcp(Ssid, Password, requiresDateTime: true, token: new CancellationTokenSource(60_000).Token);
+    if (!connected)
+    {
+        Debug.WriteLine("Failed to connect to WiFi");
+        return;
+    }
+
+    // Step 1: Discover and register MCP tools
+    McpToolRegistry.DiscoverTools(new Type[] { typeof(McpTools) });
+    Debug.WriteLine("MCP Tools discovered and registered.");
+
+    // Step 2: Start WebServer with MCP controller
+    // You can add more types if you also want to use it as a Web Server
+    // Note: HTTPS and certs are also supported, see the pervious sections
+    using (var server = new WebServer(80, HttpProtocol.Http, new Type[] { typeof(McpServerController) }))
+    {        // Optional: Customize MCP server information and instructions
+        // This will override the default server name "nanoFramework" and version "1.0.0"
+        McpServerController.ServerName = "MyIoTDevice";
+        McpServerController.ServerVersion = "2.1.0";
+        
+        // Optional: Customize instructions sent to AI agents
+        // This will override the default instruction about single request limitation
+        McpServerController.Instructions = "This is my custom IoT device. Please send requests one at a time and wait for responses. Supports GPIO control and sensor readings.";
+        
+        server.Start();
+        Thread.Sleep(Timeout.Infinite);
+    }
+}
+```
+
+### MCP Authentication Options
+
+The MCP implementation supports three authentication modes:
+
+#### 1. No Authentication (Default)
+```csharp
+// Use McpServerController for no authentication
+var server = new WebServer(80, HttpProtocol.Http, new Type[] { typeof(McpServerController) });
+```
+
+#### 2. Basic Authentication
+```csharp
+// Use McpServerBasicAuthenticationController for basic auth
+var server = new WebServer(80, HttpProtocol.Http, new Type[] { typeof(McpServerBasicAuthenticationController) });
+server.Credential = new NetworkCredential("username", "password");
+```
+
+#### 3. API Key Authentication
+```csharp
+// Use McpServerKeyAuthenticationController for API key auth
+var server = new WebServer(80, HttpProtocol.Http, new Type[] { typeof(McpServerKeyAuthenticationController) });
+server.ApiKey = "your-secret-api-key";
+```
+
+### MCP Request/Response Examples
+
+You have a collection of [tests queries](./tests/McpEndToEndTest/requests.http) available. To run them, install the [VS Code REST Client extension](https://marketplace.visualstudio.com/items?itemName=humao.rest-client). And I encourage you to get familiar with the way of working using the [McpEndToEndTest](./tests/McpEndToEndTest/) project.
+
+#### Tool Discovery Request
+
+```json
+POST /mcp
+{
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "tools/list"
+}
+```
+
+#### Tool Discovery Response
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": 1,
+    "result": {
+        "tools": [
+            {
+                "name": "echo",
+                "description": "Echoes the input string back to the caller",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "value": {"type": "string"}
+                    },
+                }
+            },
+            {
+                "name": "process_person",
+                "description": "Processes a person object and returns a summary",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "person": {
+                            "type": "object",
+                            "properties": {
+                                "Name": {"type": "string", "description": "The person's first name"},
+                                "Surname": {"type": "string"},
+                                "Age": {"type": "number", "description": "The person's age in years"},
+                                "Address": {
+                                    "type": "object",
+                                    "properties": {
+                                        "Street": {"type": "string"},
+                                        "City": {"type": "string"},
+                                        "PostalCode": {"type": "string"},
+                                        "Country": {"type": "string"}
+                                    }
+                                }
+                            }
+                        }
+                    },
+                }
+            }
+        ]
+    }
+}
+```
+
+> [!Note]
+> the `required` field is not supported. You'll have to manage in the code the fact that you may not receive all the elements.
+> In case, you require more elements, just send back to the agent that you need the missing fields, it will ask the user and send you back a proper query. With history, it will learn and call you properly the next time in most of the cases.
+
+#### Tool Invocation Request
+
+```json
+POST /mcp
+{
+    "jsonrpc": "2.0",
+    "id": 2,
+    "method": "tools/call",
+    "params": {
+        "name": "process_person",
+        "arguments": {
+            "person": {
+                "Name": "Alice",
+                "Surname": "Smith",
+                "Age": "28",
+                "Address": {
+                    "Street": "789 Oak Ave",
+                    "City": "Springfield",
+                    "PostalCode": "54321",
+                    "Country": "USA"
+                }
+            }
+        }
+    }
+}
+```
+
+> [!Note]
+> Most agents will not send you numbers as number in JSON serializaton, like in the example with the age. The library will always try to convert the serialized element as the target type. It can be sent as a string, if a number is inside, it will be deserialized properly.
+
+#### Tool Invocation Response
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": 2,
+    "result": {
+        "content": [
+            {
+                "type": "text",
+                "text": "Processed: Alice Smith, Age: 28, Location: Springfield, USA"
+            }
+        ]
+    }
+}
+```
+
+### MCP Protocol Flow
+
+1. **Initialization**: AI agent sends `initialize` request to establish connection
+2. **Tool Discovery**: Agent requests available tools via `tools/list`
+3. **Tool Invocation**: Agent calls specific tools via `tools/call` with parameters
+4. **Response Handling**: Server returns results in MCP-compliant format
+
+### Error Handling
+
+The MCP implementation provides robust error handling:
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": 1,
+    "error": {
+        "code": -32601,
+        "message": "Method not found"
+    }
+}
+```
+
+Common error codes:
+- `-32601`: Method not found
+- `-32602`: Invalid parameters or internal error
+
+### Best Practices
+
+1. **Tool Design**: Keep tools focused on single responsibilities
+2. **Type Safety**: Use strongly-typed parameters and return values
+3. **Documentation**: Provide clear descriptions for tools and complex parameters
+4. **Error Handling**: Implement proper validation in your tool methods
+5. **Memory Management**: Be mindful of memory usage on embedded devices
+6. **Authentication**: Use appropriate authentication for your security requirements
+7. **SSL**: Use SSL encryption with certificate to protect the data transfer especially if you expose your service over Internet
+
+### Complete Example
+
+For a complete working example, see the [McpEndToEndTest](tests/McpEndToEndTest/) project which demonstrates:
+
+- Tool discovery and registration
+- Various parameter types (primitive, complex objects)
+- WiFi connectivity setup
+- Server configuration with MCP support
+
+### .NET 10 MCP Client with Azure OpenAI
+
+The repository also includes a [.NET 10 MCP client example](tests/McpClientTest/) that demonstrates how to connect to your nanoFramework MCP server from a full .NET application using Azure OpenAI and Semantic Kernel. This client example shows:
+
+- **Azure OpenAI integration** using Semantic Kernel
+- **MCP client connectivity** to nanoFramework devices
+- **Automatic tool discovery** and registration as AI functions
+- **Interactive chat interface** that can invoke tools on your embedded device
+- **Real-time communication** between AI agents and nanoFramework hardware
+
+The client uses the official ModelContextProtocol NuGet package and can automatically discover and invoke any tools exposed by your nanoFramework MCP server, enabling seamless AI-to-hardware interactions.
+
+```csharp
+// Example: Connect .NET client to nanoFramework MCP server
+var mcpToolboxClient = await McpClientFactory.CreateAsync(
+    new SseClientTransport(new SseClientTransportOptions()
+    {
+        Endpoint = new Uri("http://192.168.1.139/mcp"), // Your nanoFramework device IP
+        TransportMode = HttpTransportMode.StreamableHttp,
+    }, new HttpClient()));
+
+// Register discovered tools with Semantic Kernel
+var tools = await mcpToolboxClient.ListToolsAsync();
+kernel.Plugins.AddFromFunctions("MyDeviceTools", tools.Select(t => t.AsKernelFunction()));
+```
+
+This comprehensive MCP support enables your nanoFramework devices to seamlessly integrate with AI systems and language models, opening up new possibilities for intelligent embedded applications.
 
 ## Feedback and documentation
 

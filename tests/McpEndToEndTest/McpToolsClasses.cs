@@ -27,14 +27,16 @@ namespace McpServerTests
 
     public class McpTools
     {
-        [McpServerTool("echo","The echoed string")]
+        [McpServerTool("echo", "The echoed string")]
         public static string Echo(string echo) => echo;
+
+        [McpServerTool("super_math", "make a complex super cool math")]
+        public static float SuperMAth(float a) => a * a - 1;
 
         [McpServerTool("process_person", "Processes a person object.", "the output is person processed.")]
         public static string ProcessPerson(Person person)
         {
-            //return $"Processed: {person.Name} {person.Surname}, Age: {person.Age}, Location: {person.Address.City}, {person.Address.Country}";
-            return $"Processed: {person.Name} {person.Surname}, Age: {person.Age}"; //, Location: {person.Address.City}, {person.Address.Country}";
+            return $"Processed: {person.Name} {person.Surname}, Age: {person.Age}, Location: {person.Address.City}, {person.Address.Country}";
         }
 
         [McpServerTool("get_default_person", "Returns a default person object.", "the output is a default person object.")]
