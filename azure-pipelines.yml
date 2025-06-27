@@ -55,7 +55,7 @@ steps:
     parameters:
       sonarCloudProject: 'nanoframework_lib-nanoframework.WebServer'
   
-  # build the 2 libs step
+  # build the 3 libs step
   - template: azure-pipelines-templates/class-lib-package.yml@templates  
     parameters:
       nugetPackageName: 'nanoFramework.WebServer'
@@ -64,7 +64,11 @@ steps:
     parameters:
       nugetPackageName: 'nanoFramework.WebServer.FileSystem'
 
-  # publish the 2 libs
+  - template: azure-pipelines-templates/class-lib-package.yml@templates  
+    parameters:
+      nugetPackageName: 'nanoFramework.WebServer.Mcp'
+
+  # publish the 3 libs
   - template: azure-pipelines-templates/class-lib-publish.yml@templates
 
   # create GitHub release build from main branch

@@ -1,0 +1,66 @@
+# This file is a collection of requests that can be executed with the REST Client extension for Visual Studio Code
+# https://marketplace.visualstudio.com/items?itemName=humao.rest-client
+# adjust your host here
+@host=192.168.1.139:80
+
+### this will get a 404 error
+
+GET http://{{host}}/tools HTTP/1.1
+Content-Type: application/json
+
+### This will get the list of the tools available in the MCP server
+
+POST http://{{host}}/mcp HTTP/1.1 
+Content-Type: application/json
+
+{"method":"tools/list","params":{},"id":2,"jsonrpc":"2.0"}
+
+### This is the initialization request to the MCP server.
+
+POST http://{{host}}/mcp HTTP/1.1 
+Content-Type: application/json
+
+{"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"McpClientTest","version":"1.0.0.0"}},"id":1,"jsonrpc":"2.0"}
+
+### This is the initialization request to the MCP server but with a wrong version not matching. Should return an error
+
+POST http://{{host}}/mcp HTTP/1.1 
+Content-Type: application/json
+
+{"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"McpClientTest","version":"1.0.0.0"}},"id":1,"jsonrpc":"2.0"}
+
+
+### This is send to initialize the MCP server and should return a 200 OK response
+
+POST http://{{host}}/mcp HTTP/1.1 
+Content-Type: application/json
+
+{"method":"notifications/initialized","jsonrpc":"2.0"}
+
+###
+
+POST http://{{host}}/mcp HTTP/1.1 
+Content-Type: application/json
+
+{"method":"tools/call","params":{"name":"process_person","arguments":{"Name":"John","Surname":"Doe","Address":"{\u0022Street\u0022:\u0022456 Elm St\u0022,\u0022City\u0022:\u0022Sample City\u0022,\u0022PostalCode\u0022:\u002267890\u0022,\u0022Country\u0022:\u0022Sample Country\u0022}"}},"id":12,"jsonrpc":"2.0"}
+
+###
+
+POST http://{{host}}/mcp HTTP/1.1 
+Content-Type: application/json
+
+{"method":"tools/call","params":{"name":"echo","arguments":{"value":"Laurent is the best"}},"id":8,"jsonrpc":"2.0"}
+
+###
+
+POST http://{{host}}/mcp HTTP/1.1 
+Content-Type: application/json
+
+{"method":"tools/call","params":{"name":"super_math","arguments":{"value":"3.14"}},"id":3,"jsonrpc":"2.0"}
+
+###
+
+POST http://{{host}}/mcp HTTP/1.1 
+Content-Type: application/json
+
+{"method":"tools/call","params":{"name":"get_default_address","arguments":{}},"id":5,"jsonrpc":"2.0"}

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>nanoFramework.WebServer.Mcp</id>
+    <title>nanoFramework.WebServer.Mcp</title>
+    <version>$version$</version>
+    <authors>Laurent Ellerbach,nanoframework</authors>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <license type="file">LICENSE.md</license>
+    <releaseNotes>
+    </releaseNotes>
+    <readme>docs\README.md</readme>
+    <developmentDependency>false</developmentDependency>
+    <projectUrl>https://github.com/nanoframework/nanoFramework.WebServer</projectUrl>
+    <icon>images\nf-logo.png</icon>
+    <repository type="git" url="https://github.com/nanoframework/nanoFramework.WebServer" commit="$commit$" />
+    <copyright>Copyright (c) .NET Foundation and Contributors</copyright>
+    <description>This is a simple Model Context Protocol (MCP) multithread WebServer supporting tools for integration with AI Agents.
+Perfect for .NET nanoFramework to be integrated with AI solutions. Supports both HTTPS and HTTP, Authentication, Strong Typing, Automatic Discovery.
+This comes also with the nanoFramework WebServer. Allowing to create a REST API based project with ease as well.
+</description>
+    <tags>http https webserver net netmf nf nanoframework mcp ai agent model context protocol</tags>
+    <dependencies>
+      <dependency id="nanoFramework.CoreLibrary" version="1.17.11" />
+      <dependency id="nanoFramework.System.Net.Http.Server" version="1.5.196" />
+      <dependency id="nanoFramework.Json" version="2.2.199" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="nanoFramework.WebServer\bin\Release\nanoFramework.WebServer.*" target="lib" />
+    <file src="nanoFramework.WebServer.Mcp\bin\Release\nanoFramework.WebServer.Mcp.*" target="lib" />
+    <file src="assets\readme.txt" target="" />
+    <file src="README.md" target="docs\" />
+    <file src="assets\nf-logo.png" target="images" />
+    <file src="LICENSE.md" target="" />
+  </files>
+</package>
