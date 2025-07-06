@@ -31,9 +31,13 @@ This library provides a lightweight, multi-threaded HTTP/HTTPS WebServer for .NE
 
 ## Quick Start
 
-### Basic WebServer
+### Basic Event Based WebServer
+
+Using the Web Server is very straight forward and supports event based calls.
 
 ```csharp
+// You need to be connected to a wifi or ethernet connection with a proper IP Address
+
 using (WebServer server = new WebServer(80, HttpProtocol.Http))
 {
     server.CommandReceived += ServerCommandReceived;
@@ -56,6 +60,8 @@ private static void ServerCommandReceived(object source, WebServerEventArgs e)
 
 ### Controller-Based WebServer
 
+Controllers are supported including with parametarized routes like `api/led/{id}/dosomething/{order}`.
+
 ```csharp
 using (WebServer server = new WebServer(80, HttpProtocol.Http, new Type[] { typeof(MyController) }))
 {
@@ -70,6 +76,14 @@ public class MyController
     public void Hello(WebServerEventArgs e)
     {
         WebServer.OutPutStream(e.Context.Response, "Hello from Controller!");
+    }
+
+    [Route("api/led/{id}")]
+    [Method("GET")]
+    public void LedState(WebServerEventArgs e)
+    {
+        string ledId = e.GetRouteParameter("id");
+        WebServer.OutPutStream(e.Context.Response, $"You selected Led {ledId}!");
     }
 }
 ```
@@ -90,7 +104,7 @@ public class IoTTools
         return "23.5°C";
     }
 
-    [McpServerTool("control_led", "Controls device LED")]
+    [McpServerTool("control_led", "Controls device LED", "Uutput the statusof the LED")]
     public static string ControlLed(LedCommand command)
     {
         // Your LED control code
@@ -172,15 +186,12 @@ POST /mcp
 
 - No compression support in request/response streams
 - MCP implementation supports server features only (no notifications or SSE)
-- Single parameter limitation for MCP tools (use complex objects for multiple parameters)
+- No or single parameter limitation for MCP tools (use complex objects for multiple parameters)
 
 ## Installation
 
-```xml
-<PackageReference Include="nanoFramework.WebServer" Version="2.2.x" />
-<PackageReference Include="nanoFramework.WebServer.FileSystem" Version="1.1.x" /> <!-- For file serving -->
-<PackageReference Include="nanoFramework.WebServer.Mcp" Version="1.0.x" /> <!-- For MCP support -->
-```
+Install `nanoFramework.WebServer` for the Web Server without File System support. Install `nanoFramework.WebServer.FileSystem` for file serving, so with devices supporting File System.
+Install `nanoFramework.WebServer.Mcp` for MCP support. It does contains the full `nanoFramework.WebServer` but does not include native file serving. You can add this feature fairly easilly by reusing the code function serving it.
 
 ## Contributing
 

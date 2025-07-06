@@ -333,6 +333,7 @@ private static void ServerCommandReceived(object source, WebServerEventArgs e)
         
         if (url.ToLower() == "/api/status")
         {
+            // Example of a manual json serialization. You can also use the nanoFramework.Json nuget.
             string json = $@"{{
                 ""status"": ""running"",
                 ""timestamp"": ""{DateTime.UtcNow:yyyy-MM-ddTHH:mm:ssZ}"",
@@ -691,6 +692,8 @@ private static void ServerCommandReceived(object source, WebServerEventArgs e)
 ```
 
 ### 2. Cache Frequently Used Data
+
+Note that cashing elements consumes memory< Be mindfull that you are on an embedded device.
 
 ```csharp
 private static readonly Hashtable ResponseCache = new Hashtable();

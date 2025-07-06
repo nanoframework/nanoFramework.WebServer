@@ -412,56 +412,52 @@ public class DataController
         public string Timestamp { get; set; }
     }
 
-    [Route("api/data"), Route("api/data/")]
+    // Delete all data
+    [Route("api/data")]
     [Method("DELETE")]
-    public void DeleteData(WebServerEventArgs e)
+    public void DeleteAllData(WebServerEventArgs e)
     {
-        var url = e.Context.Request.RawUrl;
-        var segments = url.Split('/');
+        var count = _dataStore.Count;
+        _dataStore.Clear();
         
-        // Check if there's an ID parameter (4th segment: api/data/{id})
-        if (segments.Length >= 4 && !string.IsNullOrEmpty(segments[3]))
+        var response = new DeleteResponse()
         {
-            // Delete specific item by ID
-            var id = segments[3];
-            
-            if (_dataStore.Contains(id))
-            {
-                _dataStore.Remove(id);
-                
-                var response = new DeleteResponse()
-                {
-                    Message = $"Data with id '{id}' deleted successfully",
-                    Count = 1,
-                    Timestamp = DateTime.UtcNow.ToString()
-                };
-                
-                e.Context.Response.ContentType = "application/json";
-                WebServer.OutPutStream(e.Context.Response, JsonConvert.SerializeObject(response));
-            }
-            else
-            {
-                var error = $"{{\"error\":\"Data with id '{id}' not found\"}}";
-                e.Context.Response.ContentType = "application/json";
-                e.Context.Response.StatusCode = (int)HttpStatusCode.NotFound;
-                WebServer.OutPutStream(e.Context.Response, error);
-            }
-        }
-        else
+            Message = "All data deleted successfully",
+            Count = count,
+            Timestamp = DateTime.UtcNow.ToString()
+        };
+        
+        e.Context.Response.ContentType = "application/json";
+        WebServer.OutPutStream(e.Context.Response, JsonConvert.SerializeObject(response));
+    }
+
+    // Delete specific item by ID using parameterized route
+    [Route("api/data/{id}")]
+    [Method("DELETE")]
+    public void DeleteDataById(WebServerEventArgs e)
+    {
+        string id = e.GetRouteParameter("id");
+        
+        if (_dataStore.Contains(id))
         {
-            // Delete all data (no ID provided)
-            var count = _dataStore.Count;
-            _dataStore.Clear();
+            _dataStore.Remove(id);
             
             var response = new DeleteResponse()
             {
-                Message = "All data deleted successfully",
-                Count = count,
+                Message = $"Data with id '{id}' deleted successfully",
+                Count = 1,
                 Timestamp = DateTime.UtcNow.ToString()
             };
             
             e.Context.Response.ContentType = "application/json";
-            WebServer.OutPutStream(e.Context.Response, JsonConvert.SerializeObject(response));
+            WebServer.OutPutStream(e.Context.Response, response);
+        }
+        else
+        {
+            var error = $"{{\"error\":\"Data with id '{id}' not found\"}}";
+            e.Context.Response.ContentType = "application/json";
+            e.Context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+            WebServer.OutPutStream(e.Context.Response, error);
         }
     }
 }
@@ -473,19 +469,32 @@ public class DataController
 
 ### Path Parameters
 
-Extract parameters from URL paths:
+#### Parameterized Routes
+
+Use parameterized routes with named placeholders for cleaner, more maintainable code:
 
 ```csharp
 public class UserController
 {
-    [Route("api/users/")]
+    public class User
+    {
+        public string Id { get; set; }
+        public string Name { get; set; }
+        public string Email { get; set; }
+    }
+
+    public class UserSettingResponse
+    {
+        public string UserId { get; set; }
+        public string SettingName { get; set; }
+        public string Value { get; set; }
+    }
+
+    [Route("api/users/{id}")]
     [Method("GET")]
     public void GetUser(WebServerEventArgs e)
     {
-        var url = e.Context.Request.RawUrl;
-        var segments = url.Split('/');
-        // In real life, you should check that you have a 3rd parameter
-        var userId = segments[3]; // Extract id parameter
+        string userId = e.GetRouteParameter("id");
         
         // Simulate user lookup
         var user = GetUserById(userId);
@@ -497,15 +506,48 @@ public class UserController
         }
         else
         {
-            var error = $"{{\"error\:\"User {userId} not found\"}}";
+            var error = $"{{\"error\":\"User {userId} not found\"}}";
             e.Context.Response.ContentType = "application/json";
             e.Context.Response.StatusCode = (int)HttpStatusCode.NotFound;
             WebServer.OutPutStream(e.Context.Response, error);
         }
-    }        
-    
-    private object GetUserById(string id)
+    }
+
+    [Route("api/users/{userId}/settings/{settingName}")]
+    [Method("GET")]
+    public void GetUserSetting(WebServerEventArgs e)
     {
+        string userId = e.GetRouteParameter("userId");
+        string settingName = e.GetRouteParameter("settingName");
+        
+        var setting = GetUserSetting(userId, settingName);
+        if (setting != null)
+        {
+            var response = new UserSettingResponse()
+            {
+                UserId = userId,
+                SettingName = settingName,
+                Value = setting
+            };
+            e.Context.Response.ContentType = "application/json";
+            WebServer.OutPutStream(e.Context.Response, JsonConvert.SerializeObject(response));
+        }
+        else
+        {
+            var error = $"{{\"error\":\"Setting {settingName} not found for user {userId}\"}}";
+            e.Context.Response.ContentType = "application/json";
+            e.Context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+            WebServer.OutPutStream(e.Context.Response, error);
+        }
+    }
+    
+    private User GetUserById(string id)
+    {
+        if (string.IsNullOrEmpty(id))
+        {
+            return null;
+        }
+
         // Implement user lookup logic
         return new User() { Id = id, Name = "John Doe", Email = "john@example.com" };
     }
@@ -1120,6 +1162,45 @@ Complete CRUD (Create, Read, Update, Delete) API for managing IoT devices:
 public class IoTDeviceController
 {
     private static Hashtable _devices = new Hashtable();
+
+    public class DeviceResponse
+    {
+        public int Total { get; set; }
+        public object[] Devices { get; set; }
+    }
+
+    public class Device
+    {
+        public string Id { get; set; }
+        public string Name { get; set; }
+        public string Type { get; set; }
+        public string Status { get; set; }
+        public string CreatedAt { get; set; }
+        public string LastSeen { get; set; }
+    }
+
+    public class SensorDataResponse
+    {
+        public string DeviceId { get; set; }
+        public string SensorId { get; set; }
+        public double Value { get; set; }
+        public string Unit { get; set; }
+        public DateTime Timestamp { get; set; }
+    }
+
+    public class SensorConfigResponse
+    {
+        public string DeviceId { get; set; }
+        public string SensorId { get; set; }
+        public string Message { get; set; }
+        public DateTime Timestamp { get; set; }
+    }
+
+    public class DeleteResponse
+    {
+        public string Message { get; set; }
+        public string Timestamp { get; set; }
+    }
     
     // GET /api/devices - List all devices
     [Route("api/devices")]
@@ -1145,16 +1226,43 @@ public class IoTDeviceController
     }
     
     // GET /api/devices/{id} - Get specific device
-    [Route("api/devices/")]
+    [Route("api/devices/{id}")]
     [Method("GET")]
     public void GetDevice(WebServerEventArgs e)
     {
-        var deviceId = ExtractPathParameter(e.Context.Request.RawUrl, 3);
+        string deviceId = e.GetRouteParameter("id");
         
         if (_devices.Contains(deviceId))
         {
             e.Context.Response.ContentType = "application/json";
             WebServer.OutPutStream(e.Context.Response, JsonConvert.SerializeObject(_devices[deviceId]));
+        }
+        else
+        {
+            SendNotFound(e.Context.Response, $"Device {deviceId} not found");
+        }
+    }
+    
+    // GET /api/devices/{deviceId}/sensors/{sensorId} - Get specific sensor data
+    [Route("api/devices/{deviceId}/sensors/{sensorId}")]
+    [Method("GET")]
+    public void GetDeviceSensor(WebServerEventArgs e)
+    {
+        string deviceId = e.GetRouteParameter("deviceId");
+        string sensorId = e.GetRouteParameter("sensorId");
+        
+        if (_devices.Contains(deviceId))
+        {
+            var sensorData = GetSensorData(deviceId, sensorId);
+            if (sensorData != null)
+            {
+                e.Context.Response.ContentType = "application/json";
+                WebServer.OutPutStream(e.Context.Response, JsonConvert.SerializeObject(sensorData));
+            }
+            else
+            {
+                SendNotFound(e.Context.Response, $"Sensor {sensorId} not found on device {deviceId}");
+            }
         }
         else
         {
@@ -1184,8 +1292,8 @@ public class IoTDeviceController
             var device = new Device()
             {
                 Id = deviceId,
-                Name = deviceData["name"],
-                Type = deviceData["type"],
+                Name = deviceData["name"].ToString(),
+                Type = deviceData["type"].ToString(),
                 Status = "offline",
                 CreatedAt = DateTime.UtcNow.ToString(),
                 LastSeen = DateTime.UtcNow.ToString()
@@ -1204,11 +1312,11 @@ public class IoTDeviceController
     }
     
     // PUT /api/devices/{id} - Update device
-    [Route("api/devices/")]
+    [Route("api/devices/{id}")]
     [Method("PUT")]
     public void UpdateDevice(WebServerEventArgs e)
     {
-        var deviceId = ExtractPathParameter(e.Context.Request.RawUrl, 3);
+        string deviceId = e.GetRouteParameter("id");
         
         if (!_devices.Contains(deviceId))
         {
@@ -1249,12 +1357,43 @@ public class IoTDeviceController
         }
     }
     
+    // PUT /api/devices/{deviceId}/sensors/{sensorId} - Update sensor configuration
+    [Route("api/devices/{deviceId}/sensors/{sensorId}")]
+    [Method("PUT")]
+    public void UpdateDeviceSensor(WebServerEventArgs e)
+    {
+        string deviceId = e.GetRouteParameter("deviceId");
+        string sensorId = e.GetRouteParameter("sensorId");
+        
+        if (!_devices.Contains(deviceId))
+        {
+            SendNotFound(e.Context.Response, $"Device {deviceId} not found");
+            return;
+        }
+        
+        try
+        {
+            var body = e.Context.Request.ReadBody();
+            var json = System.Text.Encoding.UTF8.GetString(body, 0, body.Length);
+            var sensorUpdate = JsonConvert.DeserializeObject(json, typeof(Hashtable)) as Hashtable;
+            
+            var result = UpdateSensorConfiguration(deviceId, sensorId, sensorUpdate);
+            
+            e.Context.Response.ContentType = "application/json";
+            WebServer.OutPutStream(e.Context.Response, JsonConvert.SerializeObject(result));
+        }
+        catch (Exception ex)
+        {
+            SendInternalError(e.Context.Response, ex.Message);
+        }
+    }
+    
     // DELETE /api/devices/{id} - Delete device
-    [Route("api/devices/")]
+    [Route("api/devices/{id}")]
     [Method("DELETE")]
     public void DeleteDevice(WebServerEventArgs e)
     {
-        var deviceId = ExtractPathParameter(e.Context.Request.RawUrl, 3);
+        string deviceId = e.GetRouteParameter("id");
         
         if (_devices.Contains(deviceId))
         {
@@ -1276,10 +1415,29 @@ public class IoTDeviceController
     }
     
     // Helper methods
-    private string ExtractPathParameter(string url, int index)
+    private SensorDataResponse GetSensorData(string deviceId, string sensorId)
     {
-        var segments = url.Split('/');
-        return segments.Length > index ? segments[index] : "";
+        // Implement sensor data retrieval logic
+        return new SensorDataResponse()
+        {
+            DeviceId = deviceId,
+            SensorId = sensorId,
+            Value = 23.5,
+            Unit = "°C",
+            Timestamp = DateTime.UtcNow
+        };
+    }
+    
+    private SensorConfigResponse UpdateSensorConfiguration(string deviceId, string sensorId, Hashtable config)
+    {
+        // Implement sensor configuration update logic
+        return new SensorConfigResponse()
+        {
+            DeviceId = deviceId,
+            SensorId = sensorId,
+            Message = "Sensor configuration updated",
+            Timestamp = DateTime.UtcNow
+        };
     }
 
     private void SendBadRequest(HttpListenerResponse response, string message)
@@ -1574,6 +1732,18 @@ Test your REST API with curl, Postman, or VS Code REST Client:
 GET http://192.168.1.100/api/status
 Accept: application/json
 
+### Get all devices
+GET http://192.168.1.100/api/devices
+Accept: application/json
+
+### Get specific device by ID
+GET http://192.168.1.100/api/devices/123e4567-e89b-12d3-a456-426614174000
+Accept: application/json
+
+### Get specific sensor data
+GET http://192.168.1.100/api/devices/esp32-001/sensors/temperature
+Accept: application/json
+
 ### Create a new device
 POST http://192.168.1.100/api/devices
 Content-Type: application/json
@@ -1584,7 +1754,7 @@ Content-Type: application/json
     "location": "Living Room"
 }
 
-### Update device
+### Update device by ID
 PUT http://192.168.1.100/api/devices/123e4567-e89b-12d3-a456-426614174000
 Content-Type: application/json
 
@@ -1592,6 +1762,18 @@ Content-Type: application/json
     "name": "Updated Temperature Sensor",
     "status": "online"
 }
+
+### Update sensor configuration
+PUT http://192.168.1.100/api/devices/esp32-001/sensors/temperature
+Content-Type: application/json
+
+{
+    "sampleRate": 5000,
+    "threshold": 25.0
+}
+
+### Delete specific device
+DELETE http://192.168.1.100/api/devices/123e4567-e89b-12d3-a456-426614174000
 
 ### Search with query parameters
 GET http://192.168.1.100/api/search?q=temperature&limit=10&sort=date

@@ -150,6 +150,8 @@ Example URL: `/api/search?q=nanoframework&category=iot&limit=10`
 
 ### Path Parameters
 
+#### Traditional Path Parsing
+
 ```csharp
 [Route("api/users")]
 public void GetUser(WebServerEventArgs e)
@@ -165,11 +167,50 @@ public void GetUser(WebServerEventArgs e)
 }
 ```
 
+#### Parameterized Routes
+
+nanoFramework WebServer supports parameterized routes with named placeholders using curly braces `{}`. The `GetRouteParameter` method allows you to extract parameter values by name:
+
+```csharp
+[Route("api/users/{id}")]
+public void GetUserById(WebServerEventArgs e)
+{
+    string userId = e.GetRouteParameter("id");
+    WebServer.OutPutStream(e.Context.Response, $"User ID: {userId}");
+}
+
+[Route("api/users/{userId}/sensors/{sensorId}")]
+public void GetUserSensor(WebServerEventArgs e)
+{
+    string userId = e.GetRouteParameter("userId");
+    string sensorId = e.GetRouteParameter("sensorId");
+    
+    WebServer.OutPutStream(e.Context.Response, 
+        $"User: {userId}, Sensor: {sensorId}");
+}
+
+[Route("api/devices/{deviceId}/measurements/{type}")]
+public void GetDeviceMeasurement(WebServerEventArgs e)
+{
+    string deviceId = e.GetRouteParameter("deviceId");
+    string measurementType = e.GetRouteParameter("type");
+    
+    // Example: /api/devices/esp32-001/measurements/temperature
+    WebServer.OutPutStream(e.Context.Response, 
+        $"Device {deviceId} - {measurementType} data");
+}
+```
+
+Example URLs that would match these routes:
+- `/api/users/123` → `id = "123"`
+- `/api/users/abc123/sensors/temp01` → `userId = "abc123"`, `sensorId = "temp01"`
+- `/api/devices/esp32-001/measurements/temperature` → `deviceId = "esp32-001"`, `type = "temperature"`
+
 ## REST API Example
 
-A very [detqiled REST API sample](./rest-api.md) walk through is available as well.
+A very [detailed REST API sample](./rest-api.md) walk through is available as well.
 
-The following example show the key principals for a REST API using GET, POST and DELETE methods.
+The following example shows the key principles for a REST API using GET, POST and DELETE methods, including both traditional and parameterized routes.
 
 ```csharp
 public class PersonController
@@ -183,6 +224,26 @@ public class PersonController
         string json = JsonConvert.SerializeObject(persons);
         e.Context.Response.ContentType = "application/json";
         WebServer.OutPutStream(e.Context.Response, json);
+    }
+
+    [Route("api/persons/{id}")]
+    [Method("GET")]
+    public void GetPersonById(WebServerEventArgs e)
+    {
+        string personId = e.GetRouteParameter("id");
+        
+        // Find person by ID logic here
+        var person = FindPersonById(personId);
+        if (person != null)
+        {
+            string json = JsonConvert.SerializeObject(person);
+            e.Context.Response.ContentType = "application/json";
+            WebServer.OutPutStream(e.Context.Response, json);
+        }
+        else
+        {
+            WebServer.OutputHttpCode(e.Context.Response, HttpStatusCode.NotFound);
+        }
     }
 
     [Route("api/persons")]
@@ -206,6 +267,32 @@ public class PersonController
         }
     }
 
+    [Route("api/persons/{id}")]
+    [Method("DELETE")]
+    public void DeletePersonById(WebServerEventArgs e)
+    {
+        string personId = e.GetRouteParameter("id");
+        
+        if (personId != null)
+        {
+            // Remove person by ID logic here
+            bool removed = RemovePersonById(personId);
+            if (removed)
+            {
+                WebServer.OutputHttpCode(e.Context.Response, HttpStatusCode.OK);
+            }
+            else
+            {
+                WebServer.OutputHttpCode(e.Context.Response, HttpStatusCode.NotFound);
+            }
+        }
+        else
+        {
+            WebServer.OutputHttpCode(e.Context.Response, HttpStatusCode.BadRequest);
+        }
+    }
+
+    // Traditional query parameter approach for compatibility
     [Route("api/persons")]
     [Method("DELETE")]
     public void DeletePerson(WebServerEventArgs e)
@@ -243,6 +330,8 @@ public class PersonController
 4. **Content Types**: Set correct content types for responses
 5. **Error Handling**: Implement proper error handling and validation
 6. **URL Structure**: Use consistent URL patterns (e.g., `/api/resource` for collections)
+7. **Parameterized Routes**: Prefer parameterized routes (`/api/users/{id}`) over query parameters for resource identification as they provide cleaner URLs and better RESTful design
+8. **Parameter Validation**: Always validate route parameters before using them in your logic
 
 ##  Route Conflicts
 
