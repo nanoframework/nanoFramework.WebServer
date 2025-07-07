@@ -139,7 +139,7 @@ private static X509Certificate2 LoadCertificate()
 
 This section goes through different options for the SSL configuration.
 
-### TLS 1.2 Only (Recommended)
+### TLS 1.2 Only (Minimum Recommended)
 
 ```csharp
 server.SslProtocols = SslProtocols.Tls12;
@@ -155,7 +155,8 @@ server.SslProtocols = SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12
 
 - `SslProtocols.Tls` - TLS 1.0
 - `SslProtocols.Tls11` - TLS 1.1  
-- `SslProtocols.Tls12` - TLS 1.2 (recommended)
+- `SslProtocols.Tls12` - TLS 1.2 (minimum recommended)
+- `SslProtocols.Tls13` - TLS 1.3
 
 ## Certificate Storage Options
 
@@ -163,6 +164,7 @@ You have 4 diufferent ways to store certificates and use them:
 
 - **Embed in code**: this is not really recommended for production as you cannot easilly replace the certificate except by flashing the device with a new code.
 - **From resources**: similar as for the in code, this solution won't allow you to easilly replace the certificate.
+- **From Visual Studio**: in the .NET nanoFramework extension, select your device, then `Edit Network Configuration`, then `General`, you can upload root CA and device CA.
 - **From storage**: typically added in the (typically internal) storage at setup time or flash time, this is suitable for production as can also be replaced more easilly.
 - **At flash time**: during the initial flash process, this can be deployed as well as the wifi credential. Also suitable for production and also easier to flash later on.
 
@@ -182,6 +184,8 @@ Proc-Type: 4,ENCRYPTED
 -----END RSA PRIVATE KEY-----";
 }
 ```
+
+> [!Note] You can upload mutliple certificates at once, add them one after the other one, in the same file/string each properly separated by the `BEGIN CERTIFICATE` and `END CERTIFICATE` markers.
 
 ### From Resources
 
