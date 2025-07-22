@@ -120,10 +120,27 @@ namespace nanoFramework.WebServer.Mcp
 
                         sb.Append($",\"result\":{{\"content\":[{{\"type\":\"text\",\"text\":{result}}}]}}}}");
                     }
+                    else if (request["method"].ToString() == "prompts/list")
+                    {
+                        string promptListJson = McpPromptRegistry.GetPromptMetadataJson();
+                        sb.Append($",\"result\":{{{promptListJson}}}}}");
+                    }
+                    else if (request["method"].ToString() == "prompts/get")
+                    {
+                        string promptName = ((Hashtable)request["params"])["name"].ToString();
+                        Hashtable arguments = ((Hashtable)request["params"])["arguments"] == null ? null : (Hashtable)((Hashtable)request["params"])["arguments"];
+
+                        string result = McpPromptRegistry.InvokePrompt(promptName, arguments);
+                        sb.Append($",\"result\":{result}}}");
+                    }
                     else
                     {
                         sb.Append($",\"error\":{{\"code\":-32601,\"message\":\"Method not found\"}}}}");
                     }
+
+                    Debug.WriteLine();
+                    Debug.WriteLine($"Response: {sb.ToString()}");
+                    Debug.WriteLine();
 
                     WebServer.OutPutStream(e.Context.Response, sb.ToString());
                     return;
