@@ -27,7 +27,8 @@ The Model Context Protocol (MCP) is an open standard that enables seamless integ
 
 ### Key Features
 
-- **Automatic tool discovery** through reflection and attributes
+- **Automatic tool and prompt discovery** through reflection and attributes
+- **MCP Prompts**: Define reusable, high-level prompt workflows for AI agents, with support for parameters
 - **JSON-RPC 2.0 compliant** request/response handling
 - **Type-safe parameter handling** with automatic deserialization from JSON to .NET objects
 - **Flexible authentication** options (none, basic auth, API key)
@@ -35,6 +36,41 @@ The Model Context Protocol (MCP) is an open standard that enables seamless integ
 - **Robust error handling** and validation
 - **Memory efficient** implementation optimized for embedded devices
 - **HTTPS support** with SSL/TLS encryption
+## Defining MCP Prompts
+
+MCP Prompts allow you to define reusable, multi-step instructions or workflows that can be invoked by AI agents. Prompts are discovered and registered similarly to tools, using the `[McpServerPrompt]` attribute on static methods that return an array of `PromptMessage`.
+
+Prompts can encapsulate complex logic, multi-step flows, or provide high-level instructions for agents. You can also define parameters for prompts using the `[McpPromptParameter]` attribute. **All parameters defined for a prompt are mandatory.**
+
+### Example: Defining a Prompt
+
+```csharp
+using nanoFramework.WebServer.Mcp;
+
+public class McpPrompts
+{
+    [McpServerPrompt("echo_sanity_check", "Echo test prompt")]
+    public static PromptMessage[] EchoSanityCheck()
+    {
+        return new PromptMessage[]
+        {
+            new PromptMessage("Call Echo with the string 'Hello MCP world!' and return the response.")
+        };
+    }
+
+    [McpServerPrompt("summarize_person", "Summarize a person with age threshold")]
+    [McpPromptParameter("ageThreshold", "The age threshold to determine if the person is a senior or junior.")]
+    public static PromptMessage[] SummarizePerson(string ageThreshold)
+    {
+        return new PromptMessage[]
+        {
+            new PromptMessage($"Call GetDefaultPerson, then if person.Age > {ageThreshold} label as senior, else junior.")
+        };
+    }
+}
+```
+
+Prompts are listed and invoked via the MCP protocol, just like tools.
 
 ### Supported Version
 
@@ -309,6 +345,11 @@ public static void Main()
         typeof(SensorTools)
     });
 
+    // Discover and register prompts
+    McpPromptRegistry.DiscoverPrompts(new Type[] {
+        typeof(McpPrompts)
+    });
+
     // Step 3: Start WebServer with MCP support
     using (var server = new WebServer(80, HttpProtocol.Http, new Type[] { typeof(McpServerController) }))
     {
@@ -482,7 +523,8 @@ POST /mcp
 }
 ```
 
-### 2. Tool Discovery
+
+### 2. Tool and Prompt Discovery
 
 Agent discovers available tools:
 
@@ -495,7 +537,18 @@ POST /mcp
 }
 ```
 
-The response will be the list of the tools. See next section for detailed examples.
+And prompts:
+
+```json
+POST /mcp
+{
+    "jsonrpc": "2.0",
+    "method": "prompts/list",
+    "id": 2
+}
+```
+
+There will be responses for tools and prompts. See next section for detailed examples.
 
 ### 3. Tool Invocation
 
@@ -519,7 +572,8 @@ POST /mcp
 
 ## Request/Response Examples
 
-This section shows real exampled of requests and responses.
+This section shows real examples of requests and responses.
+
 
 ### Tool Discovery
 
@@ -527,7 +581,6 @@ This section shows real exampled of requests and responses.
 
 ```json
 POST /mcp
-
 {
     "jsonrpc": "2.0",
     "method": "tools/list",
@@ -604,6 +657,61 @@ POST /mcp
                     },
                     "required": []
                 }
+            }
+        ],
+        "nextCursor": null
+    }
+}
+```
+
+### Prompt Discovery
+
+**Request:**
+
+```json
+POST /mcp
+{
+    "jsonrpc": "2.0",
+    "method": "prompts/list",
+    "id": 1
+}
+```
+
+**Response:**
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": 1,
+    "result": {
+        "prompts": [
+            {
+                "name": "echo_sanity_check",
+                "description": "Echo test prompt",
+                "parameters": [],
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": "Call Echo with the string 'Hello MCP world!' and return the response."
+                    }
+                ]
+            },
+            {
+                "name": "summarize_person",
+                "description": "Summarize a person with age threshold",
+                "parameters": [
+                    {
+                        "name": "ageThreshold",
+                        "description": "The age threshold to determine if the person is a senior or junior.",
+                        "type": "string"
+                    }
+                ],
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": "Call GetDefaultPerson, then if person.Age > {ageThreshold} label as senior, else junior."
+                    }
+                ]
             }
         ],
         "nextCursor": null
@@ -708,6 +816,78 @@ POST /mcp
             {
                 "type": "text",
                 "text": "Device 'Thermostat-01' configured successfully. Mode: auto, Interval: 120s"
+            }
+        ]
+    }
+}
+```
+
+### Prompt usage
+
+#### Prompt Retrieval Example
+
+To retrieve a prompt, use the `prompts/get` method. Provide the prompt name and any required parameters.
+
+**Request:**
+
+```json
+POST /mcp
+{
+    "jsonrpc": "2.0",
+    "method": "prompts/get",
+    "params": {
+        "name": "echo_sanity_check",
+        "arguments": {}
+    },
+    "id": 5
+}
+```
+
+**Response:**
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": 5,
+    "result": {
+        "messages": [
+            {
+                "role": "system",
+                "content": "Call Echo with the string 'Hello MCP world!' and return the response."
+            }
+        ]
+    }
+}
+```
+
+If the prompt requires parameters, include them in the `arguments` object:
+
+```json
+POST /mcp
+{
+    "jsonrpc": "2.0",
+    "method": "prompts/get",
+    "params": {
+        "name": "summarize_person",
+        "arguments": {
+            "ageThreshold": "65"
+        }
+    },
+    "id": 6
+}
+```
+
+**Response:**
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": 6,
+    "result": {
+        "messages": [
+            {
+                "role": "system",
+                "content": "Call GetDefaultPerson, then if person.Age > 65 label as senior, else junior."
             }
         ]
     }

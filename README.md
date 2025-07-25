@@ -1,4 +1,4 @@
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=nanoframework_lib-nanoframework.WebServer&metric=alert_status)](https://sonarcloud.io/dashboard?id=nanoframework_lib-nanoframework.WebServer) [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=nanoframework_lib-nanoframework.WebServer&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=nanoframework_lib-nanoframework.WebServer) [![NuGet](https://img.shields.io/nuget/dt/nanoFramework.WebServer.svg?label=NuGet&style=flat&logo=nuget)](https://www.nuget.org/packages/nanoFramework.WebServer/) [![#yourfirstpr](https://img.shields.io/badge/first--timers--only-friendly-blue.svg)](https://github.com/nanoframework/Home/blob/main/CONTRIBUTING.md) [![Discord](https://img.shields.io/discord/478725473862549535.svg?logo=discord&logoColor=white&label=Discord&color=7289DA)](https://discord.gg/gCyBu8T)
+﻿[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=nanoframework_lib-nanoframework.WebServer&metric=alert_status)](https://sonarcloud.io/dashboard?id=nanoframework_lib-nanoframework.WebServer) [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=nanoframework_lib-nanoframework.WebServer&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=nanoframework_lib-nanoframework.WebServer) [![NuGet](https://img.shields.io/nuget/dt/nanoFramework.WebServer.svg?label=NuGet&style=flat&logo=nuget)](https://www.nuget.org/packages/nanoFramework.WebServer/) [![#yourfirstpr](https://img.shields.io/badge/first--timers--only-friendly-blue.svg)](https://github.com/nanoframework/Home/blob/main/CONTRIBUTING.md) [![Discord](https://img.shields.io/discord/478725473862549535.svg?logo=discord&logoColor=white&label=Discord&color=7289DA)](https://discord.gg/gCyBu8T)
 
 ![nanoFramework logo](https://raw.githubusercontent.com/nanoframework/Home/main/resources/logo/nanoFramework-repo-logo.png)
 
@@ -35,7 +35,7 @@ This library provides a lightweight, multi-threaded HTTP/HTTPS WebServer for .NE
 
 Using the Web Server is very straight forward and supports event based calls.
 
-```csharp
+'''csharp
 // You need to be connected to a wifi or ethernet connection with a proper IP Address
 
 using (WebServer server = new WebServer(80, HttpProtocol.Http))
@@ -56,13 +56,13 @@ private static void ServerCommandReceived(object source, WebServerEventArgs e)
         WebServer.OutputHttpCode(e.Context.Response, HttpStatusCode.NotFound);
     }
 }
-```
+'''
 
 ### Controller-Based WebServer
 
-Controllers are supported including with parametarized routes like `api/led/{id}/dosomething/{order}`.
+Controllers are supported including with parametarized routes like 'api/led/{id}/dosomething/{order}'.
 
-```csharp
+'''csharp
 using (WebServer server = new WebServer(80, HttpProtocol.Http, new Type[] { typeof(MyController) }))
 {
     server.Start();
@@ -86,7 +86,7 @@ public class MyController
         WebServer.OutPutStream(e.Context.Response, $"You selected Led {ledId}!");
     }
 }
-```
+'''
 
 ## Model Context Protocol (MCP) Support
 
@@ -94,7 +94,7 @@ Enable AI agents to interact with your embedded devices through standardized too
 
 ### Defining MCP Tools
 
-```csharp
+'''csharp
 public class IoTTools
 {
     [McpServerTool("read_sensor", "Reads temperature from sensor")]
@@ -117,11 +117,35 @@ public class LedCommand
     [Description("LED state: on, off, or blink")]
     public string State { get; set; }
 }
+'''
+
+### Defining MCP Prompts
+
+You can define reusable, high-level prompts for AI agents using the `McpServerPrompt` attribute. Prompts encapsulate multi-step instructions or workflows that can be invoked by agents.
+
+Here's a simple example:
+
+```csharp
+using nanoFramework.WebServer.Mcp;
+
+public class McpPrompts
+{
+    [McpServerPrompt("echo_sanity_check", "Echo test prompt")]
+    public static PromptMessage[] EchoSanityCheck()
+    {
+        return new PromptMessage[]
+        {
+            new PromptMessage("Call Echo with the string 'Hello MCP world!' and return the response.")
+        };
+    }
+}
 ```
+
+Prompts can be discovered and invoked by AI agents in the same way as tools. You can also define prompts with parameters using the `McpPromptParameter` attribute.
 
 ### Setting Up MCP Server
 
-```csharp
+'''csharp
 public static void Main()
 {
     // Connect to WiFi first
@@ -129,6 +153,9 @@ public static void Main()
     
     // Discover and register MCP tools
     McpToolRegistry.DiscoverTools(new Type[] { typeof(IoTTools) });
+
+    // Discover and register MCP prompts
+    McpPromptRegistry.DiscoverPrompts(new Type[] { typeof(McpPrompts) });
     
     // Start WebServer with MCP support
     using (var server = new WebServer(80, HttpProtocol.Http, new Type[] { typeof(McpServerController) }))
@@ -141,13 +168,13 @@ public static void Main()
         Thread.Sleep(Timeout.Infinite);
     }
 }
-```
+'''
 
 ### AI Agent Integration
 
 Once running, AI agents can discover and invoke your tools:
 
-```json
+'''json
 // Tool discovery
 POST /mcp
 {
@@ -167,7 +194,7 @@ POST /mcp
     },
     "id": 2
 }
-```
+'''
 
 ## Documentation
 
@@ -187,11 +214,12 @@ POST /mcp
 - No compression support in request/response streams
 - MCP implementation supports server features only (no notifications or SSE)
 - No or single parameter limitation for MCP tools (use complex objects for multiple parameters)
+- Prompt parameters, when declared, are always mandatory.
 
 ## Installation
 
-Install `nanoFramework.WebServer` for the Web Server without File System support. Install `nanoFramework.WebServer.FileSystem` for file serving, so with devices supporting File System.
-Install `nanoFramework.WebServer.Mcp` for MCP support. It does contains the full `nanoFramework.WebServer` but does not include native file serving. You can add this feature fairly easilly by reusing the code function serving it.
+Install 'nanoFramework.WebServer' for the Web Server without File System support. Install 'nanoFramework.WebServer.FileSystem' for file serving, so with devices supporting File System.
+Install 'nanoFramework.WebServer.Mcp' for MCP support. It does contains the full 'nanoFramework.WebServer' but does not include native file serving. You can add this feature fairly easilly by reusing the code function serving it.
 
 ## Contributing
 
