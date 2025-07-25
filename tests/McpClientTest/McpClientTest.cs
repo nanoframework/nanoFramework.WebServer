@@ -46,7 +46,14 @@ Console.WriteLine("// --");
 // Load them as AI functions in the kernel
 #pragma warning disable SKEXP0001
 kernel.Plugins.AddFromFunctions("nanoFramework", tools.Select(aiFunction => aiFunction.AsKernelFunction()));
-// --
+
+// Check available prompts
+var prompts = await mcpToolboxClient.ListPromptsAsync().ConfigureAwait(false);
+
+// Print those prompts
+Console.WriteLine("// Available prompts:");
+foreach (var p in prompts) Console.WriteLine($"{p.Name}: {p.Description}");
+Console.WriteLine("// --");
 
 var history = new ChatHistory();
 var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
