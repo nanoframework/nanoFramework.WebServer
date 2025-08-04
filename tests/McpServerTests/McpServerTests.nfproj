@@ -27,6 +27,7 @@
     <RunSettingsFilePath>$(MSBuildProjectDirectory)\nano.runsettings</RunSettingsFilePath>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="McpPromptRegistryTests.cs" />
     <Compile Include="McpToolRegistryTests.cs" />
     <Compile Include="McpToolsAttributeTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

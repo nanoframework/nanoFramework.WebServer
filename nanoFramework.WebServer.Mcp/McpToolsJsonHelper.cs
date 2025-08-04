@@ -35,7 +35,7 @@ namespace nanoFramework.WebServer.Mcp
         /// Checks if the specified <see cref="Type"/> is a primitive type.
         /// </summary>
         /// <param name="type">The <see cref="Type"/> to check.</param>
-        /// <returns><c>true</c> if the type is a primitive type; otherwise, <c>false</c>.</returns> <summary>
+        /// <returns><c>true</c> if the type is a primitive type; otherwise, <c>false</c>.</returns>
         public static bool IsPrimitiveType(Type type)
         {
             return type == typeof(bool) ||

@@ -30,8 +30,10 @@ namespace McpEndToEndTest
             Debug.WriteLine($"Connected with wifi credentials. IP Address: {GetCurrentIPAddress()}");
 
             McpToolRegistry.DiscoverTools(new Type[] { typeof(McpServerTests.McpTools) });
-
             Debug.WriteLine("MCP Tools discovered and registered.");
+
+            McpPromptRegistry.DiscoverPrompts(new Type[] { typeof(McpServerTests.McpPrompts) });
+            Debug.WriteLine("MCP Prompts discovered and registered.");
 
             _server = new WebServer(80, HttpProtocol.Http, new Type[] { typeof(McpServerController) });
             _server.CommandReceived += ServerCommandReceived;
