@@ -93,7 +93,7 @@ namespace nanoFramework.WebServer.Mcp
                 {
                     sb.Append(isFirst ? "" : ",");
 
-                    sb.Append($"{{{parameterNameAttribute}}}");
+                    sb.Append($"{parameterNameAttribute}");
 
                     isFirst = false;
                 }

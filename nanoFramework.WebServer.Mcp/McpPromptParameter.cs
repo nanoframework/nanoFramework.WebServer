@@ -46,7 +46,7 @@ namespace nanoFramework.WebServer.Mcp
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"{{\"name\":\"{Name}\",\"description\":\"{Description}\",\"required\":\"true\"}}";
+            return $"{{\"name\":\"{Name}\",\"description\":\"{Description}\",\"required\":true}}";
         }
     }
 }
