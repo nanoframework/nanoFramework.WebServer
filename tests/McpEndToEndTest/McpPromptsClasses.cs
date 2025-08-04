@@ -12,7 +12,7 @@ namespace McpServerTests
         {
             return new PromptMessage[]
             {
-                new PromptMessage("List all available tools and their method signatures: Echo, SuperMath, ProcessPerson, GetDefaultAddress, GetDefaultPerson. Show parameter names/types and return types.")
+                new PromptMessage("List all available tools and their method signatures: echo, super_math, process_person, get_default_address, get_default_person. Show parameter names/types and return types.")
             };
         }
 
@@ -21,16 +21,16 @@ namespace McpServerTests
         {
             return new PromptMessage[]
             {
-                new PromptMessage("Call Echo with the string 'Hello MCP world!' and return the response.")
+                new PromptMessage("Call echo with the string 'Hello MCP world!' and return the response.")
             };
         }
 
-        [McpServerPrompt("supermaty_basic_usage", "Demonstrate basic usage of SuperMath tool")]
+        [McpServerPrompt("supermaty_basic_usage", "Demonstrate basic usage of super_math tool")]
         public static PromptMessage[] SuperMathBasicUsage()
         {
             return new PromptMessage[]
             {
-                new PromptMessage("Run SuperMath to multiply 56 x 78. If the tool fails or returns nothing, indicate the failure; otherwise, report the result.")
+                new PromptMessage("Run super_math to multiply 56 x 78. If the tool fails or returns nothing, indicate the failure; otherwise, report the result.")
             };
         }
 
@@ -39,25 +39,25 @@ namespace McpServerTests
         {
             return new PromptMessage[]
             {
-                new PromptMessage("Create a Person object with Name: 'Alice', Surname: 'Smith', Age: '25', Address: { Street: '456 Elm St', City: 'Springfield', PostalCode: '67890', Country: 'USA' }. Then call ProcessPerson with this object and return the response.")
+                new PromptMessage("Create a Person object with Name: 'Alice', Surname: 'Smith', Age: '25', Address: { Street: '456 Elm St', City: 'Springfield', PostalCode: '67890', Country: 'USA' }. Then call process_person with this object and return the response.")
             };
         }
 
-        [McpServerPrompt("processperson_workflow", "Demonstrate a workflow using ProcessPerson tool")]
+        [McpServerPrompt("processperson_workflow", "Demonstrate a workflow using process_person tool")]
         public static PromptMessage[] ProcessPersonWorkflow()
         {
             return new PromptMessage[]
             {
-                new PromptMessage("Call GetDefaultPerson, then pass its output into ProcessPerson. Return both the initial and processed person object.")
+                new PromptMessage("Call GetDefaultPerson, then pass its output into process_person. Return both the initial and processed person object.")
             };
         }
 
-        [McpServerPrompt("get_default_address_integration", "Demonstrate integration with GetDefaultAddress tool")]
+        [McpServerPrompt("get_default_address_integration", "Demonstrate integration with get_default_address tool")]
         public static PromptMessage[] GetDefaultAddressIntegration()
         {
             return new PromptMessage[]
             {
-                new PromptMessage("First call GetDefaultPerson, then call GetDefaultAddress. Combine both into a summary like: 'Person X lives at Y'.")
+                new PromptMessage("First call GetDefaultPerson, then call get_default_address. Combine both into a summary like: 'Person X lives at Y'.")
             };
         }
 
@@ -66,7 +66,7 @@ namespace McpServerTests
         {
             return new PromptMessage[]
             {
-                new PromptMessage("You're a data-summary agent. Fetch the default person and address, then produce a human -readable summary. If age > 30, add '(senior)', otherwise '(junior)' at the end.")
+                new PromptMessage("You're a data-summary agent. Fetch the default person and address, then produce a human-readable summary. If age > 30, add '(senior)', otherwise '(junior)' at the end.")
             };
         }
 
@@ -85,7 +85,12 @@ namespace McpServerTests
         {
             return new PromptMessage[]
             {
-                new PromptMessage($"Please perform the following steps:\r\n1. Call GetDefaultPerson() -> person.\r\n2. Call GetDefaultAddress() -> address.\r\n3. If person.Age > {ageThreshold} then set label = \"senior\"; otherwise set label = \"junior\".\r\n4. Call ProcessPerson(person) -> processed.\r\n5. Return a JSON object:\r\n{{ \"name\": person.Name, \"age\": person.Age, \"label\": label, \"address\": address, \"processed\": processed }}")
+                new PromptMessage("Please perform the following steps:\\n"
+                                  + "1. Call get_default_person \u2192 person.\\n"
+                                  + "2. Call get_default_address \u2192 address.\\n"
+                                  + $"3. If person.Age > {ageThreshold ?? string.Empty} then set label = 'senior'; otherwise set label = 'junior'.\\n"
+                                  + "4. Call process_person(person) \u2192 processed.\\n"
+                                  + "5. Return a JSON object: { 'name': person.Name, 'age': person.Age, 'label': label, 'address': address, 'processed': 'processed' }")
             };
         }
     }
