@@ -35,7 +35,7 @@ This library provides a lightweight, multi-threaded HTTP/HTTPS WebServer for .NE
 
 Using the Web Server is very straight forward and supports event based calls.
 
-'''csharp
+```csharp
 // You need to be connected to a wifi or ethernet connection with a proper IP Address
 
 using (WebServer server = new WebServer(80, HttpProtocol.Http))
@@ -56,13 +56,13 @@ private static void ServerCommandReceived(object source, WebServerEventArgs e)
         WebServer.OutputHttpCode(e.Context.Response, HttpStatusCode.NotFound);
     }
 }
-'''
+```
 
 ### Controller-Based WebServer
 
 Controllers are supported including with parametarized routes like 'api/led/{id}/dosomething/{order}'.
 
-'''csharp
+```csharp
 using (WebServer server = new WebServer(80, HttpProtocol.Http, new Type[] { typeof(MyController) }))
 {
     server.Start();
@@ -86,7 +86,7 @@ public class MyController
         WebServer.OutPutStream(e.Context.Response, $"You selected Led {ledId}!");
     }
 }
-'''
+```
 
 ## Model Context Protocol (MCP) Support
 
@@ -94,7 +94,7 @@ Enable AI agents to interact with your embedded devices through standardized too
 
 ### Defining MCP Tools
 
-'''csharp
+```csharp
 public class IoTTools
 {
     [McpServerTool("read_sensor", "Reads temperature from sensor")]
@@ -117,7 +117,7 @@ public class LedCommand
     [Description("LED state: on, off, or blink")]
     public string State { get; set; }
 }
-'''
+```
 
 ### Defining MCP Prompts
 
@@ -145,7 +145,7 @@ Prompts can be discovered and invoked by AI agents in the same way as tools. You
 
 ### Setting Up MCP Server
 
-'''csharp
+```csharp
 public static void Main()
 {
     // Connect to WiFi first
@@ -168,13 +168,13 @@ public static void Main()
         Thread.Sleep(Timeout.Infinite);
     }
 }
-'''
+```
 
 ### AI Agent Integration
 
 Once running, AI agents can discover and invoke your tools:
 
-'''json
+```json
 // Tool discovery
 POST /mcp
 {
@@ -194,7 +194,7 @@ POST /mcp
     },
     "id": 2
 }
-'''
+```
 
 ## Documentation
 
