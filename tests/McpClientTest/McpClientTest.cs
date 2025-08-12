@@ -46,7 +46,68 @@ Console.WriteLine("// --");
 // Load them as AI functions in the kernel
 #pragma warning disable SKEXP0001
 kernel.Plugins.AddFromFunctions("nanoFramework", tools.Select(aiFunction => aiFunction.AsKernelFunction()));
-// --
+
+// Check available prompts
+Console.WriteLine("// Available prompts:");
+
+try
+{
+    var prompts = await mcpToolboxClient.ListPromptsAsync().ConfigureAwait(false);
+
+    List<KernelFunction> functionPrompts = new List<KernelFunction>();
+
+    foreach (var p in prompts)
+    {
+        Console.WriteLine($"{p.Name}: {p.Description}");
+
+        // compose parameters list, if any
+        Dictionary<string, object?> promptArguments = new Dictionary<string, object?>();
+
+        if (p.ProtocolPrompt.Arguments is not null)
+        {
+            foreach (ModelContextProtocol.Protocol.PromptArgument argument in p.ProtocolPrompt.Arguments)
+            {
+                if (argument.Required.HasValue && argument.Required.Value)
+                {
+                    // simplification here
+                    // we assume that the only prompt argument from the list is the ageThreshold which we are hard coding to "65"
+                    promptArguments.Add(argument.Name, "65");
+                }
+                else
+                {
+                    promptArguments.Add(argument.Name, string.Empty);
+                }
+            }
+        }
+
+        var promptResult = await mcpToolboxClient.GetPromptAsync(p.Name, promptArguments);
+
+        var promptTemplate = string.Join("\n", promptResult.Messages.Select(m => m.Content));
+
+        var semanticFunction = KernelFunctionFactory.CreateFromPrompt(
+            promptTemplate: promptTemplate,
+            executionSettings: (PromptExecutionSettings?)null, // Explicit cast to resolve ambiguity
+            functionName: p.Name,
+            description: promptResult.Description,
+            templateFormat: "semantic-kernel"
+        );
+
+        functionPrompts.Add(semanticFunction);
+    }
+
+    if (functionPrompts.Any())
+    {
+        kernel.Plugins.AddFromFunctions("from_prompts", functionPrompts);
+    }
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"Error loading prompts: {ex.Message}");
+}
+finally
+{
+    Console.WriteLine("// --");
+}
 
 var history = new ChatHistory();
 var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
