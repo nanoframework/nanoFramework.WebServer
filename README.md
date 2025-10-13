@@ -36,7 +36,8 @@ This library provides a lightweight, multi-threaded HTTP/HTTPS WebServer for .NE
 Using the Web Server is very straight forward and supports event based calls.
 
 ```csharp
-// You need to be connected to a wifi or ethernet connection with a proper IP Address
+// You need to be connected to a Wi-Fi or ethernet connection with a proper IP Address
+// Optionally you can pass a parameter with the IP address for the server to bind to
 
 using (WebServer server = new WebServer(80, HttpProtocol.Http))
 {

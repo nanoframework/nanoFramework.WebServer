@@ -263,7 +263,11 @@ namespace nanoFramework.WebServer
         /// </summary>
         /// <param name="port">Port number to listen on.</param>
         /// <param name="protocol"><see cref="HttpProtocol"/> version to use with web server.</param>
-        public WebServer(int port, HttpProtocol protocol) : this(port, protocol, null)
+        /// <param name="address">IP address to bind to.</param>
+        public WebServer(
+            int port,
+            HttpProtocol protocol,
+            IPAddress address) : this(port, protocol, address, null)
         { }
 
         /// <summary>
@@ -272,14 +276,38 @@ namespace nanoFramework.WebServer
         /// <param name="port">Port number to listen on.</param>
         /// <param name="protocol"><see cref="HttpProtocol"/> version to use with web server.</param>
         /// <param name="controllers">Controllers to use with this web server.</param>
-        public WebServer(int port, HttpProtocol protocol, Type[] controllers)
+        public WebServer(
+            int port,
+            HttpProtocol protocol,
+            Type[] controllers) : this(port, protocol, null, controllers)
+        { }
+
+        /// <summary>
+        /// Instantiates a new web server.
+        /// </summary>
+        /// <param name="port">Port number to listen on.</param>
+        /// <param name="protocol"><see cref="HttpProtocol"/> version to use with web server.</param>
+        /// <param name="address">IP address to bind to. If <see langword="null"/>, will bind to default address.</param>
+        /// <param name="controllers">Controllers to use with this web server.</param>
+        public WebServer(
+            int port,
+            HttpProtocol protocol,
+            IPAddress address,
+            Type[] controllers)
         {
             _callbackRoutes = new ArrayList();
+
             RegisterControllers(controllers);
+
             Protocol = protocol;
             Port = port;
+
             string prefix = Protocol == HttpProtocol.Http ? "http" : "https";
-            _listener = new HttpListener(prefix, port);
+
+            _listener = new HttpListener(
+                prefix,
+                port,
+                address);
         }
 
         private void RegisterControllers(Type[] controllers)
