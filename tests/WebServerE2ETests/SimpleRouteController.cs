@@ -27,7 +27,7 @@ namespace WebServerE2ETests
         public void OutputWithOKText(WebServerEventArgs e)
         {
             Debug.WriteLine($"{nameof(OutputWithOKText)} {e.Context.Request.HttpMethod} {e.Context.Request.RawUrl}");
-            WebServer.OutPutStream(e.Context.Response, "OK");
+            WebServer.OutputAsStream(e.Context.Response, "OK");
         }
 
         [Route("test"), Route("Test2"), Route("tEst42"), Route("TEST")]
@@ -37,7 +37,7 @@ namespace WebServerE2ETests
         {
             string route = $"The route asked is {e.Context.Request.RawUrl.TrimStart('/').Split('/')[0]}";
             e.Context.Response.ContentType = "text/plain";
-            WebServer.OutPutStream(e.Context.Response, route);
+            WebServer.OutputAsStream(e.Context.Response, route);
         }
 
         [Route("test/any")]
@@ -50,14 +50,14 @@ namespace WebServerE2ETests
         public void FirstOfMultipleCallback(WebServerEventArgs e)
         {
             Debug.WriteLine($"{nameof(FirstOfMultipleCallback)} {e.Context.Request.HttpMethod} {e.Context.Request.RawUrl}");
-            WebServer.OutPutStream(e.Context.Response, nameof(FirstOfMultipleCallback));
+            WebServer.OutputAsStream(e.Context.Response, nameof(FirstOfMultipleCallback));
         }
 
         [Route("multiplecallback")]
         public void SecondOfMultipleCallback(WebServerEventArgs e)
         {
             Debug.WriteLine($"{nameof(SecondOfMultipleCallback)} {e.Context.Request.HttpMethod} {e.Context.Request.RawUrl}");
-            WebServer.OutPutStream(e.Context.Response, nameof(SecondOfMultipleCallback));
+            WebServer.OutputAsStream(e.Context.Response, nameof(SecondOfMultipleCallback));
         }
     }
 }

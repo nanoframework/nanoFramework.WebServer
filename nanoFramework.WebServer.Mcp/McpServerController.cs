@@ -88,7 +88,7 @@ namespace nanoFramework.WebServer.Mcp
                                 if (clientVersion != SupportedVersion)
                                 {
                                     sb.Append($",\"error\":{{\"code\":-32602,\"message\":\"Unsupported protocol version\",\"data\":{{\"supported\":[\"{SupportedVersion}\"],\"requested\":\"{clientVersion}\"}}}}}}");
-                                    WebServer.OutPutStream(e.Context.Response, sb.ToString());
+                                    WebServer.OutputAsStream(e.Context.Response, sb.ToString());
                                     return;
                                 }
                             }
@@ -142,13 +142,13 @@ namespace nanoFramework.WebServer.Mcp
                     Debug.WriteLine($"Response: {sb.ToString()}");
                     Debug.WriteLine();
 
-                    WebServer.OutPutStream(e.Context.Response, sb.ToString());
+                    WebServer.OutputAsStream(e.Context.Response, sb.ToString());
                     return;
                 }
             }
             catch (Exception ex)
             {
-                WebServer.OutPutStream(e.Context.Response, $"{{\"jsonrpc\":\"2.0\",\"id\":{id},\"error\":{{\"code\":-32602,\"message\":\"{ex.Message}\"}}}}");
+                WebServer.OutputAsStream(e.Context.Response, $"{{\"jsonrpc\":\"2.0\",\"id\":{id},\"error\":{{\"code\":-32602,\"message\":\"{ex.Message}\"}}}}");
             }
         }
     }

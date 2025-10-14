@@ -532,20 +532,26 @@ namespace nanoFramework.WebServer
         }
 
         /// <summary>
-        /// Output a stream
+        /// Output a string content as a stream.
         /// </summary>
-        /// <param name="response">the socket stream</param>
-        /// <param name="strResponse">the stream to output</param>
-        public static void OutPutStream(HttpListenerResponse response, string strResponse)
+        /// <param name="response">The response to write to.</param>
+        /// <param name="content">the stream to output</param>
+        public static void OutputAsStream(
+            HttpListenerResponse response,
+            string content)
         {
             if (response == null)
             {
                 return;
             }
 
-            byte[] messageBody = Encoding.UTF8.GetBytes(strResponse);
+            byte[] messageBody = Encoding.UTF8.GetBytes(content);
+
             response.ContentLength64 = messageBody.Length;
-            response.OutputStream.Write(messageBody, 0, messageBody.Length);
+            response.OutputStream.Write(
+                messageBody,
+                0,
+                messageBody.Length);
         }
 
         /// <summary>
@@ -777,7 +783,7 @@ namespace nanoFramework.WebServer
                         {
                             multipleCallback += ".";
                             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                            OutPutStream(context.Response, multipleCallback);
+                            OutputAsStream(context.Response, multipleCallback);
                         }
                         else
                         {

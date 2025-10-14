@@ -66,7 +66,7 @@ private static void ServerCommandReceived(object source, WebServerEventArgs e)
 
     if (url.ToLower() == "/hello")
     {
-        WebServer.OutPutStream(e.Context.Response, "Hello from nanoFramework!");
+        WebServer.OutputAsStream(e.Context.Response, "Hello from nanoFramework!");
     }
     else
     {
@@ -101,7 +101,7 @@ private static void ServerCommandReceived(object source, WebServerEventArgs e)
         }
         
         response += "</body></html>";
-        WebServer.OutPutStream(e.Context.Response, response);
+        WebServer.OutputAsStream(e.Context.Response, response);
     }
 }
 ```
@@ -135,7 +135,7 @@ private static void ServerCommandReceived(object source, WebServerEventArgs e)
     {
         // Create a test file
         File.WriteAllText("I:\\test.txt", "This is a dynamically created file");
-        WebServer.OutPutStream(e.Context.Response, "File created successfully");
+        WebServer.OutputAsStream(e.Context.Response, "File created successfully");
     }
 }
 ```
@@ -262,7 +262,7 @@ private static void ServerCommandReceived(object source, WebServerEventArgs e)
     }
     
     // Send response
-    WebServer.OutPutStream(response, "Request processed successfully");
+    WebServer.OutputAsStream(response, "Request processed successfully");
 }
 ```
 
@@ -280,16 +280,16 @@ private static void ServerCommandReceived(object source, WebServerEventArgs e)
     switch (url.ToLower())
     {
         case "/":
-            WebServer.OutPutStream(e.Context.Response, "Welcome to nanoFramework WebServer!");
+            WebServer.OutputAsStream(e.Context.Response, "Welcome to nanoFramework WebServer!");
             break;
             
         case "/time":
-            WebServer.OutPutStream(e.Context.Response, $"Current time: {DateTime.UtcNow}");
+            WebServer.OutputAsStream(e.Context.Response, $"Current time: {DateTime.UtcNow}");
             break;
             
         case "/info":
             var info = $"Server running on nanoFramework\nUptime: {Environment.TickCount}ms";
-            WebServer.OutPutStream(e.Context.Response, info);
+            WebServer.OutputAsStream(e.Context.Response, info);
             break;
             
         default:
@@ -325,7 +325,7 @@ private static void ServerCommandReceived(object source, WebServerEventArgs e)
         </body>
         </html>";
         
-        WebServer.OutPutStream(e.Context.Response, html);
+        WebServer.OutputAsStream(e.Context.Response, html);
     }
 }
 ```
@@ -350,7 +350,7 @@ private static void ServerCommandReceived(object source, WebServerEventArgs e)
                 ""memory"": {System.GC.GetTotalMemory(false)}
             }}";
             
-            WebServer.OutPutStream(e.Context.Response, json);
+            WebServer.OutputAsStream(e.Context.Response, json);
         }
         else
         {
@@ -411,12 +411,12 @@ private static void HandleRequest(WebServerEventArgs e)
         {
             response += $"{entry}\n";
         }
-        WebServer.OutPutStream(e.Context.Response, response);
+        WebServer.OutputAsStream(e.Context.Response, response);
     }
     else
     {
         // Handle other requests
-        WebServer.OutPutStream(e.Context.Response, "Request processed");
+        WebServer.OutputAsStream(e.Context.Response, "Request processed");
     }
 }
 ```
@@ -503,7 +503,7 @@ private static void HandleJsonRequest(WebServerEventArgs e)
     
     // Process JSON and respond
     e.Context.Response.ContentType = "application/json";
-    WebServer.OutPutStream(e.Context.Response, "{\"status\":\"success\"}");
+    WebServer.OutputAsStream(e.Context.Response, "{\"status\":\"success\"}");
 }
 ```
 
@@ -561,7 +561,7 @@ private static void ServerCommandReceived(object source, WebServerEventArgs e)
         }).Start();
         
         // Return immediate response
-        WebServer.OutPutStream(e.Context.Response, "Processing started");
+        WebServer.OutputAsStream(e.Context.Response, "Processing started");
     }
     // Here, you would implement another routing for returning the status of your long process.
 }
@@ -649,7 +649,7 @@ private static void ServerCommandReceived(object source, WebServerEventArgs e)
         System.GC.Collect();
         
         response.StatusCode = (int)HttpStatusCode.ServiceUnavailable;
-        WebServer.OutPutStream(response, "Service temporarily unavailable - low memory");
+        WebServer.OutputAsStream(response, "Service temporarily unavailable - low memory");
     }
     catch (System.IO.IOException ioEx)
     {
@@ -717,7 +717,7 @@ private static void ServerCommandReceived(object source, WebServerEventArgs e)
     ResponseBuilder.Append("Response data: ");
     ResponseBuilder.Append(DateTime.UtcNow);
     
-    WebServer.OutPutStream(e.Context.Response, ResponseBuilder.ToString());
+    WebServer.OutputAsStream(e.Context.Response, ResponseBuilder.ToString());
 }
 ```
 
@@ -734,7 +734,7 @@ private static void ServerCommandReceived(object source, WebServerEventArgs e)
     if (ResponseCache.Contains(url))
     {
         string cachedResponse = (string)ResponseCache[url];
-        WebServer.OutPutStream(e.Context.Response, cachedResponse);
+        WebServer.OutputAsStream(e.Context.Response, cachedResponse);
         return;
     }
     
@@ -747,7 +747,7 @@ private static void ServerCommandReceived(object source, WebServerEventArgs e)
         ResponseCache[url] = response;
     }
     
-    WebServer.OutPutStream(e.Context.Response, response);
+    WebServer.OutputAsStream(e.Context.Response, response);
 }
 ```
 

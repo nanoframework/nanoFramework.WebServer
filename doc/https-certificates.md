@@ -88,7 +88,7 @@ public class SecureController
         
         string json = JsonConvert.SerializeObject(data);
         e.Context.Response.ContentType = "application/json";
-        WebServer.OutPutStream(e.Context.Response, json);
+        WebServer.OutputAsStream(e.Context.Response, json);
     }
 }
 

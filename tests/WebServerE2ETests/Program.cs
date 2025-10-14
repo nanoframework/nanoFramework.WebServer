@@ -69,7 +69,7 @@ namespace WebServerE2ETests
                     toOutput += $"Parameter name: {par.Name}, Value: {par.Value}<br />";
                 }
                 toOutput += "</body></html>";
-                WebServer.OutPutStream(e.Context.Response, toOutput);
+                WebServer.OutputAsStream(e.Context.Response, toOutput);
                 return;
             }
             else if (url.IndexOf("/Text.txt") == 0)
@@ -97,7 +97,7 @@ namespace WebServerE2ETests
             }
             else
             {
-                WebServer.OutPutStream(e.Context.Response, "<html><head>" +
+                WebServer.OutputAsStream(e.Context.Response, "<html><head>" +
                     "<title>Hi from nanoFramework Server</title></head><body>You want me to say hello in a real HTML page!<br/><a href='/useinternal'>Generate an internal text.txt file</a><br />" +
                     "<a href='/Text.txt'>Download the Text.txt file</a><br>" +
                     "Try this url with parameters: <a href='/param.htm?param1=42&second=24&NAme=Ellerbach'>/param.htm?param1=42&second=24&NAme=Ellerbach</a></body></html>");
