@@ -263,7 +263,7 @@ namespace nanoFramework.WebServer
         /// </summary>
         /// <param name="port">Port number to listen on.</param>
         /// <param name="protocol"><see cref="HttpProtocol"/> version to use with web server.</param>
-        /// <param name="address">IP address to bind to.</param>
+        /// <param name="address">IP address to bind to. If <c>null</c>, the server will bind to the default network interface.</param>
         public WebServer(
             int port,
             HttpProtocol protocol,
