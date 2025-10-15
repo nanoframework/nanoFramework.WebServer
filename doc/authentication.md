@@ -23,7 +23,7 @@ public class SecureController
     [Route("secure/data")]
     public void GetSecureData(WebServerEventArgs e)
     {
-        WebServer.OutPutStream(e.Context.Response, "Secure data");
+        WebServer.OutputAsStream(e.Context.Response, "Secure data");
     }
 }
 
@@ -45,14 +45,14 @@ public class UserController
     [Authentication("Basic:admin secretpassword")]
     public void AdminPanel(WebServerEventArgs e)
     {
-        WebServer.OutPutStream(e.Context.Response, "Admin panel");
+        WebServer.OutputAsStream(e.Context.Response, "Admin panel");
     }
 
     [Route("user")]
     [Authentication("Basic:user userpass")]
     public void UserPanel(WebServerEventArgs e)
     {
-        WebServer.OutPutStream(e.Context.Response, "User panel");
+        WebServer.OutputAsStream(e.Context.Response, "User panel");
     }
 }
 ```
@@ -70,7 +70,7 @@ public class ApiController
     [Route("api/data")]
     public void GetData(WebServerEventArgs e)
     {
-        WebServer.OutPutStream(e.Context.Response, "API data");
+        WebServer.OutputAsStream(e.Context.Response, "API data");
     }
 }
 
@@ -92,14 +92,14 @@ public class ServiceController
     [Authentication("ApiKey:premium-key-789")]
     public void PremiumService(WebServerEventArgs e)
     {
-        WebServer.OutPutStream(e.Context.Response, "Premium service");
+        WebServer.OutputAsStream(e.Context.Response, "Premium service");
     }
 
     [Route("service/basic")]
     [Authentication("ApiKey:basic-key-456")]
     public void BasicService(WebServerEventArgs e)
     {
-        WebServer.OutPutStream(e.Context.Response, "Basic service");
+        WebServer.OutputAsStream(e.Context.Response, "Basic service");
     }
 }
 ```
@@ -125,7 +125,7 @@ public class PublicController
     [Route("public/info")]
     public void GetPublicInfo(WebServerEventArgs e)
     {
-        WebServer.OutPutStream(e.Context.Response, "Public information");
+        WebServer.OutputAsStream(e.Context.Response, "Public information");
     }
 }
 ```
@@ -140,28 +140,28 @@ public class MixedController
     public void BasicAuth(WebServerEventArgs e)
     {
         // Uses class-level Basic authentication
-        WebServer.OutPutStream(e.Context.Response, "Basic auth data");
+        WebServer.OutputAsStream(e.Context.Response, "Basic auth data");
     }
 
     [Route("secure/api")]
     [Authentication("ApiKey:special-key-123")]  // Override with API key
     public void ApiKeyAuth(WebServerEventArgs e)
     {
-        WebServer.OutPutStream(e.Context.Response, "API key data");
+        WebServer.OutputAsStream(e.Context.Response, "API key data");
     }
 
     [Route("secure/custom")]
     [Authentication("Basic:customuser custompass")]  // Override with custom basic auth
     public void CustomAuth(WebServerEventArgs e)
     {
-        WebServer.OutPutStream(e.Context.Response, "Custom auth data");
+        WebServer.OutputAsStream(e.Context.Response, "Custom auth data");
     }
 
     [Route("public")]
     [Authentication("None")]  // Override to allow public access
     public void PublicAccess(WebServerEventArgs e)
     {
-        WebServer.OutPutStream(e.Context.Response, "Public data");
+        WebServer.OutputAsStream(e.Context.Response, "Public data");
     }
 }
 ```
@@ -177,27 +177,27 @@ public class MultiAuthController
     [Authentication("Basic")]
     public void DataBasicAuth(WebServerEventArgs e)
     {
-        WebServer.OutPutStream(e.Context.Response, "Data via Basic auth");
+        WebServer.OutputAsStream(e.Context.Response, "Data via Basic auth");
     }
 
     [Route("data")]
     [Authentication("ApiKey:key1")]
     public void DataApiKey1(WebServerEventArgs e)
     {
-        WebServer.OutPutStream(e.Context.Response, "Data via API key 1");
+        WebServer.OutputAsStream(e.Context.Response, "Data via API key 1");
     }
 
     [Route("data")]
     [Authentication("ApiKey:key2")]
     public void DataApiKey2(WebServerEventArgs e)
     {
-        WebServer.OutPutStream(e.Context.Response, "Data via API key 2");
+        WebServer.OutputAsStream(e.Context.Response, "Data via API key 2");
     }
 
     [Route("data")]
     public void DataPublic(WebServerEventArgs e)
     {
-        WebServer.OutPutStream(e.Context.Response, "Public data");
+        WebServer.OutputAsStream(e.Context.Response, "Public data");
     }
 }
 ```

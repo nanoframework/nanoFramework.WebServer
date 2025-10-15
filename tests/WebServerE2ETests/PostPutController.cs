@@ -16,7 +16,7 @@ namespace WebServerE2ETests
             byte[] buff = new byte[e.Context.Request.InputStream.Length];
             e.Context.Request.InputStream.Read(buff, 0, buff.Length);
             var txt = e.Context.Request.ContentType.Contains("text") ? System.Text.Encoding.UTF8.GetString(buff, 0, buff.Length) : BitConverter.ToString(buff);
-            WebServer.OutPutStream(e.Context.Response, $"POST: {txt}");
+            WebServer.OutputAsStream(e.Context.Response, $"POST: {txt}");
         }
 
         [Method("PUT")]
@@ -26,7 +26,7 @@ namespace WebServerE2ETests
             byte[] buff = new byte[e.Context.Request.InputStream.Length];
             e.Context.Request.InputStream.Read(buff, 0, buff.Length);
             var txt = e.Context.Request.ContentType.Contains("text") ? System.Text.Encoding.UTF8.GetString(buff, 0, buff.Length) : BitConverter.ToString(buff);
-            WebServer.OutPutStream(e.Context.Response, $"PUT: {txt}");
+            WebServer.OutputAsStream(e.Context.Response, $"PUT: {txt}");
         }
 
     }

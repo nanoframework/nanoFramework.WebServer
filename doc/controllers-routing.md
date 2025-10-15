@@ -31,7 +31,7 @@ public class TestController
     [Method("GET")]
     public void GetTest(WebServerEventArgs e)
     {
-        WebServer.OutPutStream(e.Context.Response, "Test endpoint");
+        WebServer.OutputAsStream(e.Context.Response, "Test endpoint");
     }
 }
 ```
@@ -47,7 +47,7 @@ public class TestController
     public void MultipleRoutes(WebServerEventArgs e)
     {
         string route = e.Context.Request.RawUrl.TrimStart('/').Split('/')[0];
-        WebServer.OutPutStream(e.Context.Response, $"Route: {route}");
+        WebServer.OutputAsStream(e.Context.Response, $"Route: {route}");
     }
 }
 ```
@@ -123,7 +123,7 @@ public class TestController
     {
         // Will handle GET, POST, PUT, DELETE, etc.
         string method = e.Context.Request.HttpMethod;
-        WebServer.OutPutStream(e.Context.Response, $"Method: {method}");
+        WebServer.OutputAsStream(e.Context.Response, $"Method: {method}");
     }
 }
 ```
@@ -162,7 +162,7 @@ public void GetUser(WebServerEventArgs e)
     if (segments.Length > 2)
     {
         string userId = segments[2]; // /api/users/123
-        WebServer.OutPutStream(e.Context.Response, $"User ID: {userId}");
+        WebServer.OutputAsStream(e.Context.Response, $"User ID: {userId}");
     }
 }
 ```
@@ -176,7 +176,7 @@ nanoFramework WebServer supports parameterized routes with named placeholders us
 public void GetUserById(WebServerEventArgs e)
 {
     string userId = e.GetRouteParameter("id");
-    WebServer.OutPutStream(e.Context.Response, $"User ID: {userId}");
+    WebServer.OutputAsStream(e.Context.Response, $"User ID: {userId}");
 }
 
 [Route("api/users/{userId}/sensors/{sensorId}")]
@@ -185,7 +185,7 @@ public void GetUserSensor(WebServerEventArgs e)
     string userId = e.GetRouteParameter("userId");
     string sensorId = e.GetRouteParameter("sensorId");
     
-    WebServer.OutPutStream(e.Context.Response, 
+    WebServer.OutputAsStream(e.Context.Response, 
         $"User: {userId}, Sensor: {sensorId}");
 }
 
@@ -196,7 +196,7 @@ public void GetDeviceMeasurement(WebServerEventArgs e)
     string measurementType = e.GetRouteParameter("type");
     
     // Example: /api/devices/esp32-001/measurements/temperature
-    WebServer.OutPutStream(e.Context.Response, 
+    WebServer.OutputAsStream(e.Context.Response, 
         $"Device {deviceId} - {measurementType} data");
 }
 ```
@@ -223,7 +223,7 @@ public class PersonController
     {
         string json = JsonConvert.SerializeObject(persons);
         e.Context.Response.ContentType = "application/json";
-        WebServer.OutPutStream(e.Context.Response, json);
+        WebServer.OutputAsStream(e.Context.Response, json);
     }
 
     [Route("api/persons/{id}")]
@@ -238,7 +238,7 @@ public class PersonController
         {
             string json = JsonConvert.SerializeObject(person);
             e.Context.Response.ContentType = "application/json";
-            WebServer.OutPutStream(e.Context.Response, json);
+            WebServer.OutputAsStream(e.Context.Response, json);
         }
         else
         {
@@ -421,7 +421,7 @@ public void GetData(WebServerEventArgs e)
     string json = JsonConvert.SerializeObject(data);
     
     e.Context.Response.ContentType = "application/json";
-    WebServer.OutPutStream(e.Context.Response, json);
+    WebServer.OutputAsStream(e.Context.Response, json);
 }
 ```
 
@@ -433,7 +433,7 @@ public void GetPage(WebServerEventArgs e)
 {
     string html = "<html><body><h1>Hello nanoFramework!</h1></body></html>";
     e.Context.Response.ContentType = "text/html";
-    WebServer.OutPutStream(e.Context.Response, html);
+    WebServer.OutputAsStream(e.Context.Response, html);
 }
 ```
 
@@ -446,6 +446,6 @@ Bonus point if you read up to here, you can also create your custom status code!
 public void CustomStatus(WebServerEventArgs e)
 {
     e.Context.Response.StatusCode = 418; // I'm a teapot
-    WebServer.OutPutStream(e.Context.Response, "I'm a teapot!");
+    WebServer.OutputAsStream(e.Context.Response, "I'm a teapot!");
 }
 ```

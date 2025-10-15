@@ -50,7 +50,7 @@ private static void ServerCommandReceived(object source, WebServerEventArgs e)
 {
     if (e.Context.Request.RawUrl.ToLower() == "/hello")
     {
-        WebServer.OutPutStream(e.Context.Response, "Hello from nanoFramework!");
+        WebServer.OutputAsStream(e.Context.Response, "Hello from nanoFramework!");
     }
     else
     {
@@ -76,7 +76,7 @@ public class MyController
     [Method("GET")]
     public void Hello(WebServerEventArgs e)
     {
-        WebServer.OutPutStream(e.Context.Response, "Hello from Controller!");
+        WebServer.OutputAsStream(e.Context.Response, "Hello from Controller!");
     }
 
     [Route("api/led/{id}")]
@@ -84,7 +84,7 @@ public class MyController
     public void LedState(WebServerEventArgs e)
     {
         string ledId = e.GetRouteParameter("id");
-        WebServer.OutPutStream(e.Context.Response, $"You selected Led {ledId}!");
+        WebServer.OutputAsStream(e.Context.Response, $"You selected Led {ledId}!");
     }
 }
 ```

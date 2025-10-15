@@ -53,7 +53,7 @@ public class ApiController
         };
         
         e.Context.Response.ContentType = "application/json";
-        WebServer.OutPutStream(e.Context.Response, JsonConvert.SerializeObject(response));
+        WebServer.OutputAsStream(e.Context.Response, JsonConvert.SerializeObject(response));
     }
     
     [Route("api/hello")]
@@ -67,7 +67,7 @@ public class ApiController
             
             var response = $"{{\"message\":\"Hello, {content}!\"}}";
             e.Context.Response.ContentType = "application/json";
-            WebServer.OutPutStream(e.Context.Response, response);
+            WebServer.OutputAsStream(e.Context.Response, response);
         }
         else
         {
@@ -215,7 +215,7 @@ public class DeviceController
         };
         
         e.Context.Response.ContentType = "application/json";
-        WebServer.OutPutStream(e.Context.Response, JsonConvert.SerializeObject(deviceInfo));
+        WebServer.OutputAsStream(e.Context.Response, JsonConvert.SerializeObject(deviceInfo));
     }
     
     [Route("api/sensors")]
@@ -230,7 +230,7 @@ public class DeviceController
         };
         
         e.Context.Response.ContentType = "application/json";
-        WebServer.OutPutStream(e.Context.Response, JsonConvert.SerializeObject(sensors));
+        WebServer.OutputAsStream(e.Context.Response, JsonConvert.SerializeObject(sensors));
     }
     
     private static DateTime _startTime = DateTime.UtcNow;
@@ -277,7 +277,7 @@ public class ConfigController
                 var error = $"{{\"error\":\"Request body is required\"}}";
                 e.Context.Response.ContentType = "application/json";
                 e.Context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-                WebServer.OutPutStream(e.Context.Response, error);
+                WebServer.OutputAsStream(e.Context.Response, error);
                 return;
             }
             
@@ -291,7 +291,7 @@ public class ConfigController
                 var error = $"{{\"error\":\"Missing required fields: name, value\"}}";
                 e.Context.Response.ContentType = "application/json";
                 e.Context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-                WebServer.OutPutStream(e.Context.Response, error);
+                WebServer.OutputAsStream(e.Context.Response, error);
                 return;
             }
             
@@ -307,14 +307,14 @@ public class ConfigController
             
             e.Context.Response.ContentType = "application/json";
             e.Context.Response.StatusCode = (int)HttpStatusCode.Created;
-            WebServer.OutPutStream(e.Context.Response, JsonConvert.SerializeObject(response));
+            WebServer.OutputAsStream(e.Context.Response, JsonConvert.SerializeObject(response));
         }
         catch (Exception ex)
         {
             var error = $"{{\"error\":\"Internal server error: {ex.Message}\"}}";
             e.Context.Response.ContentType = "application/json";
             e.Context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-            WebServer.OutPutStream(e.Context.Response, error);
+            WebServer.OutputAsStream(e.Context.Response, error);
         }
     }
     
@@ -351,7 +351,7 @@ public class LedController
                 var error = $"{{\"error\":\"Missing 'state' field\"}}";
                 e.Context.Response.ContentType = "application/json";
                 e.Context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-                WebServer.OutPutStream(e.Context.Response, error);
+                WebServer.OutputAsStream(e.Context.Response, error);
                 return;
             }
             
@@ -364,7 +364,7 @@ public class LedController
                 var error = $"{{\"error\":\"State must be 'on' or 'off'\"}}";
                 e.Context.Response.ContentType = "application/json";
                 e.Context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-                WebServer.OutPutStream(e.Context.Response, error);
+                WebServer.OutputAsStream(e.Context.Response, error);
                 return;
             }
             
@@ -380,14 +380,14 @@ public class LedController
             };
             
             e.Context.Response.ContentType = "application/json";
-            WebServer.OutPutStream(e.Context.Response, JsonConvert.SerializeObject(response));
+            WebServer.OutputAsStream(e.Context.Response, JsonConvert.SerializeObject(response));
         }
         catch (Exception ex)
         {
             var error = $"{{\"error\":\"Failed to update LED: {ex.Message}\"}}";
             e.Context.Response.ContentType = "application/json";
             e.Context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-            WebServer.OutPutStream(e.Context.Response, error);
+            WebServer.OutputAsStream(e.Context.Response, error);
         }
     }
     
@@ -428,7 +428,7 @@ public class DataController
         };
         
         e.Context.Response.ContentType = "application/json";
-        WebServer.OutPutStream(e.Context.Response, JsonConvert.SerializeObject(response));
+        WebServer.OutputAsStream(e.Context.Response, JsonConvert.SerializeObject(response));
     }
 
     // Delete specific item by ID using parameterized route
@@ -450,14 +450,14 @@ public class DataController
             };
             
             e.Context.Response.ContentType = "application/json";
-            WebServer.OutPutStream(e.Context.Response, response);
+            WebServer.OutputAsStream(e.Context.Response, response);
         }
         else
         {
             var error = $"{{\"error\":\"Data with id '{id}' not found\"}}";
             e.Context.Response.ContentType = "application/json";
             e.Context.Response.StatusCode = (int)HttpStatusCode.NotFound;
-            WebServer.OutPutStream(e.Context.Response, error);
+            WebServer.OutputAsStream(e.Context.Response, error);
         }
     }
 }
@@ -502,14 +502,14 @@ public class UserController
         if (user != null)
         {
             e.Context.Response.ContentType = "application/json";
-            WebServer.OutPutStream(e.Context.Response, JsonConvert.SerializeObject(user));
+            WebServer.OutputAsStream(e.Context.Response, JsonConvert.SerializeObject(user));
         }
         else
         {
             var error = $"{{\"error\":\"User {userId} not found\"}}";
             e.Context.Response.ContentType = "application/json";
             e.Context.Response.StatusCode = (int)HttpStatusCode.NotFound;
-            WebServer.OutPutStream(e.Context.Response, error);
+            WebServer.OutputAsStream(e.Context.Response, error);
         }
     }
 
@@ -530,14 +530,14 @@ public class UserController
                 Value = setting
             };
             e.Context.Response.ContentType = "application/json";
-            WebServer.OutPutStream(e.Context.Response, JsonConvert.SerializeObject(response));
+            WebServer.OutputAsStream(e.Context.Response, JsonConvert.SerializeObject(response));
         }
         else
         {
             var error = $"{{\"error\":\"Setting {settingName} not found for user {userId}\"}}";
             e.Context.Response.ContentType = "application/json";
             e.Context.Response.StatusCode = (int)HttpStatusCode.NotFound;
-            WebServer.OutPutStream(e.Context.Response, error);
+            WebServer.OutputAsStream(e.Context.Response, error);
         }
     }
     
@@ -616,7 +616,7 @@ public class SearchController
             var error = $"{{\"error\":\"Query parameter 'q' is required\"}}";
             e.Context.Response.ContentType = "application/json";
             e.Context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-            WebServer.OutPutStream(e.Context.Response, error);
+            WebServer.OutputAsStream(e.Context.Response, error);
             return;
         }
         
@@ -634,7 +634,7 @@ public class SearchController
         };
         
         e.Context.Response.ContentType = "application/json";
-        WebServer.OutPutStream(e.Context.Response, JsonConvert.SerializeObject(response));
+        WebServer.OutputAsStream(e.Context.Response, JsonConvert.SerializeObject(response));
     }
     
     private object[] PerformSearch(string query, int limit, int offset, string sortBy)
@@ -681,7 +681,7 @@ public class ProductController
                 var error = $"{{\"error\":\"Content-Type must be application/json\"}}";
                 e.Context.Response.ContentType = "application/json";
                 e.Context.Response.StatusCode = (int)HttpStatusCode.UnsupportedMediaType;
-                WebServer.OutPutStream(e.Context.Response, error);
+                WebServer.OutputAsStream(e.Context.Response, error);
                 return;
             }
             
@@ -699,7 +699,7 @@ public class ProductController
                     var error = $"{{\"error\":\"Missing required field: {field}\"}}";
                     e.Context.Response.ContentType = "application/json";
                     e.Context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-                    WebServer.OutPutStream(e.Context.Response, JsonConvert.SerializeObject(error));
+                    WebServer.OutputAsStream(e.Context.Response, JsonConvert.SerializeObject(error));
                     return;
                 }
             }
@@ -710,7 +710,7 @@ public class ProductController
                 var error = $"{{\"error\":\"Price must be a positive number\"}}";
                 e.Context.Response.ContentType = "application/json";
                 e.Context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-                WebServer.OutPutStream(e.Context.Response, error);
+                WebServer.OutputAsStream(e.Context.Response, error);
                 return;
             }
             
@@ -729,14 +729,14 @@ public class ProductController
             
             e.Context.Response.ContentType = "application/json";
             e.Context.Response.StatusCode = (int)HttpStatusCode.Created;
-            WebServer.OutPutStream(e.Context.Response, JsonConvert.SerializeObject(response));
+            WebServer.OutputAsStream(e.Context.Response, JsonConvert.SerializeObject(response));
         }
         catch (Exception ex)
         {
             var error = $"{{\"error\":\"Failed to create product: {ex.Message}\"}}";
             e.Context.Response.ContentType = "application/json";
             e.Context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-            WebServer.OutPutStream(e.Context.Response, error);
+            WebServer.OutputAsStream(e.Context.Response, error);
         }
     }
     
@@ -775,7 +775,7 @@ public class UploadController
                 };
                 
                 e.Context.Response.ContentType = "application/json";
-                WebServer.OutPutStream(e.Context.Response, JsonConvert.SerializeObject(response));
+                WebServer.OutputAsStream(e.Context.Response, JsonConvert.SerializeObject(response));
             }
             else if (contentType == "application/x-www-form-urlencoded")
             {
@@ -794,14 +794,14 @@ public class UploadController
                 };
                 
                 e.Context.Response.ContentType = "application/json";
-                WebServer.OutPutStream(e.Context.Response, JsonConvert.SerializeObject(response));
+                WebServer.OutputAsStream(e.Context.Response, JsonConvert.SerializeObject(response));
             }
             else
             {
                 var error = $"{{\"error\":\"Unsupported content type\"}}";
                 e.Context.Response.ContentType = "application/json";
                 e.Context.Response.StatusCode = (int)HttpStatusCode.UnsupportedMediaType;
-                WebServer.OutPutStream(e.Context.Response, error);
+                WebServer.OutputAsStream(e.Context.Response, error);
             }
         }
         catch (Exception ex)
@@ -809,7 +809,7 @@ public class UploadController
             var error = $"{{\"error\":\"Upload failed: {ex.Message}\"}}";
             e.Context.Response.ContentType = "application/json";
             e.Context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-            WebServer.OutPutStream(e.Context.Response, error);
+            WebServer.OutputAsStream(e.Context.Response, error);
         }
     }
     
@@ -884,7 +884,7 @@ public class ResponseController
         };
         
         e.Context.Response.ContentType = "application/json";
-        WebServer.OutPutStream(e.Context.Response, JsonConvert.SerializeObject(data));
+        WebServer.OutputAsStream(e.Context.Response, JsonConvert.SerializeObject(data));
     }
 }
 ```
@@ -914,7 +914,7 @@ public class XmlController
 </response>";
         
         e.Context.Response.ContentType = "application/xml";
-        WebServer.OutPutStream(e.Context.Response, xml);
+        WebServer.OutputAsStream(e.Context.Response, xml);
     }
 }
 ```
@@ -937,7 +937,7 @@ public class CsvController
         
         e.Context.Response.ContentType = "text/csv";
         e.Context.Response.Headers.Add("Content-Disposition", "attachment; filename=sensor_data.csv");
-        WebServer.OutPutStream(e.Context.Response, csv.ToString());
+        WebServer.OutputAsStream(e.Context.Response, csv.ToString());
     }
 }
 ```
@@ -1017,7 +1017,7 @@ public class ErrorHandlingController
         
         response.ContentType = "application/json";
         response.StatusCode = (int)statusCode;
-        WebServer.OutPutStream(response, JsonConvert.SerializeObject(error));
+        WebServer.OutputAsStream(response, JsonConvert.SerializeObject(error));
     }
 }
 ```
@@ -1039,7 +1039,7 @@ public class GlobalErrorHandler
         
         e.Context.Response.ContentType = "application/json";
         e.Context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-        WebServer.OutPutStream(e.Context.Response, JsonConvert.SerializeObject(error));
+        WebServer.OutputAsStream(e.Context.Response, JsonConvert.SerializeObject(error));
     }
 }
 ```
@@ -1085,20 +1085,20 @@ public class ContentNegotiationController
 </data>";
             
             e.Context.Response.ContentType = "application/xml";
-            WebServer.OutPutStream(e.Context.Response, xml);
+            WebServer.OutputAsStream(e.Context.Response, xml);
         }
         else if (acceptHeader.Contains("text/plain"))
         {
             var text = $"Temperature: {data.temperature}°C\nHumidity: {data.humidity}%\nTimestamp: {data.timestamp}";
             
             e.Context.Response.ContentType = "text/plain";
-            WebServer.OutPutStream(e.Context.Response, text);
+            WebServer.OutputAsStream(e.Context.Response, text);
         }
         else
         {
             // Default to JSON
             e.Context.Response.ContentType = "application/json";
-            WebServer.OutPutStream(e.Context.Response, JsonConvert.SerializeObject(data));
+            WebServer.OutputAsStream(e.Context.Response, JsonConvert.SerializeObject(data));
         }
     }
 }
@@ -1128,7 +1128,7 @@ public class SecureApiController
         };
         
         e.Context.Response.ContentType = "application/json";
-        WebServer.OutPutStream(e.Context.Response, JsonConvert.SerializeObject(secureData));
+        WebServer.OutputAsStream(e.Context.Response, JsonConvert.SerializeObject(secureData));
     }
     
     [Route("api/secure/config")]
@@ -1147,7 +1147,7 @@ public class SecureApiController
         };
         
         e.Context.Response.ContentType = "application/json";
-        WebServer.OutPutStream(e.Context.Response, JsonConvert.SerializeObject(response));
+        WebServer.OutputAsStream(e.Context.Response, JsonConvert.SerializeObject(response));
     }
 }
 ```
@@ -1222,7 +1222,7 @@ public class IoTDeviceController
         };
         
         e.Context.Response.ContentType = "application/json";
-        WebServer.OutPutStream(e.Context.Response, JsonConvert.SerializeObject(response));
+        WebServer.OutputAsStream(e.Context.Response, JsonConvert.SerializeObject(response));
     }
     
     // GET /api/devices/{id} - Get specific device
@@ -1235,7 +1235,7 @@ public class IoTDeviceController
         if (_devices.Contains(deviceId))
         {
             e.Context.Response.ContentType = "application/json";
-            WebServer.OutPutStream(e.Context.Response, JsonConvert.SerializeObject(_devices[deviceId]));
+            WebServer.OutputAsStream(e.Context.Response, JsonConvert.SerializeObject(_devices[deviceId]));
         }
         else
         {
@@ -1257,7 +1257,7 @@ public class IoTDeviceController
             if (sensorData != null)
             {
                 e.Context.Response.ContentType = "application/json";
-                WebServer.OutPutStream(e.Context.Response, JsonConvert.SerializeObject(sensorData));
+                WebServer.OutputAsStream(e.Context.Response, JsonConvert.SerializeObject(sensorData));
             }
             else
             {
@@ -1303,7 +1303,7 @@ public class IoTDeviceController
             
             e.Context.Response.ContentType = "application/json";
             e.Context.Response.StatusCode = (int)HttpStatusCode.Created;
-            WebServer.OutPutStream(e.Context.Response, JsonConvert.SerializeObject(device));
+            WebServer.OutputAsStream(e.Context.Response, JsonConvert.SerializeObject(device));
         }
         catch (Exception ex)
         {
@@ -1349,7 +1349,7 @@ public class IoTDeviceController
             currentDevice["lastSeen"] = DateTime.UtcNow.ToString();
             
             e.Context.Response.ContentType = "application/json";
-            WebServer.OutPutStream(e.Context.Response, JsonConvert.SerializeObject(currentDevice));
+            WebServer.OutputAsStream(e.Context.Response, JsonConvert.SerializeObject(currentDevice));
         }
         catch (Exception ex)
         {
@@ -1380,7 +1380,7 @@ public class IoTDeviceController
             var result = UpdateSensorConfiguration(deviceId, sensorId, sensorUpdate);
             
             e.Context.Response.ContentType = "application/json";
-            WebServer.OutPutStream(e.Context.Response, JsonConvert.SerializeObject(result));
+            WebServer.OutputAsStream(e.Context.Response, JsonConvert.SerializeObject(result));
         }
         catch (Exception ex)
         {
@@ -1406,7 +1406,7 @@ public class IoTDeviceController
             };
             
             e.Context.Response.ContentType = "application/json";
-            WebServer.OutPutStream(e.Context.Response, JsonConvert.SerializeObject(response));
+            WebServer.OutputAsStream(e.Context.Response, JsonConvert.SerializeObject(response));
         }
         else
         {
@@ -1445,7 +1445,7 @@ public class IoTDeviceController
         var error = $"{{\"error\":\"{message}\"}}";
         response.ContentType = "application/json";
         response.StatusCode = (int)HttpStatusCode.BadRequest;
-        WebServer.OutPutStream(response, error);
+        WebServer.OutputAsStream(response, error);
     }
 
     private void SendNotFound(HttpListenerResponse response, string message)
@@ -1453,7 +1453,7 @@ public class IoTDeviceController
         var error = $"{{\"error\":\"{message}\"}}";
         response.ContentType = "application/json";
         response.StatusCode = (int)HttpStatusCode.NotFound;
-        WebServer.OutPutStream(response, error);
+        WebServer.OutputAsStream(response, error);
     }
 
     private void SendInternalError(HttpListenerResponse response, string message)
@@ -1461,7 +1461,7 @@ public class IoTDeviceController
         var error = $"{{\"error\":\"Internal server error: {message}\"}}";
         response.ContentType = "application/json";
         response.StatusCode = (int)HttpStatusCode.InternalServerError;
-        WebServer.OutPutStream(response, error);
+        WebServer.OutputAsStream(response, error);
     }
 }
 ```
@@ -1505,7 +1505,7 @@ public class BatchController
             };
             
             e.Context.Response.ContentType = "application/json";
-            WebServer.OutPutStream(e.Context.Response, JsonConvert.SerializeObject(response));
+            WebServer.OutputAsStream(e.Context.Response, JsonConvert.SerializeObject(response));
         }
         catch (Exception ex)
         {
@@ -1568,7 +1568,7 @@ public class BatchController
         var error = $"{{\"error\":\"{message}\"}}";
         response.ContentType = "application/json";
         response.StatusCode = (int)HttpStatusCode.BadRequest;
-        WebServer.OutPutStream(response, error);
+        WebServer.OutputAsStream(response, error);
     }
     
     private void SendInternalError(HttpListenerResponse response, string message)
@@ -1576,7 +1576,7 @@ public class BatchController
         var error = $"{{\"error\":\"Internal server error: {message}\"}}";
         response.ContentType = "application/json";
         response.StatusCode = (int)HttpStatusCode.InternalServerError;
-        WebServer.OutPutStream(response, error);
+        WebServer.OutputAsStream(response, error);
     }
 }
 ```
@@ -1610,7 +1610,7 @@ public static class ResponseHelper
         };
         
         response.ContentType = "application/json";
-        WebServer.OutPutStream(response, JsonConvert.SerializeObject(standardResponse));
+        WebServer.OutputAsStream(response, JsonConvert.SerializeObject(standardResponse));
     }
     
     public static void SendErrorResponse(HttpListenerResponse response, HttpStatusCode statusCode, string message)
@@ -1624,7 +1624,7 @@ public static class ResponseHelper
         
         response.ContentType = "application/json";
         response.StatusCode = (int)statusCode;
-        WebServer.OutPutStream(response, JsonConvert.SerializeObject(standardResponse));
+        WebServer.OutputAsStream(response, JsonConvert.SerializeObject(standardResponse));
     }
 }
 ```

@@ -176,11 +176,11 @@ namespace nanoFramework.WebServer
             // Remove query parameters from the URL for matching
             var urlParam = rawUrl.IndexOf(ParamStart);
             var urlPath = urlParam > 0 ? rawUrl.Substring(0, urlParam) : rawUrl;
-            
+
             // Normalize the URL path and route for comparison
             var urlToCompare = caseSensitive ? urlPath : urlPath.ToLower();
             var routeToCompare = caseSensitive ? route : route.ToLower();
-            
+
             // Ensure both paths start with '/' for consistent segment splitting
             if (!urlToCompare.StartsWith("/"))
             {
@@ -190,34 +190,34 @@ namespace nanoFramework.WebServer
             {
                 routeToCompare = "/" + routeToCompare;
             }
-            
+
             // Split into segments
             var urlSegments = urlToCompare.Split('/');
             var routeSegments = routeToCompare.Split('/');
-            
+
             // Number of segments must match
             if (urlSegments.Length != routeSegments.Length)
             {
                 return null;
             }
-            
+
             ArrayList parameters = new ArrayList();
-            
+
             // Compare each segment and extract parameters
             for (int i = 0; i < routeSegments.Length; i++)
             {
                 var routeSegment = routeSegments[i];
                 var urlSegment = urlSegments[i];
-                
+
                 // Skip empty segments (from leading slash)
                 if (string.IsNullOrEmpty(routeSegment) && string.IsNullOrEmpty(urlSegment))
                 {
                     continue;
                 }
-                
+
                 // Check if this is a parameter segment (starts and ends with curly braces)
-                if (routeSegment.Length > 2 && 
-                    routeSegment.StartsWith("{") && 
+                if (routeSegment.Length > 2 &&
+                    routeSegment.StartsWith("{") &&
                     routeSegment.EndsWith("}"))
                 {
                     // Parameter segment matches any non-empty segment that doesn't contain '/'
@@ -225,32 +225,32 @@ namespace nanoFramework.WebServer
                     {
                         return null;
                     }
-                    
+
                     // Extract parameter name (remove curly braces)
                     var paramName = routeSegment.Substring(1, routeSegment.Length - 2);
                     parameters.Add(new UrlParameter { Name = paramName, Value = urlSegments[i] }); // Use original case for value
                     continue;
                 }
-                
+
                 // Exact match required for non-parameter segments
                 if (routeSegment != urlSegment)
                 {
                     return null;
                 }
             }
-            
+
             // Convert ArrayList to array
             if (parameters.Count == 0)
             {
                 return null;
             }
-            
+
             var result = new UrlParameter[parameters.Count];
             for (int i = 0; i < parameters.Count; i++)
             {
                 result[i] = (UrlParameter)parameters[i];
             }
-            
+
             return result;
         }
 
@@ -536,16 +536,30 @@ namespace nanoFramework.WebServer
         /// </summary>
         /// <param name="response">the socket stream</param>
         /// <param name="strResponse">the stream to output</param>
-        public static void OutPutStream(HttpListenerResponse response, string strResponse)
+        [Obsolete("Use OutputAsStream instead. This method will be removed in a future version.")]
+        public static void OutPutStream(HttpListenerResponse response, string strResponse) => OutputAsStream(response, strResponse);
+
+        /// <summary>
+        /// Output a string content as a stream.
+        /// </summary>
+        /// <param name="response">The response to write to.</param>
+        /// <param name="content">the stream to output</param>
+        public static void OutputAsStream(
+            HttpListenerResponse response,
+            string content)
         {
             if (response == null)
             {
                 return;
             }
 
-            byte[] messageBody = Encoding.UTF8.GetBytes(strResponse);
+            byte[] messageBody = Encoding.UTF8.GetBytes(content);
+
             response.ContentLength64 = messageBody.Length;
-            response.OutputStream.Write(messageBody, 0, messageBody.Length);
+            response.OutputStream.Write(
+                messageBody,
+                0,
+                messageBody.Length);
         }
 
         /// <summary>
@@ -777,7 +791,7 @@ namespace nanoFramework.WebServer
                         {
                             multipleCallback += ".";
                             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                            OutPutStream(context.Response, multipleCallback);
+                            OutputAsStream(context.Response, multipleCallback);
                         }
                         else
                         {
@@ -821,47 +835,47 @@ namespace nanoFramework.WebServer
             // Remove query parameters from the URL for matching
             var urlParam = rawUrl.IndexOf(ParamStart);
             var urlPath = urlParam > 0 ? rawUrl.Substring(0, urlParam) : rawUrl;
-            
+
             // Normalize the URL path and route for comparison
             var urlToCompare = route.CaseSensitive ? urlPath : urlPath.ToLower();
             var routeToCompare = route.CaseSensitive ? route.Route : route.Route.ToLower();
-            
+
             // Ensure both paths start with '/' for consistent segment splitting
             if (!urlToCompare.StartsWith("/"))
             {
                 urlToCompare = "/" + urlToCompare;
             }
-            
+
             if (!routeToCompare.StartsWith("/"))
             {
                 routeToCompare = "/" + routeToCompare;
             }
-            
+
             // Split into segments
             var urlSegments = urlToCompare.Split('/');
             var routeSegments = routeToCompare.Split('/');
-            
+
             // Number of segments must match
             if (urlSegments.Length != routeSegments.Length)
             {
                 return false;
             }
-            
+
             // Compare each segment
             for (int i = 0; i < routeSegments.Length; i++)
             {
                 var routeSegment = routeSegments[i];
                 var urlSegment = urlSegments[i];
-                
+
                 // Skip empty segments (from leading slash)
                 if (string.IsNullOrEmpty(routeSegment) && string.IsNullOrEmpty(urlSegment))
                 {
                     continue;
                 }
-                
+
                 // Check if this is a parameter segment (starts and ends with curly braces)
-                if (routeSegment.Length > 2 && 
-                    routeSegment.StartsWith("{") && 
+                if (routeSegment.Length > 2 &&
+                    routeSegment.StartsWith("{") &&
                     routeSegment.EndsWith("}"))
                 {
                     // Parameter segment matches any non-empty segment that doesn't contain '/'
@@ -872,14 +886,14 @@ namespace nanoFramework.WebServer
                     // Parameter matches, continue to next segment
                     continue;
                 }
-                
+
                 // Exact match required for non-parameter segments
                 if (routeSegment != urlSegment)
                 {
                     return false;
                 }
             }
-            
+
             return true;
         }
 
@@ -892,12 +906,12 @@ namespace nanoFramework.WebServer
         {
             // Extract route parameters if the route contains parameter placeholders
             var routeParameters = ExtractRouteParameters(route.Route, context.Request.RawUrl, route.CaseSensitive);
-            
+
             // Create WebServerEventArgs with or without route parameters
-            var eventArgs = routeParameters != null 
+            var eventArgs = routeParameters != null
                 ? new WebServerEventArgs(context, routeParameters)
                 : new WebServerEventArgs(context);
-                
+
             route.Callback.Invoke(null, new object[] { eventArgs });
         }
 
