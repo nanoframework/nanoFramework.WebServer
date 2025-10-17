@@ -3,8 +3,9 @@
 // See LICENSE file in the project root for full license information.
 //
 
-using nanoFramework.TestFramework;
 using System;
+using System.Net;
+using nanoFramework.TestFramework;
 
 namespace nanoFramework.WebServer.Tests
 {
@@ -200,6 +201,178 @@ namespace nanoFramework.WebServer.Tests
             Assert.AreEqual(1, parameters.Length, "Should have exactly one route parameter");
             Assert.AreEqual("id", parameters[0].Name, "Parameter name should be 'id'");
             Assert.AreEqual("123", parameters[0].Value, "Parameter value should be '123'");
+        }
+
+        [TestMethod]
+        public void WebServerConstructors()
+        {
+            // Test basic constructor with port and protocol only (HTTP)
+            var httpServer = new WebServer(8080, HttpProtocol.Http);
+            Assert.AreEqual(8080, httpServer.Port);
+            Assert.AreEqual(HttpProtocol.Http, httpServer.Protocol);
+            httpServer.Dispose();
+
+            // Test basic constructor with port and protocol only (HTTPS)  
+            var httpsServer = new WebServer(8443, HttpProtocol.Https);
+            Assert.AreEqual(8443, httpsServer.Port);
+            Assert.AreEqual(HttpProtocol.Https, httpsServer.Protocol);
+            httpsServer.Dispose();
+        }
+
+        [TestMethod]
+        public void WebServerConstructor_WithIPAddress_HTTP()
+        {
+            // Test constructor with IP address for HTTP
+            var address = IPAddress.Parse("127.0.0.1");
+            var server = new WebServer(8080, HttpProtocol.Http, address);
+
+            Assert.AreEqual(8080, server.Port);
+            Assert.AreEqual(HttpProtocol.Http, server.Protocol);
+            server.Dispose();
+        }
+
+        [TestMethod]
+        public void WebServerConstructor_WithIPAddress_HTTPS()
+        {
+            // Test constructor with IP address for HTTPS
+            var address = IPAddress.Parse("192.168.1.100");
+            var server = new WebServer(8443, HttpProtocol.Https, address);
+
+            Assert.AreEqual(8443, server.Port);
+            Assert.AreEqual(HttpProtocol.Https, server.Protocol);
+            server.Dispose();
+        }
+
+        [TestMethod]
+        public void WebServerConstructor_WithoutIPAddress()
+        {
+            // Test constructor without (should bind to default interface)
+            var server = new WebServer(9000, HttpProtocol.Http);
+
+            Assert.AreEqual(9000, server.Port);
+            Assert.AreEqual(HttpProtocol.Http, server.Protocol);
+            server.Dispose();
+        }
+
+        [TestMethod]
+        public void WebServerConstructor_WithControllers_HTTP()
+        {
+            // Test constructor with controllers for HTTP
+            var controllers = new Type[] { typeof(TestController) };
+            var server = new WebServer(8080, HttpProtocol.Http, controllers);
+
+            Assert.AreEqual(8080, server.Port);
+            Assert.AreEqual(HttpProtocol.Http, server.Protocol);
+            server.Dispose();
+        }
+
+        [TestMethod]
+        public void WebServerConstructor_WithControllers_HTTPS()
+        {
+            // Test constructor with controllers for HTTPS
+            var controllers = new Type[] { typeof(TestController), typeof(AnotherTestController) };
+            var server = new WebServer(8443, HttpProtocol.Https, controllers);
+
+            Assert.AreEqual(8443, server.Port);
+            Assert.AreEqual(HttpProtocol.Https, server.Protocol);
+            server.Dispose();
+        }
+
+        [TestMethod]
+        public void WebServerConstructor_WithEmptyControllers()
+        {
+            // Test constructor with empty controllers array
+            var controllers = new Type[0];
+            var server = new WebServer(9002, HttpProtocol.Http, controllers);
+
+            Assert.AreEqual(9002, server.Port);
+            Assert.AreEqual(HttpProtocol.Http, server.Protocol);
+            server.Dispose();
+        }
+
+        [TestMethod]
+        public void WebServerConstructor_FullConstructor_HTTP()
+        {
+            // Test full constructor with IP address and controllers for HTTP
+            var address = IPAddress.Parse("10.0.0.1");
+            var controllers = new Type[] { typeof(TestController) };
+            var server = new WebServer(8080, HttpProtocol.Http, address, controllers);
+
+            Assert.AreEqual(8080, server.Port);
+            Assert.AreEqual(HttpProtocol.Http, server.Protocol);
+            server.Dispose();
+        }
+
+        [TestMethod]
+        public void WebServerConstructor_FullConstructor_HTTPS()
+        {
+            // Test full constructor with IP address and controllers for HTTPS
+            var address = IPAddress.Parse("172.16.0.1");
+            var controllers = new Type[] { typeof(TestController), typeof(AnotherTestController) };
+            var server = new WebServer(8443, HttpProtocol.Https, address, controllers);
+
+            Assert.AreEqual(8443, server.Port);
+            Assert.AreEqual(HttpProtocol.Https, server.Protocol);
+            server.Dispose();
+        }
+
+        [TestMethod]
+        public void WebServerConstructor_IsRunningProperty()
+        {
+            // Test IsRunning property is false initially for all constructor variations
+            var server1 = new WebServer(8080, HttpProtocol.Http);
+            var server2 = new WebServer(8081, HttpProtocol.Http, IPAddress.Parse("127.0.0.1"));
+            var server3 = new WebServer(8082, HttpProtocol.Http, new Type[] { typeof(TestController) });
+            var server4 = new WebServer(8083, HttpProtocol.Http, IPAddress.Parse("127.0.0.1"), new Type[] { typeof(TestController) });
+
+            Assert.IsFalse(server1.IsRunning);
+            Assert.IsFalse(server2.IsRunning);
+            Assert.IsFalse(server3.IsRunning);
+            Assert.IsFalse(server4.IsRunning);
+
+            server1.Dispose();
+            server2.Dispose();
+            server3.Dispose();
+            server4.Dispose();
+        }
+
+        [TestMethod]
+        public void WebServerConstructor_DifferentPortNumbers()
+        {
+            // Test various port numbers across different constructor overloads
+            var server1 = new WebServer(80, HttpProtocol.Http);
+            var server2 = new WebServer(443, HttpProtocol.Https, IPAddress.Parse("127.0.0.1"));
+            var server3 = new WebServer(3000, HttpProtocol.Http, new Type[] { typeof(TestController) });
+            var server4 = new WebServer(5000, HttpProtocol.Https, IPAddress.Parse("127.0.0.1"), new Type[] { typeof(TestController) });
+
+            Assert.AreEqual(80, server1.Port);
+            Assert.AreEqual(443, server2.Port);
+            Assert.AreEqual(3000, server3.Port);
+            Assert.AreEqual(5000, server4.Port);
+
+            server1.Dispose();
+            server2.Dispose();
+            server3.Dispose();
+            server4.Dispose();
+        }
+    }
+
+    // Test controller classes for constructor tests
+    internal class TestController
+    {
+        [Route("test")]
+        public void TestMethod(WebServerEventArgs e)
+        {
+            WebServer.OutputAsStream(e.Context.Response, "Test response");
+        }
+    }
+
+    internal class AnotherTestController
+    {
+        [Route("another")]
+        public void AnotherMethod(WebServerEventArgs e)
+        {
+            WebServer.OutputAsStream(e.Context.Response, "Another response");
         }
     }
 }
