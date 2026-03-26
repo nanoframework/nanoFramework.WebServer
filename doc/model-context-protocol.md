@@ -1,4 +1,4 @@
-# Model Context Protocol (MCP) Support
+﻿# Model Context Protocol (MCP) Support
 
 The nanoFramework WebServer provides comprehensive support for the Model Context Protocol (MCP), enabling AI agents and language models to directly interact with your embedded devices. MCP allows AI systems to discover, invoke, and receive responses from tools running on your nanoFramework device.
 
@@ -217,28 +217,56 @@ Use classes to handle multiple parameters or complex data structures:
 ```csharp
 public class DeviceConfig
 {
-    [Description("Device name identifier")]
-    public string DeviceName { get; set; }
+    public string DeviceName
+    {
+        [Description("Device name identifier")]
+        get;
+        set;
+    }
     
-    [Description("Operating mode: auto, manual, or sleep")]
-    public string Mode { get; set; }
+    public string Mode
+    {
+        [Description("Operating mode: auto, manual, or sleep")]
+        get;
+        set;
+    }
     
-    [Description("Update interval in seconds")]
-    public int UpdateInterval { get; set; } = 60;
+    public int UpdateInterval
+    {
+        [Description("Update interval in seconds")]
+        get;
+        set;
+    } = 60;
     
-    public WifiSettings Wifi { get; set; } = new WifiSettings();
+    public WifiSettings Wifi
+    {
+        get;
+        set;
+    } = new WifiSettings();
 }
 
 public class WifiSettings
 {
-    [Description("WiFi network SSID")]
-    public string SSID { get; set; }
+    public string SSID
+    {
+        [Description("WiFi network SSID")]
+        get;
+        set;
+    }
     
-    [Description("WiFi signal strength in dBm")]
-    public int SignalStrength { get; set; }
+    public int SignalStrength
+    {
+        [Description("WiFi signal strength in dBm")]
+        get;
+        set;
+    }
     
-    [Description("Connection status")]
-    public bool IsConnected { get; set; }
+    public bool IsConnected
+    {
+        [Description("Connection status")]
+        get;
+        set;
+    }
 }
 ```
 
@@ -1104,10 +1132,18 @@ public class SecureTools
 public class ResetRequest
 {
     [Description("Confirmation code (must be 'FACTORY_RESET_CONFIRMED')")]
-    public string ConfirmationCode { get; set; }
+    public string ConfirmationCode
+    {
+        get;
+        set;
+    }
     
     [Description("Reason for factory reset")]
-    public string Reason { get; set; }
+    public string Reason
+    {
+        get;
+        set;
+    }
 }
 ```
 
@@ -1125,14 +1161,26 @@ using nanoFramework.WebServer.Mcp;
 
 public class ThermostatConfig
 {
-    [Description("Target temperature in Celsius")]
-    public float TargetTemperature { get; set; } = 22.0f;
+    public float TargetTemperature
+    {
+        [Description("Target temperature in Celsius")]
+        get;
+        set;
+    } = 22.0f;
     
-    [Description("Operating mode: heat, cool, auto, or off")]
-    public string Mode { get; set; } = "auto";
+    public string Mode
+    {
+        [Description("Operating mode: heat, cool, auto, or off")]
+        get;
+        set;
+    } = "auto";
     
-    [Description("Enable schedule-based operation")]
-    public bool ScheduleEnabled { get; set; } = true;
+    public bool ScheduleEnabled
+    {
+        [Description("Enable schedule-based operation")]
+        get;
+        set;
+    } = true;
 }
 
 public class ThermostatStatus

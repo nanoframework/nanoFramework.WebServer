@@ -105,7 +105,7 @@ public class IoTTools
         return "23.5°C";
     }
 
-    [McpServerTool("control_led", "Controls device LED", "Uutput the statusof the LED")]
+    [McpServerTool("control_led", "Controls device LED", "Output the status of the LED")]
     public static string ControlLed(LedCommand command)
     {
         // Your LED control code
@@ -115,8 +115,12 @@ public class IoTTools
 
 public class LedCommand
 {
-    [Description("LED state: on, off, or blink")]
-    public string State { get; set; }
+    public string State
+    {
+        [Description("LED state: on, off, or blink")]
+        get;
+        set;
+    }
 }
 ```
 
