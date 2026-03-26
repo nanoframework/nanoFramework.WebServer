@@ -1131,16 +1131,16 @@ public class SecureTools
 
 public class ResetRequest
 {
-    [Description("Confirmation code (must be 'FACTORY_RESET_CONFIRMED')")]
     public string ConfirmationCode
     {
+        [Description("Confirmation code (must be 'FACTORY_RESET_CONFIRMED')")]
         get;
         set;
     }
     
-    [Description("Reason for factory reset")]
     public string Reason
     {
+        [Description("Reason for factory reset")]
         get;
         set;
     }
