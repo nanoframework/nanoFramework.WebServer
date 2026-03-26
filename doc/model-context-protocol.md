@@ -1,4 +1,4 @@
-﻿# Model Context Protocol (MCP) Support
+# Model Context Protocol (MCP) Support
 
 The nanoFramework WebServer provides comprehensive support for the Model Context Protocol (MCP), enabling AI agents and language models to directly interact with your embedded devices. MCP allows AI systems to discover, invoke, and receive responses from tools running on your nanoFramework device.
 
