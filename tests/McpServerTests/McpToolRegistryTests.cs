@@ -92,7 +92,6 @@ namespace McpServerTests
             // Assert
             Assert.IsNotNull(metadataJson, "Metadata JSON should not be null");
             Assert.IsTrue(metadataJson.Contains("\"tools\":["), "Metadata should contain tools array");
-            Assert.IsTrue(metadataJson.Contains("\"nextCursor\":null"), "Metadata should contain nextCursor");
             Assert.IsTrue(metadataJson.Contains("simple_tool"), "Metadata should contain simple_tool");
             Assert.IsTrue(metadataJson.Contains("complex_tool"), "Metadata should contain complex_tool");
             Assert.IsTrue(metadataJson.Contains("nested_tool"), "Metadata should contain nested_tool");
@@ -115,7 +114,6 @@ namespace McpServerTests
             // Assert
             Assert.IsNotNull(metadataJson, "Metadata JSON should not be null");
             Assert.IsTrue(metadataJson.Contains("\"tools\":["), "Metadata should contain tools array");
-            Assert.IsTrue(metadataJson.Contains("\"nextCursor\":null"), "Metadata should contain nextCursor");
             // Should have empty tools array or just the tools from previous test
         }
 
@@ -150,7 +148,7 @@ namespace McpServerTests
 
             // Check overall structure
             Assert.IsTrue(metadataJson.StartsWith("\"tools\":["), "Metadata should start with tools array");
-            Assert.IsTrue(metadataJson.EndsWith("],\"nextCursor\":null"), "Metadata should end with nextCursor");
+            Assert.IsTrue(metadataJson.EndsWith("]"), "Metadata should end with ']'");
 
             // Check for tool properties
             Assert.IsTrue(metadataJson.Contains("\"name\":"), "Metadata should contain tool names");

@@ -122,7 +122,7 @@ namespace nanoFramework.WebServer.Mcp
                 }
 
                 sb.Remove(sb.Length - 1, 1);
-                sb.Append("],\"nextCursor\":null");
+                sb.Append("]");
                 return sb.ToString();
             }
             catch (Exception)
