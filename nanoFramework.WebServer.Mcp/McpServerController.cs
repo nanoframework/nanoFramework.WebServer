@@ -161,24 +161,34 @@ namespace nanoFramework.WebServer.Mcp
             }
         }
 
-        class ReadOnlyCollection : IEnumerable
+        private class ReadOnlyCollection : IEnumerable
         {
             public ReadOnlyCollection(params object[] values)
             {
                 this.values = new object[values.Length];
                 Array.Copy(values, this.values, values.Length);
             }
+
             private readonly object[] values;
+
             public IEnumerator GetEnumerator() => values.GetEnumerator();
         }
 
         private static bool CheckProtocolVersion(string clientVersion)
         {
             if (SupportedVersion == clientVersion)
+            {
                 return true;
+            }
+
             foreach (string version in OldSupportedVersions)
+            {
                 if (version == clientVersion)
+                {
                     return true;
+                }
+            }
+
             return false;
         }
     }
