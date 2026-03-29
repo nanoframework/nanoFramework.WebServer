@@ -18,7 +18,12 @@ namespace nanoFramework.WebServer.Mcp
         /// <summary>
         /// The supported version of the MCP protocol.
         /// </summary>
-        public const string SupportedVersion = "2025-03-26";
+        public const string SupportedVersion = "2025-11-25";
+
+        /// <summary>
+        /// Gets a collection of old supported versions of the MCP protocol.
+        /// </summary>
+        public static IEnumerable OldSupportedVersions { get; } = new ReadOnlyCollection("2025-03-26", "2025-06-18");
 
         /// <summary>
         /// Gets or sets the server name.
@@ -79,22 +84,26 @@ namespace nanoFramework.WebServer.Mcp
 
                     if (request["method"].ToString() == "initialize")
                     {
+                        string clientVersion = SupportedVersion;
                         // Check if client sent params with protocolVersion
                         if (request.ContainsKey("params") && request["params"] is Hashtable initParams)
                         {
                             if (initParams.ContainsKey("protocolVersion"))
                             {
-                                string clientVersion = initParams["protocolVersion"].ToString();
-                                if (clientVersion != SupportedVersion)
+                                clientVersion = initParams["protocolVersion"].ToString();
+                                if (!CheckProtocolVersion(clientVersion))
                                 {
-                                    sb.Append($",\"error\":{{\"code\":-32602,\"message\":\"Unsupported protocol version\",\"data\":{{\"supported\":[\"{SupportedVersion}\"],\"requested\":\"{clientVersion}\"}}}}}}");
+                                    sb.Append($",\"error\":{{\"code\":-32602,\"message\":\"Unsupported protocol version\",\"data\":{{\"supported\":[");
+                                    foreach (string version in OldSupportedVersions)
+                                        sb.Append($"\"{version}\",");
+                                    sb.Append($"\"{SupportedVersion}\"],\"requested\":\"{clientVersion}\"}}}}}}");
                                     WebServer.OutputAsStream(e.Context.Response, sb.ToString());
                                     return;
                                 }
                             }
                         }
 
-                        sb.Append($",\"result\":{{\"protocolVersion\":\"{SupportedVersion}\"");
+                        sb.Append($",\"result\":{{\"protocolVersion\":\"{clientVersion}\"");
 
                         // Add capabilities
                         sb.Append($",\"capabilities\":{{\"logging\":{{}},\"prompts\":{{\"listChanged\":false}},\"resources\":{{\"subscribe\":false,\"listChanged\":false}},\"tools\":{{\"listChanged\":false}}}}");
@@ -150,6 +159,37 @@ namespace nanoFramework.WebServer.Mcp
             {
                 WebServer.OutputAsStream(e.Context.Response, $"{{\"jsonrpc\":\"2.0\",\"id\":{id},\"error\":{{\"code\":-32602,\"message\":\"{ex.Message}\"}}}}");
             }
+        }
+
+        private class ReadOnlyCollection : IEnumerable
+        {
+            public ReadOnlyCollection(params object[] values)
+            {
+                this.values = new object[values.Length];
+                Array.Copy(values, this.values, values.Length);
+            }
+
+            private readonly object[] values;
+
+            public IEnumerator GetEnumerator() => values.GetEnumerator();
+        }
+
+        private static bool CheckProtocolVersion(string clientVersion)
+        {
+            if (SupportedVersion == clientVersion)
+            {
+                return true;
+            }
+
+            foreach (string version in OldSupportedVersions)
+            {
+                if (version == clientVersion)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

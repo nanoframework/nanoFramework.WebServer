@@ -67,7 +67,9 @@ namespace nanoFramework.WebServer.Mcp
                                     Name = attribute.Name,
                                     Description = attribute.Description,
                                     InputType = inputType,
-                                    OutputType = McpToolJsonHelper.GenerateOutputJson(method.ReturnType, attribute.OutputDescription),
+                                    OutputType = !McpToolJsonHelper.IsPrimitiveType(method.ReturnType) && method.ReturnType != typeof(string)
+                                        ? McpToolJsonHelper.GenerateOutputJson(method.ReturnType, attribute.OutputDescription)
+                                        : string.Empty,
                                     Method = method,
                                     MethodType = parameters.Length > 0 ? parameters[0].ParameterType : null,
                                 });
@@ -104,7 +106,7 @@ namespace nanoFramework.WebServer.Mcp
                 }
 
                 sb.Remove(sb.Length - 1, 1);
-                sb.Append("],\"nextCursor\":null");
+                sb.Append("]");
                 return sb.ToString();
             }
             catch (Exception)

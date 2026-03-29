@@ -110,7 +110,7 @@ namespace McpServerTests
 
             // Check overall structure
             Assert.IsTrue(metadataJson.StartsWith("\"prompts\":["), "Metadata should start with prompts array");
-            Assert.IsTrue(metadataJson.EndsWith("],\"nextCursor\":null"), "Metadata should end with nextCursor");
+            Assert.IsTrue(metadataJson.EndsWith("]"), "Metadata should end with ']'");
 
             // Check for prompts properties
             Assert.IsTrue(metadataJson.Contains("\"name\":"), "Metadata should contain prompts names");
