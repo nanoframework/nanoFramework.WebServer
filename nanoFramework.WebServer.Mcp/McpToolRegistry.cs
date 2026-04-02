@@ -105,7 +105,10 @@ namespace nanoFramework.WebServer.Mcp
                     sb.Append(",");
                 }
 
-                sb.Remove(sb.Length - 1, 1);
+                if (tools.Count > 0)
+                {
+                    sb.Remove(sb.Length - 1, 1);
+                }
                 sb.Append("]");
                 return sb.ToString();
             }
