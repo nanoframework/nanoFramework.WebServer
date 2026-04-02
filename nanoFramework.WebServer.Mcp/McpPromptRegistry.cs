@@ -14,7 +14,7 @@ namespace nanoFramework.WebServer.Mcp
     /// </summary>
     public class McpPromptRegistry : RegistryBase
     {
-        private static readonly Hashtable promtps = new Hashtable();
+        private static readonly Hashtable prompts = new Hashtable();
         private static bool isInitialized = false;
 
         /// <summary>
@@ -56,7 +56,7 @@ namespace nanoFramework.WebServer.Mcp
                                     throw new Exception($"Method {method.Name} does not return an array of PromptMessage.");
                                 }
 
-                                promtps.Add(attribute.Name, new PromptMetadata
+                                prompts.Add(attribute.Name, new PromptMetadata
                                 {
                                     Name = attribute.Name,
                                     Description = attribute.Description,
@@ -115,13 +115,16 @@ namespace nanoFramework.WebServer.Mcp
                 StringBuilder sb = new StringBuilder();
                 sb.Append("\"prompts\":[");
 
-                foreach (PromptMetadata prompt in promtps.Values)
+                foreach (PromptMetadata prompt in prompts.Values)
                 {
                     sb.Append(prompt.ToString());
                     sb.Append(",");
                 }
 
-                sb.Remove(sb.Length - 1, 1);
+                if (prompts.Count > 0)
+                {
+                    sb.Remove(sb.Length - 1, 1);
+                }
                 sb.Append("]");
                 return sb.ToString();
             }
@@ -139,9 +142,9 @@ namespace nanoFramework.WebServer.Mcp
         /// <exception cref="Exception">Thrown when the specified prompt is not found in the registry.</exception>
         public static string GetPromptDescription(string promptName)
         {
-            if (promtps.Contains(promptName))
+            if (prompts.Contains(promptName))
             {
-                PromptMetadata promptMetadata = (PromptMetadata)promtps[promptName];
+                PromptMetadata promptMetadata = (PromptMetadata)prompts[promptName];
                 return promptMetadata.Description;
             }
 
@@ -157,9 +160,9 @@ namespace nanoFramework.WebServer.Mcp
         /// <exception cref="Exception">Thrown when the specified prompt is not found in the registry.</exception>
         public static string InvokePrompt(string promptName, Hashtable arguments)
         {
-            if (promtps.Contains(promptName))
+            if (prompts.Contains(promptName))
             {
-                PromptMetadata promptMetadata = (PromptMetadata)promtps[promptName];
+                PromptMetadata promptMetadata = (PromptMetadata)prompts[promptName];
                 MethodInfo method = promptMetadata.Method;
                 Debug.WriteLine($"Prompt name: {promptName}, method: {method.Name}");
 
