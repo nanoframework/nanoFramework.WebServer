@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>nanoFramework.WebServer.Skills</id>
+    <title>nanoFramework.WebServer.Skills</title>
+    <version>$version$</version>
+    <authors>Laurent Ellerbach,nanoframework</authors>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <license type="file">LICENSE.md</license>
+    <releaseNotes>
+    </releaseNotes>
+    <readme>docs\README.md</readme>
+    <developmentDependency>false</developmentDependency>
+    <projectUrl>https://github.com/nanoframework/nanoFramework.WebServer</projectUrl>
+    <icon>images\nf-logo.png</icon>
+    <repository type="git" url="https://github.com/nanoframework/nanoFramework.WebServer" commit="$commit$" />
+    <copyright>Copyright (c) .NET Foundation and Contributors</copyright>
+    <description>AI Agent Skills Discovery Service for nanoFramework WebServer.
+Enables embedded devices to advertise capabilities to AI agents using an A2A-compatible Agent Card.
+Attribute-driven, lightweight, protocol-agnostic. Supports JSON and markdown output modes.
+This comes also with the nanoFramework WebServer. Allowing to create a REST API based project with ease as well.
+</description>
+    <tags>http https webserver net netmf nf nanoframework skills ai agent discovery a2a iot</tags>
+    <dependencies>
+      <dependency id="nanoFramework.CoreLibrary" version="1.17.11" />
+      <dependency id="nanoFramework.System.Net.Http.Server" version="1.5.200" />
+      <dependency id="nanoFramework.Json" version="2.2.203" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="nanoFramework.WebServer\bin\Release\nanoFramework.WebServer.*" target="lib" />
+    <file src="nanoFramework.WebServer.Skills\bin\Release\nanoFramework.WebServer.Skills.*" target="lib" />
+    <file src="assets\readme.txt" target="" />
+    <file src="README.md" target="docs\" />
+    <file src="assets\nf-logo.png" target="images" />
+    <file src="LICENSE.md" target="" />
+  </files>
+</package>
