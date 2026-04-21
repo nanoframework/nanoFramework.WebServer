@@ -185,7 +185,7 @@ namespace nanoFramework.WebServer.Skills
             ConstructorInfo constructor = type.GetConstructor(new Type[0]);
             if (constructor == null)
             {
-                throw new Exception($"Type {type.Name} does not have a parameterless constructor");
+                throw new Exception();
             }
 
             return constructor.Invoke(new object[0]);

@@ -89,13 +89,13 @@ namespace nanoFramework.WebServer.Skills
         public void AppendJson(StringBuilder sb)
         {
             sb.Append("{\"id\":\"");
-            sb.Append(Id);
+            sb.Append(SkillJsonHelper.EscapeJsonString(Id));
             sb.Append("\",\"name\":\"");
-            sb.Append(Name);
+            sb.Append(SkillJsonHelper.EscapeJsonString(Name));
             sb.Append("\",\"description\":\"");
-            sb.Append(Description);
+            sb.Append(SkillJsonHelper.EscapeJsonString(Description));
             sb.Append("\",\"version\":\"");
-            sb.Append(Version);
+            sb.Append(SkillJsonHelper.EscapeJsonString(Version));
             sb.Append("\"");
 
             // Tags (A2A required)
@@ -174,7 +174,7 @@ namespace nanoFramework.WebServer.Skills
                     }
 
                     sb.Append("\"");
-                    sb.Append(values[i]);
+                    sb.Append(SkillJsonHelper.EscapeJsonString(values[i]));
                     sb.Append("\"");
                 }
             }

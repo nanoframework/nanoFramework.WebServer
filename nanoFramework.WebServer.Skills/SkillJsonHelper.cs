@@ -72,7 +72,7 @@ namespace nanoFramework.WebServer.Skills
             bool hasDescription = !string.IsNullOrEmpty(description);
             if (hasDescription)
             {
-                sb.Append(",\"description\":\"").Append(description).Append("\"");
+                sb.Append(",\"description\":\"").Append(EscapeJsonString(description)).Append("\"");
             }
 
             if (mappedType == "object")
@@ -114,7 +114,7 @@ namespace nanoFramework.WebServer.Skills
                     {
                         sb.Append("{");
                         sb.Append("\"type\":\"").Append(mappedType).Append("\",");
-                        sb.Append("\"description\":\"").Append(GetTypeDescription(method, propName)).Append("\"");
+                        sb.Append("\"description\":\"").Append(EscapeJsonString(GetTypeDescription(method, propName))).Append("\"");
                         sb.Append("}");
                     }
                 }
@@ -175,7 +175,7 @@ namespace nanoFramework.WebServer.Skills
                     sb.Append($"\"{propName}\":{{");
                     string mappedType = MapType(propType);
                     sb.Append("\"type\":\"").Append(mappedType).Append("\",");
-                    sb.Append("\"description\":\"").Append(GetTypeDescription(method, propName)).Append("\"");
+                    sb.Append("\"description\":\"").Append(EscapeJsonString(GetTypeDescription(method, propName))).Append("\"");
                     if (mappedType == "object")
                     {
                         sb.Append(",\"properties\":{");
@@ -195,13 +195,19 @@ namespace nanoFramework.WebServer.Skills
                 return "string";
             }
             else if (type == typeof(int) || type == typeof(double) || type == typeof(float) ||
-                type == typeof(long) || type == typeof(short) || type == typeof(byte))
+                type == typeof(long) || type == typeof(short) || type == typeof(byte) ||
+                type == typeof(uint) || type == typeof(ulong) || type == typeof(ushort) ||
+                type == typeof(sbyte))
             {
                 return "number";
             }
             else if (type == typeof(bool))
             {
                 return "boolean";
+            }
+            else if (type == typeof(char))
+            {
+                return "string";
             }
             else if (type.IsArray)
             {
@@ -213,6 +219,49 @@ namespace nanoFramework.WebServer.Skills
             }
 
             return "string";
+        }
+
+        /// <summary>
+        /// Escapes special characters in a string for use in JSON values.
+        /// Handles backslash, double-quote, newline, carriage return, and tab.
+        /// </summary>
+        /// <param name="value">The string to escape.</param>
+        /// <returns>The escaped string safe for JSON embedding.</returns>
+        internal static string EscapeJsonString(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return value;
+            }
+
+            StringBuilder sb = new StringBuilder(value.Length);
+            for (int i = 0; i < value.Length; i++)
+            {
+                char c = value[i];
+                switch (c)
+                {
+                    case '\\':
+                        sb.Append("\\\\");
+                        break;
+                    case '"':
+                        sb.Append("\\\"");
+                        break;
+                    case '\n':
+                        sb.Append("\\n");
+                        break;
+                    case '\r':
+                        sb.Append("\\r");
+                        break;
+                    case '\t':
+                        sb.Append("\\t");
+                        break;
+                    default:
+                        sb.Append(c);
+                        break;
+                }
+            }
+
+            return sb.ToString();
         }
     }
 }

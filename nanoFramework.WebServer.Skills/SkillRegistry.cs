@@ -271,19 +271,21 @@ namespace nanoFramework.WebServer.Skills
         /// <param name="parameters">The parameters to pass to the action as a Hashtable.</param>
         /// <returns>The serialized result string. For text/markdown or text/plain actions, the raw string is returned.
         /// For JSON actions, the JSON-serialized result is returned.</returns>
-        /// <exception cref="Exception">Thrown when the skill or action is not found.</exception>
+        /// <exception cref="Exception">Thrown when the skill is not found in the registry.</exception>
+        /// <exception cref="Exception">Thrown when the action is not found in the skill.</exception>
+        /// <exception cref="Exception">Thrown when the action requires parameters but none were provided.</exception>
         public static string InvokeAction(string skillId, string actionName, Hashtable parameters)
         {
             if (!_skills.Contains(skillId))
             {
-                throw new Exception("Skill not found");
+                throw new Exception();
             }
 
             SkillMetadata skill = (SkillMetadata)_skills[skillId];
             SkillActionMetadata action = skill.FindAction(actionName);
             if (action == null)
             {
-                throw new Exception("Action not found");
+                throw new Exception();
             }
 
             Debug.WriteLine($"Skill: {skillId}, Action: {actionName}, Method: {action.Method.Name}");
@@ -291,6 +293,11 @@ namespace nanoFramework.WebServer.Skills
             object[] methodParams = null;
             if (action.ParameterType != null)
             {
+                if (parameters == null)
+                {
+                    throw new Exception();
+                }
+
                 methodParams = new object[1];
                 Type paramType = action.ParameterType;
                 if (SkillJsonHelper.IsPrimitiveType(paramType) || paramType == typeof(string))
@@ -330,8 +337,7 @@ namespace nanoFramework.WebServer.Skills
             }
             else
             {
-                string jsonResult = JsonConvert.SerializeObject(result);
-                return JsonConvert.SerializeObject(jsonResult);
+                return JsonConvert.SerializeObject(result);
             }
         }
 

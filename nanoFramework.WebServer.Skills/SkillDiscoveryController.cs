@@ -79,24 +79,24 @@ namespace nanoFramework.WebServer.Skills
 
                 StringBuilder sb = new StringBuilder();
                 sb.Append("{\"name\":\"");
-                sb.Append(AgentName);
+                sb.Append(SkillJsonHelper.EscapeJsonString(AgentName));
                 sb.Append("\"");
 
                 if (!string.IsNullOrEmpty(AgentDescription))
                 {
                     sb.Append(",\"description\":\"");
-                    sb.Append(AgentDescription);
+                    sb.Append(SkillJsonHelper.EscapeJsonString(AgentDescription));
                     sb.Append("\"");
                 }
 
                 sb.Append(",\"version\":\"");
-                sb.Append(AgentVersion);
+                sb.Append(SkillJsonHelper.EscapeJsonString(AgentVersion));
                 sb.Append("\"");
 
                 if (!string.IsNullOrEmpty(AgentUrl))
                 {
                     sb.Append(",\"url\":\"");
-                    sb.Append(AgentUrl);
+                    sb.Append(SkillJsonHelper.EscapeJsonString(AgentUrl));
                     sb.Append("\"");
                 }
 
@@ -159,7 +159,7 @@ namespace nanoFramework.WebServer.Skills
             catch (Exception ex)
             {
                 WebServer.OutputAsStream(e.Context.Response,
-                    "{\"error\":{\"code\":-1,\"message\":\"" + ex.Message + "\"}}");
+                    "{\"error\":{\"code\":-1,\"message\":\"" + SkillJsonHelper.EscapeJsonString(ex.Message) + "\"}}");
             }
         }
 
@@ -185,7 +185,7 @@ namespace nanoFramework.WebServer.Skills
 
                 Hashtable request = (Hashtable)JsonConvert.DeserializeObject(requestBody, typeof(Hashtable));
 
-                if (!request.ContainsKey("skill") || !request.ContainsKey("action"))
+                if (!request.Contains("skill") || !request.Contains("action"))
                 {
                     e.Context.Response.ContentType = "application/json";
                     WebServer.OutputAsStream(e.Context.Response,
@@ -195,7 +195,7 @@ namespace nanoFramework.WebServer.Skills
 
                 string skillId = request["skill"].ToString();
                 string actionName = request["action"].ToString();
-                Hashtable arguments = request.ContainsKey("arguments") && request["arguments"] != null
+                Hashtable arguments = request.Contains("arguments") && request["arguments"] != null
                     ? (Hashtable)request["arguments"]
                     : null;
 
@@ -230,7 +230,7 @@ namespace nanoFramework.WebServer.Skills
             {
                 e.Context.Response.ContentType = "application/json";
                 WebServer.OutputAsStream(e.Context.Response,
-                    "{\"error\":{\"code\":-1,\"message\":\"" + ex.Message + "\"}}");
+                    "{\"error\":{\"code\":-1,\"message\":\"" + SkillJsonHelper.EscapeJsonString(ex.Message) + "\"}}");
             }
         }
     }

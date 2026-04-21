@@ -3,6 +3,7 @@
 #:package DotNetEnv@3.1.1
 #:package Microsoft.SemanticKernel@1.74.0
 #:package Microsoft.SemanticKernel.Agents.Core@1.74.0
+#:property JsonSerializerIsReflectionEnabledByDefault=true
 
 // Skills Discovery E2E Test — Agent Consumer
 // Connects to a nanoFramework device running the Skills Discovery Service,
@@ -37,13 +38,30 @@ using Microsoft.SemanticKernel.ChatCompletion;
 #pragma warning disable IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute'
 #pragma warning disable IL3050 // Calling members annotated with 'RequiresDynamicCodeAttribute'
 
-// Load environment variables from .env file
-DotNetEnv.Env.Load();
+// Load environment variables from .env file next to this script
+var scriptDir = Path.GetDirectoryName(AppContext.BaseDirectory)
+    ?? Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)
+    ?? Environment.CurrentDirectory;
+// Walk up to find the .env next to the .cs source when running via dotnet run
+var envPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ".env");
+if (!File.Exists(envPath))
+{
+    // Try alongside the source file
+    envPath = Path.Combine("tests", "SkillsClientTest", ".env");
+}
+if (File.Exists(envPath))
+{
+    DotNetEnv.Env.Load(envPath);
+}
+else
+{
+    DotNetEnv.Env.Load(); // fallback: current directory
+}
 
 // -----------------------------------------------------------------
 // 1. Configuration
 // -----------------------------------------------------------------
-var deviceHost = DotNetEnv.Env.GetString("DEVICE_HOST", "192.168.1.139:80");
+var deviceHost = DotNetEnv.Env.GetString("DEVICE_HOST", "192.168.1.113:80");
 var deploymentName = DotNetEnv.Env.GetString("AZUREAI_DEPLOYMENT_NAME");
 var endpoint = DotNetEnv.Env.GetString("AZUREAI_DEPLOYMENT_ENDPOINT");
 var apiKey = DotNetEnv.Env.GetString("AZUREAI_DEPLOYMENT_API_KEY");

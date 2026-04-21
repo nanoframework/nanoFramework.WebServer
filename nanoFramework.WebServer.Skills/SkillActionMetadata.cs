@@ -55,9 +55,9 @@ namespace nanoFramework.WebServer.Skills
         public void AppendJson(StringBuilder sb)
         {
             sb.Append("{\"name\":\"");
-            sb.Append(Name);
+            sb.Append(SkillJsonHelper.EscapeJsonString(Name));
             sb.Append("\",\"description\":\"");
-            sb.Append(Description);
+            sb.Append(SkillJsonHelper.EscapeJsonString(Description));
             sb.Append("\"");
 
             if (!string.IsNullOrEmpty(ContentType) && ContentType != "application/json")
