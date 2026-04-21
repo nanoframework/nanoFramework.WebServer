@@ -4,7 +4,7 @@
 
 -----
 
-# .NET nanoFramework WebServer with Model Context Protocol (MCP)
+# .NET nanoFramework WebServer with Model Context Protocol (MCP) and Skills Discovery
 
 ## Build status
 
@@ -13,10 +13,11 @@
 | nanoFramework.WebServer | [![Build Status](https://dev.azure.com/nanoframework/nanoFramework.WebServer/_apis/build/status/nanoFramework.WebServer?repoName=nanoframework%2FnanoFramework.WebServer&branchName=main)](https://dev.azure.com/nanoframework/nanoFramework.WebServer/_build/latest?definitionId=65&repoName=nanoframework%2FnanoFramework.WebServer&branchName=main) | [![NuGet](https://img.shields.io/nuget/v/nanoFramework.WebServer.svg?label=NuGet&style=flat&logo=nuget)](https://www.nuget.org/packages/nanoFramework.WebServer/) |
 | nanoFramework.WebServer.FileSystem | [![Build Status](https://dev.azure.com/nanoframework/nanoFramework.WebServer/_apis/build/status/nanoFramework.WebServer?repoName=nanoframework%2FnanoFramework.WebServer&branchName=main)](https://dev.azure.com/nanoframework/nanoFramework.WebServer/_build/latest?definitionId=65&repoName=nanoframework%2FnanoFramework.WebServer&branchName=main) | [![NuGet](https://img.shields.io/nuget/v/nanoFramework.WebServer.FileSystem.svg?label=NuGet&style=flat&logo=nuget)](https://www.nuget.org/packages/nanoFramework.WebServer.FileSystem/) |
 | nanoFramework.WebServer.Mcp | [![Build Status](https://dev.azure.com/nanoframework/nanoFramework.WebServer/_apis/build/status/nanoFramework.WebServer?repoName=nanoframework%2FnanoFramework.WebServer&branchName=main)](https://dev.azure.com/nanoframework/nanoFramework.WebServer/_build/latest?definitionId=65&repoName=nanoframework%2FnanoFramework.WebServer&branchName=main) | [![NuGet](https://img.shields.io/nuget/v/nanoFramework.WebServer.Mcp.svg?label=NuGet&style=flat&logo=nuget)](https://www.nuget.org/packages/nanoFramework.WebServer.Mcp/) |
+| nanoFramework.WebServer.Skills | [![Build Status](https://dev.azure.com/nanoframework/nanoFramework.WebServer/_apis/build/status/nanoFramework.WebServer?repoName=nanoframework%2FnanoFramework.WebServer&branchName=main)](https://dev.azure.com/nanoframework/nanoFramework.WebServer/_build/latest?definitionId=65&repoName=nanoframework%2FnanoFramework.WebServer&branchName=main) | [![NuGet](https://img.shields.io/nuget/v/nanoFramework.WebServer.Skills.svg?label=NuGet&style=flat&logo=nuget)](https://www.nuget.org/packages/nanoFramework.WebServer.Skills/) |
 
 ## Overview
 
-This library provides a lightweight, multi-threaded HTTP/HTTPS WebServer for .NET nanoFramework with comprehensive **Model Context Protocol (MCP)** support for AI agent integration.
+This library provides a lightweight, multi-threaded HTTP/HTTPS WebServer for .NET nanoFramework with comprehensive **Model Context Protocol (MCP)** support and **AI Agent Skills Discovery** (A2A-compatible) for AI agent integration.
 
 ### Key Features
 
@@ -27,6 +28,7 @@ This library provides a lightweight, multi-threaded HTTP/HTTPS WebServer for .NE
 - **Authentication support** (Basic, API Key)
 - **HTTPS/SSL support** with certificates
 - **Model Context Protocol (MCP)** for AI agent integration
+- **AI Agent Skills Discovery** with A2A-compatible Agent Card
 - **Automatic tool discovery** and JSON-RPC 2.0 compliance
 
 ## Quick Start
@@ -201,6 +203,103 @@ POST /mcp
 }
 ```
 
+## AI Agent Skills Discovery
+
+Expose device capabilities as discoverable skills for AI agents using the [A2A (Agent2Agent) protocol](https://a2a-protocol.org) conventions.
+
+### Defining Skills
+
+```csharp
+using nanoFramework.WebServer.Skills;
+
+[Skill("climate", "Climate Control", "HVAC management for building zones")]
+[SkillTag("temperature")]
+[SkillTag("hvac")]
+[SkillExample("What is the current temperature?")]
+public class ClimateSkill
+{
+    [SkillAction("GetTemperature", "Reads current room temperature")]
+    public static double GetTemperature()
+    {
+        return 22.5;
+    }
+
+    [SkillAction("SetTarget", "Sets the target temperature")]
+    public static bool SetTarget(TargetInput input)
+    {
+        return true;
+    }
+}
+
+public class TargetInput
+{
+    public double Temperature
+    {
+        [Description("Target temperature in Celsius")]
+        get;
+        set;
+    }
+}
+```
+
+### Setting Up Skills Server
+
+```csharp
+public static void Main()
+{
+    // Connect to WiFi first
+    var connected = WifiNetworkHelper.ConnectDhcp(Ssid, Password, requiresDateTime: true);
+
+    // Discover and register skills
+    SkillRegistry.DiscoverSkills(new Type[] { typeof(ClimateSkill) });
+
+    // Start WebServer with Skills Discovery support
+    using (var server = new WebServer(80, HttpProtocol.Http, new Type[] { typeof(SkillDiscoveryController) }))
+    {
+        // Optional customization
+        SkillDiscoveryController.AgentName = "SmartThermostat";
+        SkillDiscoveryController.AgentDescription = "Embedded HVAC controller with sensor capabilities";
+
+        server.Start();
+        Thread.Sleep(Timeout.Infinite);
+    }
+}
+```
+
+### AI Agent Integration
+
+Once running, AI agents can discover and invoke your skills:
+
+```http
+GET /.well-known/agent-card.json
+```
+
+```json
+{
+  "name": "SmartThermostat",
+  "description": "Embedded HVAC controller with sensor capabilities",
+  "version": "1.0.0",
+  "skills": [
+    {
+      "id": "climate",
+      "name": "Climate Control",
+      "tags": ["temperature", "hvac"],
+      "actions": [
+        { "name": "GetTemperature", "description": "Reads current room temperature" },
+        { "name": "SetTarget", "description": "Sets the target temperature" }
+      ]
+    }
+  ]
+}
+```
+
+```http
+POST /skills/invoke
+Content-Type: application/json
+
+{ "skill": "climate", "action": "GetTemperature", "arguments": {} }
+```
+
 ## Documentation
 
 | Topic | Description |
@@ -210,6 +309,7 @@ POST /mcp
 | [HTTPS and Certificates](./doc/https-certificates.md) | Set up SSL/TLS encryption with certificates |
 | [File System Support](./doc/file-system.md) | Serve static files from storage devices |
 | [Model Context Protocol (MCP)](./doc/model-context-protocol.md) | Complete MCP guide for AI agent integration |
+| [AI Agent Skills Discovery](./doc/skills-discovery.md) | A2A-compatible skills discovery and invocation |
 | [REST API Development](./doc/rest-api.md) | Build RESTful APIs with request/response handling |
 | [Event-Driven Programming](./doc/event-driven.md) | Handle requests through events and status monitoring |
 | [Examples and Samples](./doc/examples.md) | Working examples and code samples |
@@ -218,13 +318,15 @@ POST /mcp
 
 - No compression support in request/response streams
 - MCP implementation supports server features only (no notifications or SSE)
-- No or single parameter limitation for MCP tools (use complex objects for multiple parameters)
+- No or single parameter limitation for MCP tools and Skills actions (use complex objects for multiple parameters)
 - Prompt parameters, when declared, are always mandatory.
+- Skills Discovery implements A2A discovery and invocation only (no task lifecycle)
 
 ## Installation
 
 Install 'nanoFramework.WebServer' for the Web Server without File System support. Install 'nanoFramework.WebServer.FileSystem' for file serving, so with devices supporting File System.
 Install 'nanoFramework.WebServer.Mcp' for MCP support. It does contains the full 'nanoFramework.WebServer' but does not include native file serving. You can add this feature fairly easilly by reusing the code function serving it.
+Install 'nanoFramework.WebServer.Skills' for A2A-compatible AI Agent Skills Discovery. Like MCP, it includes the core 'nanoFramework.WebServer' and can be used alongside MCP.
 
 ## Contributing
 

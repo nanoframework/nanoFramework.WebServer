@@ -133,7 +133,7 @@ namespace nanoFramework.WebServer.Skills
             catch (Exception ex)
             {
                 WebServer.OutputAsStream(e.Context.Response,
-                    "{\"error\":{\"code\":-1,\"message\":\"" + ex.Message + "\"}}");
+                    "{\"error\":{\"code\":-1,\"message\":\"" + SkillJsonHelper.EscapeJsonString(ex.Message) + "\"}}");
             }
         }
 

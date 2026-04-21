@@ -168,7 +168,7 @@ Tags enable semantic matching by orchestrators. Use the `[SkillTag]` attribute (
 public class ClimateSkill { }
 ```
 
-Tags appear in the A2A `AgentSkill.tags` field and can be used to filter skills via `GET .well-known/agent-card.json?tag=sensor`.
+Tags appear in the A2A `AgentSkill.tags` field and can be used to filter skills via `GET /.well-known/agent-card.json?tag=sensor`.
 
 ### Examples
 
