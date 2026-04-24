@@ -19,6 +19,7 @@ namespace nanoFramework.WebServer.Skills
         /// <param name="value">The value to convert.</param>
         /// <param name="targetType">The target primitive type to convert to.</param>
         /// <returns>The converted value as the target type.</returns>
+        /// <exception cref="InvalidCastException">Thrown when the value cannot be converted to the target type (e.g. invalid boolean string).</exception>
         protected static object ConvertToPrimitiveType(object value, Type targetType)
         {
             if (value == null)
@@ -40,18 +41,30 @@ namespace nanoFramework.WebServer.Skills
             }
             else if (targetType == typeof(bool))
             {
-                if (value.ToString().Length == 1)
+                string strVal = value.ToString();
+                if (strVal.Length == 1)
                 {
                     try
                     {
-                        return Convert.ToBoolean(Convert.ToByte(value.ToString()));
+                        return Convert.ToBoolean(Convert.ToByte(strVal));
                     }
                     catch (Exception)
                     {
                     }
                 }
 
-                return value.ToString().ToLower() == "true";
+                string lower = strVal.ToLower();
+                if (lower == "true")
+                {
+                    return true;
+                }
+
+                if (lower == "false")
+                {
+                    return false;
+                }
+
+                throw new InvalidCastException();
             }
             else if (targetType == typeof(long))
             {
@@ -106,6 +119,7 @@ namespace nanoFramework.WebServer.Skills
         /// <param name="hashtable">The Hashtable containing the data to deserialize.</param>
         /// <param name="targetType">The target type to deserialize the data into.</param>
         /// <returns>A new instance of the target type with properties populated from the Hashtable, or null if hashtable or targetType is null.</returns>
+        /// <exception cref="Exception">Thrown when a property value cannot be converted to the expected type.</exception>
         protected static object DeserializeFromHashtable(Hashtable hashtable, Type targetType)
         {
             if (hashtable == null || targetType == null)
@@ -167,7 +181,7 @@ namespace nanoFramework.WebServer.Skills
                 }
                 catch (Exception)
                 {
-                    continue;
+                    throw;
                 }
             }
 

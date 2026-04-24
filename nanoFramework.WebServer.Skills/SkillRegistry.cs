@@ -19,6 +19,16 @@ namespace nanoFramework.WebServer.Skills
         private static bool _isInitialized = false;
 
         /// <summary>
+        /// Resets the skill registry, clearing all registered skills.
+        /// This is intended for testing scenarios where the registry needs to be re-initialized.
+        /// </summary>
+        public static void Reset()
+        {
+            _skills.Clear();
+            _isInitialized = false;
+        }
+
+        /// <summary>
         /// Discovers skills by scanning the provided types for classes decorated with the SkillAttribute.
         /// This method should be called once at startup to populate the skill registry.
         /// </summary>

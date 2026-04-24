@@ -63,7 +63,7 @@ namespace nanoFramework.WebServer.Skills
             if (!string.IsNullOrEmpty(ContentType) && ContentType != "application/json")
             {
                 sb.Append(",\"contentType\":\"");
-                sb.Append(ContentType);
+                sb.Append(SkillJsonHelper.EscapeJsonString(ContentType));
                 sb.Append("\"");
             }
 

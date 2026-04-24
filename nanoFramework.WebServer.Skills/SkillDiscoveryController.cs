@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Diagnostics;
 using System.Text;
+using System.Web;
 using nanoFramework.Json;
 using nanoFramework.WebServer;
 
@@ -64,7 +65,7 @@ namespace nanoFramework.WebServer.Skills
                         if (eqIndex > 0)
                         {
                             string key = pair.Substring(0, eqIndex);
-                            string value = pair.Substring(eqIndex + 1);
+                            string value = HttpUtility.UrlDecode(pair.Substring(eqIndex + 1));
                             if (key == "skill")
                             {
                                 skillFilter = value;
@@ -132,6 +133,7 @@ namespace nanoFramework.WebServer.Skills
             }
             catch (Exception ex)
             {
+                e.Context.Response.StatusCode = 500;
                 WebServer.OutputAsStream(e.Context.Response,
                     "{\"error\":{\"code\":-1,\"message\":\"" + SkillJsonHelper.EscapeJsonString(ex.Message) + "\"}}");
             }
@@ -158,6 +160,7 @@ namespace nanoFramework.WebServer.Skills
             }
             catch (Exception ex)
             {
+                e.Context.Response.StatusCode = 500;
                 WebServer.OutputAsStream(e.Context.Response,
                     "{\"error\":{\"code\":-1,\"message\":\"" + SkillJsonHelper.EscapeJsonString(ex.Message) + "\"}}");
             }
@@ -188,6 +191,7 @@ namespace nanoFramework.WebServer.Skills
                 if (!request.Contains("skill") || !request.Contains("action"))
                 {
                     e.Context.Response.ContentType = "application/json";
+                    e.Context.Response.StatusCode = 400;
                     WebServer.OutputAsStream(e.Context.Response,
                         "{\"error\":{\"code\":-3,\"message\":\"Missing 'skill' or 'action' field\"}}");
                     return;
@@ -204,6 +208,7 @@ namespace nanoFramework.WebServer.Skills
                 if (contentType == null)
                 {
                     e.Context.Response.ContentType = "application/json";
+                    e.Context.Response.StatusCode = 404;
                     WebServer.OutputAsStream(e.Context.Response,
                         "{\"error\":{\"code\":-2,\"message\":\"Skill or action not found\"}}");
                     return;
@@ -229,6 +234,7 @@ namespace nanoFramework.WebServer.Skills
             catch (Exception ex)
             {
                 e.Context.Response.ContentType = "application/json";
+                e.Context.Response.StatusCode = 500;
                 WebServer.OutputAsStream(e.Context.Response,
                     "{\"error\":{\"code\":-1,\"message\":\"" + SkillJsonHelper.EscapeJsonString(ex.Message) + "\"}}");
             }

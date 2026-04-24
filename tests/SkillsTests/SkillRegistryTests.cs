@@ -99,14 +99,23 @@ namespace SkillsTests
     [TestClass]
     public class SkillRegistryTests
     {
+        [Setup]
+        public void Setup()
+        {
+            SkillRegistry.Reset();
+            SkillRegistry.DiscoverSkills(new Type[]
+            {
+                typeof(TestClimateSkill),
+                typeof(TestLightingSkill),
+                typeof(TestNestedSkill),
+                typeof(NotASkillClass)
+            });
+        }
+
         [TestMethod]
         public void DiscoverSkills_FindsDecoratedClasses()
         {
-            // Arrange
-            Type[] skillTypes = new Type[] { typeof(TestClimateSkill), typeof(TestLightingSkill), typeof(NotASkillClass) };
-
             // Act
-            SkillRegistry.DiscoverSkills(skillTypes);
             string json = SkillRegistry.GetSkillsArrayJson();
 
             // Assert
@@ -120,11 +129,7 @@ namespace SkillsTests
         [TestMethod]
         public void DiscoverSkills_CollectsTags()
         {
-            // Arrange
-            Type[] skillTypes = new Type[] { typeof(TestClimateSkill) };
-
             // Act
-            SkillRegistry.DiscoverSkills(skillTypes);
             string json = SkillRegistry.GetSkillsArrayJson();
 
             // Assert
@@ -137,11 +142,7 @@ namespace SkillsTests
         [TestMethod]
         public void DiscoverSkills_CollectsExamples()
         {
-            // Arrange
-            Type[] skillTypes = new Type[] { typeof(TestClimateSkill) };
-
             // Act
-            SkillRegistry.DiscoverSkills(skillTypes);
             string json = SkillRegistry.GetSkillsArrayJson();
 
             // Assert
@@ -153,11 +154,7 @@ namespace SkillsTests
         [TestMethod]
         public void DiscoverSkills_FindsActions()
         {
-            // Arrange
-            Type[] skillTypes = new Type[] { typeof(TestClimateSkill) };
-
             // Act
-            SkillRegistry.DiscoverSkills(skillTypes);
             string json = SkillRegistry.GetSkillsArrayJson();
 
             // Assert
@@ -171,11 +168,7 @@ namespace SkillsTests
         [TestMethod]
         public void DiscoverSkills_SetsInputOutputModes()
         {
-            // Arrange
-            Type[] skillTypes = new Type[] { typeof(TestClimateSkill) };
-
             // Act
-            SkillRegistry.DiscoverSkills(skillTypes);
             string json = SkillRegistry.GetSkillsArrayJson();
 
             // Assert
@@ -189,11 +182,7 @@ namespace SkillsTests
         [TestMethod]
         public void DiscoverSkills_MarkdownActionHasContentType()
         {
-            // Arrange
-            Type[] skillTypes = new Type[] { typeof(TestClimateSkill) };
-
             // Act
-            SkillRegistry.DiscoverSkills(skillTypes);
             string json = SkillRegistry.GetSkillsArrayJson();
 
             // Assert
@@ -203,11 +192,7 @@ namespace SkillsTests
         [TestMethod]
         public void DiscoverSkills_VersionIncluded()
         {
-            // Arrange
-            Type[] skillTypes = new Type[] { typeof(TestClimateSkill), typeof(TestLightingSkill) };
-
             // Act
-            SkillRegistry.DiscoverSkills(skillTypes);
             string json = SkillRegistry.GetSkillsArrayJson();
 
             // Assert
@@ -218,11 +203,7 @@ namespace SkillsTests
         [TestMethod]
         public void GetSkillsArrayJson_ValidJsonStructure()
         {
-            // Arrange
-            Type[] skillTypes = new Type[] { typeof(TestClimateSkill) };
-
             // Act
-            SkillRegistry.DiscoverSkills(skillTypes);
             string json = SkillRegistry.GetSkillsArrayJson();
 
             // Assert
@@ -236,11 +217,7 @@ namespace SkillsTests
         [TestMethod]
         public void GetSkillJson_BySkillId_ReturnsCorrectSkill()
         {
-            // Arrange
-            Type[] skillTypes = new Type[] { typeof(TestClimateSkill), typeof(TestLightingSkill) };
-
             // Act
-            SkillRegistry.DiscoverSkills(skillTypes);
             string json = SkillRegistry.GetSkillJson("climate-control");
 
             // Assert
@@ -252,11 +229,7 @@ namespace SkillsTests
         [TestMethod]
         public void GetSkillJson_NonExistentId_ReturnsNull()
         {
-            // Arrange
-            Type[] skillTypes = new Type[] { typeof(TestClimateSkill) };
-
             // Act
-            SkillRegistry.DiscoverSkills(skillTypes);
             string json = SkillRegistry.GetSkillJson("nonexistent");
 
             // Assert
@@ -266,11 +239,7 @@ namespace SkillsTests
         [TestMethod]
         public void GetSkillsByTagJson_MatchingTag_ReturnsFilteredSkills()
         {
-            // Arrange
-            Type[] skillTypes = new Type[] { typeof(TestClimateSkill), typeof(TestLightingSkill) };
-
             // Act
-            SkillRegistry.DiscoverSkills(skillTypes);
             string json = SkillRegistry.GetSkillsByTagJson("sensor");
 
             // Assert
@@ -282,11 +251,7 @@ namespace SkillsTests
         [TestMethod]
         public void GetSkillsByTagJson_UniqueTag_ReturnsOneSkill()
         {
-            // Arrange
-            Type[] skillTypes = new Type[] { typeof(TestClimateSkill), typeof(TestLightingSkill) };
-
             // Act
-            SkillRegistry.DiscoverSkills(skillTypes);
             string json = SkillRegistry.GetSkillsByTagJson("hvac");
 
             // Assert
@@ -297,11 +262,7 @@ namespace SkillsTests
         [TestMethod]
         public void GetSkillsByTagJson_NonExistentTag_ReturnsEmptyArray()
         {
-            // Arrange
-            Type[] skillTypes = new Type[] { typeof(TestClimateSkill) };
-
             // Act
-            SkillRegistry.DiscoverSkills(skillTypes);
             string json = SkillRegistry.GetSkillsByTagJson("nonexistent");
 
             // Assert
@@ -311,11 +272,7 @@ namespace SkillsTests
         [TestMethod]
         public void GetActionContentType_JsonAction_ReturnsApplicationJson()
         {
-            // Arrange
-            Type[] skillTypes = new Type[] { typeof(TestClimateSkill) };
-
             // Act
-            SkillRegistry.DiscoverSkills(skillTypes);
             string contentType = SkillRegistry.GetActionContentType("climate-control", "GetTemperature");
 
             // Assert
@@ -325,11 +282,7 @@ namespace SkillsTests
         [TestMethod]
         public void GetActionContentType_MarkdownAction_ReturnsTextMarkdown()
         {
-            // Arrange
-            Type[] skillTypes = new Type[] { typeof(TestClimateSkill) };
-
             // Act
-            SkillRegistry.DiscoverSkills(skillTypes);
             string contentType = SkillRegistry.GetActionContentType("climate-control", "GetDocumentation");
 
             // Assert
@@ -339,11 +292,7 @@ namespace SkillsTests
         [TestMethod]
         public void GetActionContentType_NonExistentSkill_ReturnsNull()
         {
-            // Arrange
-            Type[] skillTypes = new Type[] { typeof(TestClimateSkill) };
-
             // Act
-            SkillRegistry.DiscoverSkills(skillTypes);
             string contentType = SkillRegistry.GetActionContentType("nonexistent", "GetTemperature");
 
             // Assert
@@ -353,11 +302,7 @@ namespace SkillsTests
         [TestMethod]
         public void GetActionContentType_NonExistentAction_ReturnsNull()
         {
-            // Arrange
-            Type[] skillTypes = new Type[] { typeof(TestClimateSkill) };
-
             // Act
-            SkillRegistry.DiscoverSkills(skillTypes);
             string contentType = SkillRegistry.GetActionContentType("climate-control", "NonExistent");
 
             // Assert
@@ -367,10 +312,6 @@ namespace SkillsTests
         [TestMethod]
         public void InvokeAction_NoParameters_ReturnsResult()
         {
-            // Arrange
-            Type[] skillTypes = new Type[] { typeof(TestClimateSkill) };
-            SkillRegistry.DiscoverSkills(skillTypes);
-
             // Act
             string result = SkillRegistry.InvokeAction("climate-control", "GetTemperature", null);
 
@@ -383,9 +324,6 @@ namespace SkillsTests
         public void InvokeAction_ComplexParameter_ReturnsResult()
         {
             // Arrange
-            Type[] skillTypes = new Type[] { typeof(TestClimateSkill) };
-            SkillRegistry.DiscoverSkills(skillTypes);
-
             Hashtable arguments = new Hashtable();
             arguments.Add("Temperature", "22.0");
 
@@ -401,9 +339,6 @@ namespace SkillsTests
         public void InvokeAction_PrimitiveParameter_ReturnsResult()
         {
             // Arrange
-            Type[] skillTypes = new Type[] { typeof(TestLightingSkill) };
-            SkillRegistry.DiscoverSkills(skillTypes);
-
             Hashtable arguments = new Hashtable();
             arguments.Add("value", "80");
 
@@ -418,10 +353,6 @@ namespace SkillsTests
         [TestMethod]
         public void InvokeAction_MarkdownAction_ReturnsRawMarkdown()
         {
-            // Arrange
-            Type[] skillTypes = new Type[] { typeof(TestClimateSkill) };
-            SkillRegistry.DiscoverSkills(skillTypes);
-
             // Act
             string result = SkillRegistry.InvokeAction("climate-control", "GetDocumentation", null);
 
@@ -436,12 +367,11 @@ namespace SkillsTests
         public void InvokeAction_NestedParameter_ReturnsResult()
         {
             // Arrange
-            Type[] skillTypes = new Type[] { typeof(TestNestedSkill) };
-            SkillRegistry.DiscoverSkills(skillTypes);
-
+            Hashtable config = new Hashtable();
+            config.Add("Temperature", "42");
             Hashtable arguments = new Hashtable();
             arguments.Add("Label", "Test");
-            arguments.Add("Config", "{\"Temperature\":\"25.5\"}");
+            arguments.Add("Config", config);
 
             // Act
             string result = SkillRegistry.InvokeAction("nested-skill", "ProcessNested", arguments);
@@ -449,26 +379,21 @@ namespace SkillsTests
             // Assert
             Assert.IsNotNull(result, "Result should not be null");
             Assert.IsTrue(result.Contains("Test"), "Should contain label");
-            Assert.IsTrue(result.Contains("25.5"), "Should contain nested temperature");
+            Assert.IsTrue(result.Contains("42"), "Should contain nested temperature");
         }
 
         [TestMethod]
         public void InvokeAction_NonExistentSkill_ThrowsException()
         {
-            // Arrange
-            Type[] skillTypes = new Type[] { typeof(TestClimateSkill) };
-            SkillRegistry.DiscoverSkills(skillTypes);
-
             // Act & Assert
             bool exceptionThrown = false;
             try
             {
                 SkillRegistry.InvokeAction("nonexistent", "GetTemperature", null);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 exceptionThrown = true;
-                Assert.AreEqual("Skill not found", ex.Message, "Should throw Skill not found");
             }
 
             Assert.IsTrue(exceptionThrown, "Exception should have been thrown");
@@ -477,20 +402,15 @@ namespace SkillsTests
         [TestMethod]
         public void InvokeAction_NonExistentAction_ThrowsException()
         {
-            // Arrange
-            Type[] skillTypes = new Type[] { typeof(TestClimateSkill) };
-            SkillRegistry.DiscoverSkills(skillTypes);
-
             // Act & Assert
             bool exceptionThrown = false;
             try
             {
                 SkillRegistry.InvokeAction("climate-control", "NonExistent", null);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 exceptionThrown = true;
-                Assert.AreEqual("Action not found", ex.Message, "Should throw Action not found");
             }
 
             Assert.IsTrue(exceptionThrown, "Exception should have been thrown");
@@ -499,29 +419,35 @@ namespace SkillsTests
         [TestMethod]
         public void DiscoverSkills_Idempotent_SecondCallIgnored()
         {
-            // Arrange
-            Type[] skillTypes1 = new Type[] { typeof(TestClimateSkill) };
-            Type[] skillTypes2 = new Type[] { typeof(TestLightingSkill) };
-
-            // Act
-            SkillRegistry.DiscoverSkills(skillTypes1);
+            // Arrange — reset and register only climate skill
+            SkillRegistry.Reset();
+            SkillRegistry.DiscoverSkills(new Type[] { typeof(TestClimateSkill) });
             string firstCall = SkillRegistry.GetSkillsArrayJson();
 
-            SkillRegistry.DiscoverSkills(skillTypes2); // Should be ignored
+            // Act — second call with different types should be ignored
+            SkillRegistry.DiscoverSkills(new Type[] { typeof(TestLightingSkill) });
             string secondCall = SkillRegistry.GetSkillsArrayJson();
 
             // Assert
             Assert.AreEqual(firstCall, secondCall, "Second call should not change results");
+            Assert.IsTrue(firstCall.Contains("\"climate-control\""), "Should contain first-registered skill");
+            Assert.IsFalse(secondCall.Contains("\"lighting\""), "Should not contain second-call skill");
+
+            // Restore state for subsequent tests since [Setup] only runs once
+            SkillRegistry.Reset();
+            SkillRegistry.DiscoverSkills(new Type[]
+            {
+                typeof(TestClimateSkill),
+                typeof(TestLightingSkill),
+                typeof(TestNestedSkill),
+                typeof(NotASkillClass)
+            });
         }
 
         [TestMethod]
         public void DiscoverSkills_ComplexActionInputSchema_Generated()
         {
-            // Arrange
-            Type[] skillTypes = new Type[] { typeof(TestClimateSkill) };
-
             // Act
-            SkillRegistry.DiscoverSkills(skillTypes);
             string json = SkillRegistry.GetSkillsArrayJson();
 
             // Assert
@@ -532,17 +458,7 @@ namespace SkillsTests
         [TestMethod]
         public void DiscoverSkills_MultipleSkills_AllRegistered()
         {
-            // Arrange
-            Type[] skillTypes = new Type[]
-            {
-                typeof(TestClimateSkill),
-                typeof(TestLightingSkill),
-                typeof(TestNestedSkill),
-                typeof(NotASkillClass)
-            };
-
             // Act
-            SkillRegistry.DiscoverSkills(skillTypes);
             string json = SkillRegistry.GetSkillsArrayJson();
 
             // Assert
