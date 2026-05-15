@@ -10,6 +10,7 @@ using System.IO;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Security;
+using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
@@ -664,7 +665,20 @@ namespace nanoFramework.WebServer
                 _listener.Start();
                 while (!_cancel)
                 {
-                    HttpListenerContext context = _listener.GetContext();
+                    HttpListenerContext context;
+
+                    try
+                    {
+                        context = _listener.GetContext();
+                    }
+                    catch (SocketException)
+                    {
+                        // possibly a transient connection error
+                        // (e.g. OS captive-portal probe reset before request line is received)
+                        // this allows continue and accepting the next connection
+                        continue;
+                    }
+
                     if (context == null)
                     {
                         return;
@@ -672,143 +686,159 @@ namespace nanoFramework.WebServer
 
                     new Thread(() =>
                     {
-                        //This is for handling with transitory or bad requests
-                        if (context.Request.RawUrl == null)
+                        try
                         {
-                            return;
-                        }
-
-                        CallbackRoutes selectedRoute = null;
-                        bool selectedRouteHasAuth = false;
-                        string multipleCallback = null;
-                        bool hasAuthRoutes = false;
-                        string basicAuthNoCred = null;
-                        bool authFailed = false;
-
-                        // Variables used only within the "for". They are here for performance reasons
-                        bool mustAuthenticate;
-                        bool isAuthOk;
-
-                        foreach (CallbackRoutes route in _callbackRoutes)
-                        {
-                            if (!IsRouteMatch(route, context.Request.HttpMethod, context.Request.RawUrl))
+                            //This is for handling with transitory or bad requests
+                            if (context.Request.RawUrl == null)
                             {
-                                continue;
+                                return;
                             }
 
-                            // Check auth first
-                            mustAuthenticate = route.Authentication != null && route.Authentication.AuthenticationType != AuthenticationType.None;
-                            if (mustAuthenticate)
+                            CallbackRoutes selectedRoute = null;
+                            bool selectedRouteHasAuth = false;
+                            string multipleCallback = null;
+                            bool hasAuthRoutes = false;
+                            string basicAuthNoCred = null;
+                            bool authFailed = false;
+
+                            // Variables used only within the "for". They are here for performance reasons
+                            bool mustAuthenticate;
+                            bool isAuthOk;
+
+                            foreach (CallbackRoutes route in _callbackRoutes)
                             {
-                                hasAuthRoutes = true;
-                                if (route.Authentication.AuthenticationType == AuthenticationType.Basic)
+                                if (!IsRouteMatch(route, context.Request.HttpMethod, context.Request.RawUrl))
                                 {
-                                    var credReq = context.Request.Credentials;
-                                    if (credReq is null)
-                                    {
-                                        if (basicAuthNoCred is null)
-                                        {
-                                            basicAuthNoCred = route.Route;
-                                        }
-
-                                        continue;
-                                    }
-
-                                    var credSite = route.Authentication.Credentials ?? Credential;
-
-                                    isAuthOk = credSite != null
-                                        && (credSite.UserName == credReq.UserName)
-                                        && (credSite.Password == credReq.Password);
-                                }
-                                else if (route.Authentication.AuthenticationType == AuthenticationType.ApiKey)
-                                {
-                                    var apikeyReq = GetApiKeyFromHeaders(context.Request.Headers);
-                                    if (apikeyReq is null)
-                                    {
-                                        continue;
-                                    }
-
-                                    var apikeySite = route.Authentication.ApiKey ?? ApiKey;
-
-                                    isAuthOk = apikeyReq == apikeySite;
-                                }
-                                else
-                                {
-                                    isAuthOk = false;
-                                }
-
-                                if (isAuthOk)
-                                {
-                                    // This route can be used and has precedence over non-authenticated routes
-                                    if (!selectedRouteHasAuth)
-                                    {
-                                        selectedRoute = null;
-                                        multipleCallback = null;
-                                    }
-
-                                    selectedRouteHasAuth = true;
-                                }
-                                else
-                                {
-                                    authFailed = true;
                                     continue;
                                 }
+
+                                // Check auth first
+                                mustAuthenticate = route.Authentication != null && route.Authentication.AuthenticationType != AuthenticationType.None;
+                                if (mustAuthenticate)
+                                {
+                                    hasAuthRoutes = true;
+                                    if (route.Authentication.AuthenticationType == AuthenticationType.Basic)
+                                    {
+                                        var credReq = context.Request.Credentials;
+                                        if (credReq is null)
+                                        {
+                                            if (basicAuthNoCred is null)
+                                            {
+                                                basicAuthNoCred = route.Route;
+                                            }
+
+                                            continue;
+                                        }
+
+                                        var credSite = route.Authentication.Credentials ?? Credential;
+
+                                        isAuthOk = credSite != null
+                                            && (credSite.UserName == credReq.UserName)
+                                            && (credSite.Password == credReq.Password);
+                                    }
+                                    else if (route.Authentication.AuthenticationType == AuthenticationType.ApiKey)
+                                    {
+                                        var apikeyReq = GetApiKeyFromHeaders(context.Request.Headers);
+                                        if (apikeyReq is null)
+                                        {
+                                            continue;
+                                        }
+
+                                        var apikeySite = route.Authentication.ApiKey ?? ApiKey;
+
+                                        isAuthOk = apikeyReq == apikeySite;
+                                    }
+                                    else
+                                    {
+                                        isAuthOk = false;
+                                    }
+
+                                    if (isAuthOk)
+                                    {
+                                        // This route can be used and has precedence over non-authenticated routes
+                                        if (!selectedRouteHasAuth)
+                                        {
+                                            selectedRoute = null;
+                                            multipleCallback = null;
+                                        }
+
+                                        selectedRouteHasAuth = true;
+                                    }
+                                    else
+                                    {
+                                        authFailed = true;
+                                        continue;
+                                    }
+                                }
+                                else if (selectedRouteHasAuth || authFailed)
+                                {
+                                    // The selected route has authentication and/or a route exists with failed authentication.
+                                    // Those have precedence over non-authenticated routes
+                                    continue;
+                                }
+
+                                if (selectedRoute is null)
+                                {
+                                    selectedRoute = route;
+                                }
+                                else
+                                {
+                                    multipleCallback ??= $"Multiple matching callbacks: {selectedRoute.Callback.DeclaringType.FullName}.{selectedRoute.Callback.Name}";
+                                    multipleCallback += $", {route.Callback.DeclaringType.FullName}.{route.Callback.Name}";
+                                }
                             }
-                            else if (selectedRouteHasAuth || authFailed)
-                            {
-                                // The selected route has authentication and/or a route exists with failed authentication.
-                                // Those have precedence over non-authenticated routes
-                                continue;
-                            }
+
 
                             if (selectedRoute is null)
                             {
-                                selectedRoute = route;
-                            }
-                            else
-                            {
-                                multipleCallback ??= $"Multiple matching callbacks: {selectedRoute.Callback.DeclaringType.FullName}.{selectedRoute.Callback.Name}";
-                                multipleCallback += $", {route.Callback.DeclaringType.FullName}.{route.Callback.Name}";
-                            }
-                        }
-
-
-                        if (selectedRoute is null)
-                        {
-                            if (hasAuthRoutes)
-                            {
-                                if (!authFailed && basicAuthNoCred is not null)
+                                if (hasAuthRoutes)
                                 {
-                                    context.Response.Headers.Add("WWW-Authenticate",
-                                        $"Basic realm=\"Access to {basicAuthNoCred}\"");
-                                }
+                                    if (!authFailed && basicAuthNoCred is not null)
+                                    {
+                                        context.Response.Headers.Add("WWW-Authenticate",
+                                            $"Basic realm=\"Access to {basicAuthNoCred}\"");
+                                    }
 
-                                context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                                context.Response.ContentLength64 = 0;
+                                    context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                                    context.Response.ContentLength64 = 0;
+                                }
+                                else if (CommandReceived != null)
+                                {
+                                    // Starting a new thread to be able to handle a new request in parallel
+                                    CommandReceived.Invoke(this, new WebServerEventArgs(context));
+                                }
+                                else
+                                {
+                                    context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+                                    context.Response.ContentLength64 = 0;
+                                }
                             }
-                            else if (CommandReceived != null)
+                            else if (multipleCallback is not null)
                             {
-                                // Starting a new thread to be able to handle a new request in parallel
-                                CommandReceived.Invoke(this, new WebServerEventArgs(context));
+                                multipleCallback += ".";
+                                context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                                OutputAsStream(context.Response, multipleCallback);
                             }
                             else
                             {
-                                context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+                                InvokeRoute(selectedRoute, context);
+                            }
+
+                            HandleContextResponse(context);
+                        }
+                        catch (Exception ex)
+                        {
+
+                            try
+                            {
+                                context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                                 context.Response.ContentLength64 = 0;
                             }
+                            catch
+                            {
+                                // Response may already be partially sent or the connection closed; nothing to do.
+                            }
                         }
-                        else if (multipleCallback is not null)
-                        {
-                            multipleCallback += ".";
-                            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                            OutputAsStream(context.Response, multipleCallback);
-                        }
-                        else
-                        {
-                            InvokeRoute(selectedRoute, context);
-                        }
-
-                        HandleContextResponse(context);
                     }).Start();
 
                 }
