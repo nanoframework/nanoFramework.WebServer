@@ -1,10 +1,16 @@
-﻿using System;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.Collections;
 using System.Reflection;
-using System.Text;
 using nanoFramework.Json;
 
+#if WEBSERVER_MCP
 namespace nanoFramework.WebServer.Mcp
+#else
+namespace nanoFramework.WebServer.Skills
+#endif
 {
     /// <summary>
     /// Base class for registries that support conversion and deserialization of objects.
@@ -17,6 +23,7 @@ namespace nanoFramework.WebServer.Mcp
         /// <param name="value">The value to convert.</param>
         /// <param name="targetType">The target primitive type to convert to.</param>
         /// <returns>The converted value as the target type.</returns>
+        /// <exception cref="InvalidCastException">Thrown when the value cannot be converted to the target type (e.g. invalid boolean string).</exception>
         protected static object ConvertToPrimitiveType(object value, Type targetType)
         {
             if (value == null)
@@ -38,17 +45,30 @@ namespace nanoFramework.WebServer.Mcp
             }
             else if (targetType == typeof(bool))
             {
-                if (value.ToString().Length == 1)
+                string strVal = value.ToString();
+                if (strVal.Length == 1)
                 {
                     try
                     {
-                        return Convert.ToBoolean(Convert.ToByte(value.ToString()));
+                        return Convert.ToBoolean(Convert.ToByte(strVal));
                     }
                     catch (Exception)
                     {
                     }
                 }
-                return value.ToString().ToLower() == "true";
+
+                string lower = strVal.ToLower();
+                if (lower == "true")
+                {
+                    return true;
+                }
+
+                if (lower == "false")
+                {
+                    return false;
+                }
+
+                throw new InvalidCastException();
             }
             else if (targetType == typeof(long))
             {
@@ -103,6 +123,7 @@ namespace nanoFramework.WebServer.Mcp
         /// <param name="hashtable">The Hashtable containing the data to deserialize.</param>
         /// <param name="targetType">The target type to deserialize the data into.</param>
         /// <returns>A new instance of the target type with properties populated from the Hashtable, or null if hashtable or targetType is null.</returns>
+        /// <exception cref="InvalidCastException">Thrown when a property value cannot be converted to the expected type.</exception>
         protected static object DeserializeFromHashtable(Hashtable hashtable, Type targetType)
         {
             if (hashtable == null || targetType == null)
@@ -110,7 +131,11 @@ namespace nanoFramework.WebServer.Mcp
                 return null;
             }
 
+#if WEBSERVER_MCP
             if (McpToolJsonHelper.IsPrimitiveType(targetType) || targetType == typeof(string))
+#else
+            if (SkillJsonHelper.IsPrimitiveType(targetType) || targetType == typeof(string))
+#endif
             {
                 return hashtable;
             }
@@ -139,32 +164,33 @@ namespace nanoFramework.WebServer.Mcp
                     continue;
                 }
 
-                try
+                Type propertyType = method.GetParameters()[0].ParameterType;
+#if WEBSERVER_MCP
+                if (McpToolJsonHelper.IsPrimitiveType(propertyType) || propertyType == typeof(string))
+#else
+                if (SkillJsonHelper.IsPrimitiveType(propertyType) || propertyType == typeof(string))
+#endif
                 {
-                    Type propertyType = method.GetParameters()[0].ParameterType;
-                    if (McpToolJsonHelper.IsPrimitiveType(propertyType) || propertyType == typeof(string))
+                    object convertedValue = ConvertToPrimitiveType(value, propertyType);
+                    method.Invoke(instance, new object[] { convertedValue });
+                }
+                else
+                {
+                    if (value is string stringValue)
                     {
-                        object convertedValue = ConvertToPrimitiveType(value, propertyType);
-                        method.Invoke(instance, new object[] { convertedValue });
+                        var nestedHashtable = (Hashtable)JsonConvert.DeserializeObject(stringValue, typeof(Hashtable));
+                        object nestedObject = DeserializeFromHashtable(nestedHashtable, propertyType);
+                        method.Invoke(instance, new object[] { nestedObject });
+                    }
+                    else if (value is Hashtable nestedHashtable)
+                    {
+                        object nestedObject = DeserializeFromHashtable(nestedHashtable, propertyType);
+                        method.Invoke(instance, new object[] { nestedObject });
                     }
                     else
                     {
-                        if (value is string stringValue)
-                        {
-                            var nestedHashtable = (Hashtable)JsonConvert.DeserializeObject(stringValue, typeof(Hashtable));
-                            object nestedObject = DeserializeFromHashtable(nestedHashtable, propertyType);
-                            method.Invoke(instance, new object[] { nestedObject });
-                        }
-                        else if (value is Hashtable nestedHashtable)
-                        {
-                            object nestedObject = DeserializeFromHashtable(nestedHashtable, propertyType);
-                            method.Invoke(instance, new object[] { nestedObject });
-                        }
+                        throw new InvalidCastException();
                     }
-                }
-                catch (Exception)
-                {
-                    continue;
                 }
             }
 
@@ -172,18 +198,19 @@ namespace nanoFramework.WebServer.Mcp
         }
 
         /// <summary>
-        /// Creates an instance of a tool or prompt method using its parameterless constructor.
+        /// Creates an instance of a type using its parameterless constructor.
         /// </summary>
-        /// <param name="type">The type of the tool or prompt method to create an instance of.</param>
-        /// <returns>The result of the method invocation.</returns>
+        /// <param name="type">The type to create an instance of.</param>
+        /// <returns>A new instance of the type.</returns>
         /// <exception cref="Exception">Thrown when the type does not have a parameterless constructor.</exception>
         protected static object CreateInstance(Type type)
         {
             ConstructorInfo constructor = type.GetConstructor(new Type[0]);
             if (constructor == null)
             {
-                throw new Exception($"Type {type.Name} does not have a parameterless constructor");
+                throw new Exception();
             }
+
             return constructor.Invoke(new object[0]);
         }
     }

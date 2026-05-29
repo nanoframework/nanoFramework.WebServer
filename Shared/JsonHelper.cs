@@ -5,15 +5,24 @@ using System;
 using System.Reflection;
 using System.Text;
 
+#if WEBSERVER_MCP
+namespace nanoFramework.WebServer.Mcp
+#else
 namespace nanoFramework.WebServer.Skills
+#endif
 {
     /// <summary>
-    /// Provides utility methods for generating JSON schemas that describe the input and output parameters of skill actions.
+    /// Provides utility methods for generating JSON schemas that describe the input and output parameters of actions.
     /// </summary>
-    public static class SkillJsonHelper
+    public static class
+#if WEBSERVER_MCP
+        McpToolJsonHelper
+#else
+        SkillJsonHelper
+#endif
     {
         /// <summary>
-        /// Generates a JSON object schema describing the input parameters for a skill action.
+        /// Generates a JSON object schema describing the input parameters for an action.
         /// </summary>
         /// <param name="inputType">The <see cref="Type"/> representing the input parameter type.</param>
         /// <returns>A JSON string representing the input parameters schema.</returns>
@@ -50,7 +59,7 @@ namespace nanoFramework.WebServer.Skills
         }
 
         /// <summary>
-        /// Generates a JSON object describing the output schema for a skill action.
+        /// Generates a JSON object describing the output schema for an action.
         /// </summary>
         /// <param name="outputType">The <see cref="Type"/> of the output object.</param>
         /// <param name="description">A description of the output.</param>

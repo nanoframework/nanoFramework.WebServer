@@ -156,29 +156,36 @@ namespace nanoFramework.WebServer.Skills
                     continue;
                 }
 
-                Type propertyType = method.GetParameters()[0].ParameterType;
-                if (SkillJsonHelper.IsPrimitiveType(propertyType) || propertyType == typeof(string))
+                try
                 {
-                    object convertedValue = ConvertToPrimitiveType(value, propertyType);
-                    method.Invoke(instance, new object[] { convertedValue });
-                }
-                else
-                {
-                    if (value is string stringValue)
+                    Type propertyType = method.GetParameters()[0].ParameterType;
+                    if (SkillJsonHelper.IsPrimitiveType(propertyType) || propertyType == typeof(string))
                     {
-                        var nestedHashtable = (Hashtable)JsonConvert.DeserializeObject(stringValue, typeof(Hashtable));
-                        object nestedObject = DeserializeFromHashtable(nestedHashtable, propertyType);
-                        method.Invoke(instance, new object[] { nestedObject });
-                    }
-                    else if (value is Hashtable nestedHashtable)
-                    {
-                        object nestedObject = DeserializeFromHashtable(nestedHashtable, propertyType);
-                        method.Invoke(instance, new object[] { nestedObject });
+                        object convertedValue = ConvertToPrimitiveType(value, propertyType);
+                        method.Invoke(instance, new object[] { convertedValue });
                     }
                     else
                     {
+                        if (value is string stringValue)
+                        {
+                            var nestedHashtable = (Hashtable)JsonConvert.DeserializeObject(stringValue, typeof(Hashtable));
+                            object nestedObject = DeserializeFromHashtable(nestedHashtable, propertyType);
+                            method.Invoke(instance, new object[] { nestedObject });
+                        }
+                        else if (value is Hashtable nestedHashtable)
+                        {
+                            object nestedObject = DeserializeFromHashtable(nestedHashtable, propertyTy
+                    else
+                    {
                         throw new InvalidCastException();
+                    }pe);
+                            method.Invoke(instance, new object[] { nestedObject });
+                        }
                     }
+                }
+                catch (Exception)
+                {
+                    throw;
                 }
             }
 
