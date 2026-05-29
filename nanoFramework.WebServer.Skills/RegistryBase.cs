@@ -175,6 +175,10 @@ namespace nanoFramework.WebServer.Skills
                         object nestedObject = DeserializeFromHashtable(nestedHashtable, propertyType);
                         method.Invoke(instance, new object[] { nestedObject });
                     }
+                    else
+                    {
+                        throw new InvalidCastException();
+                    }
                 }
             }
 
