@@ -3,7 +3,11 @@
 
 using System;
 
+#if WEBSERVER_MCP
+namespace nanoFramework.WebServer.Mcp
+#else
 namespace nanoFramework.WebServer.Skills
+#endif
 {
     /// <summary>
     /// Specifies a description for a class member, such as a property or method, for use in documentation or metadata.

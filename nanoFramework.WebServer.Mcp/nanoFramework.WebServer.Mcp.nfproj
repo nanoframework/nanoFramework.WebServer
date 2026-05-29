@@ -29,9 +29,14 @@
   <PropertyGroup>
     <DelaySign>false</DelaySign>
   </PropertyGroup>
+  <PropertyGroup>
+    <DefineConstants>$(DefineConstants);WEBSERVER_MCP</DefineConstants>
+  </PropertyGroup>
   <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.props" Condition="Exists('$(NanoFrameworkProjectSystemPath)NFProjectSystem.props')" />
   <ItemGroup>
-    <Compile Include="DescriptionAttribute.cs" />
+    <Compile Include="..\Shared\DescriptionAttribute.cs" Link="Shared\DescriptionAttribute.cs" />
+    <Compile Include="..\Shared\RegistryBase.cs" Link="Shared\RegistryBase.cs" />
+    <Compile Include="..\Shared\JsonHelper.cs" Link="Shared\JsonHelper.cs" />
     <Compile Include="HashtableExtension.cs" />
     <Compile Include="McpPromptParameter.cs" />
     <Compile Include="McpPromptMessage.cs" />
@@ -41,11 +46,9 @@
     <Compile Include="McpServerToolAttribute.cs" />
     <Compile Include="McpPromptRegistry.cs" />
     <Compile Include="McpToolRegistry.cs" />
-    <Compile Include="McpToolsJsonHelper.cs" />
     <Compile Include="McpServerController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PromptMetadata.cs" />
-    <Compile Include="RegistryBase.cs" />
     <Compile Include="Role.cs" />
     <Compile Include="ToolMetadata.cs" />
   </ItemGroup>
