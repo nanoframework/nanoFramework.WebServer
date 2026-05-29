@@ -421,27 +421,32 @@ namespace SkillsTests
         {
             // Arrange — reset and register only climate skill
             SkillRegistry.Reset();
-            SkillRegistry.DiscoverSkills(new Type[] { typeof(TestClimateSkill) });
-            string firstCall = SkillRegistry.GetSkillsArrayJson();
-
-            // Act — second call with different types should be ignored
-            SkillRegistry.DiscoverSkills(new Type[] { typeof(TestLightingSkill) });
-            string secondCall = SkillRegistry.GetSkillsArrayJson();
-
-            // Assert
-            Assert.AreEqual(firstCall, secondCall, "Second call should not change results");
-            Assert.IsTrue(firstCall.Contains("\"climate-control\""), "Should contain first-registered skill");
-            Assert.IsFalse(secondCall.Contains("\"lighting\""), "Should not contain second-call skill");
-
-            // Restore state for subsequent tests since [Setup] only runs once
-            SkillRegistry.Reset();
-            SkillRegistry.DiscoverSkills(new Type[]
+            try
             {
-                typeof(TestClimateSkill),
-                typeof(TestLightingSkill),
-                typeof(TestNestedSkill),
-                typeof(NotASkillClass)
-            });
+                SkillRegistry.DiscoverSkills(new Type[] { typeof(TestClimateSkill) });
+                string firstCall = SkillRegistry.GetSkillsArrayJson();
+
+                // Act — second call with different types should be ignored
+                SkillRegistry.DiscoverSkills(new Type[] { typeof(TestLightingSkill) });
+                string secondCall = SkillRegistry.GetSkillsArrayJson();
+
+                // Assert
+                Assert.AreEqual(firstCall, secondCall, "Second call should not change results");
+                Assert.IsTrue(firstCall.Contains("\"climate-control\""), "Should contain first-registered skill");
+                Assert.IsFalse(secondCall.Contains("\"lighting\""), "Should not contain second-call skill");
+            }
+            finally
+            {
+                // Restore state for subsequent tests since [Setup] only runs once
+                SkillRegistry.Reset();
+                SkillRegistry.DiscoverSkills(new Type[]
+                {
+                    typeof(TestClimateSkill),
+                    typeof(TestLightingSkill),
+                    typeof(TestNestedSkill),
+                    typeof(NotASkillClass)
+                });
+            }
         }
 
         [TestMethod]
