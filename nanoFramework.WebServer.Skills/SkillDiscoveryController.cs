@@ -188,7 +188,8 @@ namespace nanoFramework.WebServer.Skills
 
                 Hashtable request = (Hashtable)JsonConvert.DeserializeObject(requestBody, typeof(Hashtable));
 
-                if (!request.Contains("skill") || !request.Contains("action"))
+                if (!request.Contains("skill") || !request.Contains("action")
+                    || request["skill"] == null || request["action"] == null)
                 {
                     e.Context.Response.ContentType = "application/json";
                     e.Context.Response.StatusCode = 400;
@@ -199,9 +200,22 @@ namespace nanoFramework.WebServer.Skills
 
                 string skillId = request["skill"].ToString();
                 string actionName = request["action"].ToString();
-                Hashtable arguments = request.Contains("arguments") && request["arguments"] != null
-                    ? (Hashtable)request["arguments"]
-                    : null;
+                Hashtable arguments = null;
+                if (request.Contains("arguments") && request["arguments"] != null)
+                {
+                    if (request["arguments"] is Hashtable ht)
+                    {
+                        arguments = ht;
+                    }
+                    else
+                    {
+                        e.Context.Response.ContentType = "application/json";
+                        e.Context.Response.StatusCode = 400;
+                        WebServer.OutputAsStream(e.Context.Response,
+                            "{\"error\":{\"code\":-3,\"message\":\"'arguments' must be an object\"}}");
+                        return;
+                    }
+                }
 
                 // Get the content type for the action before invoking
                 string contentType = SkillRegistry.GetActionContentType(skillId, actionName);

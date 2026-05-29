@@ -24,12 +24,14 @@ namespace nanoFramework.WebServer.Skills
         public string Description { get; set; }
 
         /// <summary>
-        /// Gets or sets the JSON schema string describing the input parameters for the action.
+        /// Gets or sets the pre-serialized JSON schema describing the input parameters for the action.
+        /// Must be a valid JSON object or array literal (starting with '{' or '[').
         /// </summary>
         public string InputSchema { get; set; }
 
         /// <summary>
-        /// Gets or sets the JSON schema string describing the output type for the action.
+        /// Gets or sets the pre-serialized JSON schema describing the output type for the action.
+        /// Must be a valid JSON object or array literal (starting with '{' or '[').
         /// </summary>
         public string OutputSchema { get; set; }
 
@@ -67,13 +69,13 @@ namespace nanoFramework.WebServer.Skills
                 sb.Append("\"");
             }
 
-            if (!string.IsNullOrEmpty(InputSchema))
+            if (!string.IsNullOrEmpty(InputSchema) && (InputSchema[0] == '{' || InputSchema[0] == '['))
             {
                 sb.Append(",\"inputSchema\":");
                 sb.Append(InputSchema);
             }
 
-            if (!string.IsNullOrEmpty(OutputSchema))
+            if (!string.IsNullOrEmpty(OutputSchema) && (OutputSchema[0] == '{' || OutputSchema[0] == '['))
             {
                 sb.Append(",\"outputSchema\":");
                 sb.Append(OutputSchema);

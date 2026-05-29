@@ -163,8 +163,9 @@ namespace nanoFramework.WebServer.Skills
                                 AddIfNotPresent(outputModes, actionAttr.ContentType);
                             }
                         }
-                        catch (Exception)
+                        catch (Exception ex)
                         {
+                            Debug.WriteLine($"Failed to register action '{method.Name}' on '{skillType.FullName}': {ex.Message}");
                             continue;
                         }
                     }
@@ -175,8 +176,9 @@ namespace nanoFramework.WebServer.Skills
 
                     _skills.Add(skillAttribute.Id, skillMetadata);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    Debug.WriteLine($"Failed to register skill '{skillType.FullName}': {ex.Message}");
                     continue;
                 }
             }
