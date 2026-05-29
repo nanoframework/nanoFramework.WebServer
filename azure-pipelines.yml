@@ -68,7 +68,11 @@ steps:
     parameters:
       nugetPackageName: 'nanoFramework.WebServer.Mcp'
 
-  # publish the 3 libs
+  - template: azure-pipelines-templates/class-lib-package.yml@templates  
+    parameters:
+      nugetPackageName: 'nanoFramework.WebServer.Skills'
+
+  # publish the 4 libs
   - template: azure-pipelines-templates/class-lib-publish.yml@templates
 
   # create GitHub release build from main branch
