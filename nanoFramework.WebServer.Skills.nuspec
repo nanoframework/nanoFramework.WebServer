@@ -24,7 +24,7 @@ This comes also with the nanoFramework WebServer. Allows creating a REST API bas
     <dependencies>
       <dependency id="nanoFramework.CoreLibrary" version="1.17.11" />
       <dependency id="nanoFramework.System.Net.Http.Server" version="1.5.208" />
-      <dependency id="nanoFramework.Json" version="2.2.212" />
+      <dependency id="nanoFramework.Json" version="2.2.213" />
     </dependencies>
   </metadata>
   <files>
