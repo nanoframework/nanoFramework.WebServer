@@ -23,7 +23,7 @@ This comes also with the nanoFramework WebServer. Allows creating a REST API bas
     <tags>http https webserver net netmf nf nanoframework skills ai agent discovery a2a iot</tags>
     <dependencies>
       <dependency id="nanoFramework.CoreLibrary" version="1.17.11" />
-      <dependency id="nanoFramework.System.Net.Http.Server" version="1.5.209" />
+      <dependency id="nanoFramework.System.Net.Http.Server" version="1.5.210" />
       <dependency id="nanoFramework.Json" version="2.2.213" />
     </dependencies>
   </metadata>
