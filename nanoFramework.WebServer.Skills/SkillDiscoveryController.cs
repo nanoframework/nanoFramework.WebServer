@@ -193,6 +193,14 @@ namespace nanoFramework.WebServer.Skills
                     return;
                 }
 
+                if (contentLength == 0)
+                {
+                    e.Context.Response.ContentType = "application/json";
+                    e.Context.Response.StatusCode = 400;
+                    WebServer.OutputAsStream(e.Context.Response, "{\"error\":{\"code\":-3,\"message\":\"Request body required\"}}");
+                    return;
+                }
+
                 if (MaximumRequestBodySize >= 0 && contentLength > MaximumRequestBodySize)
                 {
                     e.Context.Response.ContentType = "application/json";

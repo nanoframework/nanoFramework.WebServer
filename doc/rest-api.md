@@ -719,6 +719,12 @@ public class ProductController
             }
             
             // Read and parse JSON body
+            if (e.Context.Request.ContentLength64 == 0)
+            {
+                e.Context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                return;
+            }
+
             var body = e.Context.Request.ReadBody(MaximumRequestBodySize);
             if (body == null)
             {
@@ -1552,6 +1558,12 @@ public class BatchController
     {
         try
         {
+            if (e.Context.Request.ContentLength64 == 0)
+            {
+                e.Context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                return;
+            }
+
             var body = e.Context.Request.ReadBody(MaximumRequestBodySize);
             if (body == null)
             {
