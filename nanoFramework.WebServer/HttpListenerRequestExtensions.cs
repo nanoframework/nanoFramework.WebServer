@@ -4,7 +4,6 @@
 using System;
 using System.IO;
 using System.Net;
-using System.Threading;
 using nanoFramework.WebServer.HttpMultipartParser;
 
 namespace nanoFramework.WebServer
@@ -24,7 +23,7 @@ namespace nanoFramework.WebServer
         /// Reads a body from the HttpListenerRequest inputstream.
         /// </summary>
         /// <param name="httpListenerRequest">The request to read the body from</param>
-        /// <param name="maximumBodySize">The maximum body size in bytes. A value of -1 disables the check.</param>
+        /// <param name="maximumBodySize">The maximum body size in bytes. Any negative value disables the check.</param>
         /// <returns>
         /// A byte[] containing the body of the request, or <see langword="null"/> if the body could not be read.
         /// </returns>
@@ -32,10 +31,14 @@ namespace nanoFramework.WebServer
         {
             long contentLength = httpListenerRequest.ContentLength64;
 
-            // check missing or invalid content-length
-            if (contentLength <= 0)
+            if (contentLength == 0)
             {
                 return new byte[0];
+            }
+
+            if (contentLength < 0)
+            {
+                return null;
             }
 
             if (maximumBodySize >= 0 && contentLength > maximumBodySize)
@@ -62,34 +65,12 @@ namespace nanoFramework.WebServer
 
                 while (position < bodySize)
                 {
-                    // The stream is (should be) a NetworkStream which might still be receiving data while
-                    // we're already processing. Give the stream a chance to receive more data or we might
-                    // end up with "zero bytes read" too soon...
-                    Thread.Sleep(1);
-
-                    long length = stream.Length;
-
-                    if (length <= 0)
-                    {
-                        break;
-                    }
-
-                    if (length > buffer.Length)
-                    {
-                        length = buffer.Length;
-                    }
-
-                    long remaining = bodySize - position;
-                    if (length > remaining)
-                    {
-                        length = remaining;
-                    }
-
-                    int bytesRead = stream.Read(buffer, 0, (int)length);
+                    int remaining = bodySize - position;
+                    int bytesRead = stream.Read(buffer, 0, remaining > buffer.Length ? buffer.Length : remaining);
 
                     if (bytesRead == 0)
                     {
-                        break;
+                        return null;
                     }
 
                     Array.Copy(buffer, 0, body, position, bytesRead);

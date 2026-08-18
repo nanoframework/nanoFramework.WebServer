@@ -165,7 +165,7 @@ public static void Main()
     McpPromptRegistry.DiscoverPrompts(new Type[] { typeof(McpPrompts) });
 
     // You can limit request bodies to 50% of currently available memory to avoid possible memory pressure or ddos
-    // You can leave the -1 default value to ignore the check
+    // Any negative value disables the check; the default is -1
     McpServerController.MaximumRequestBodySize = nanoFramework.Runtime.Native.GC.Run(false) / 2;
     
     // Start WebServer with MCP support
@@ -258,7 +258,7 @@ public static void Main()
     SkillRegistry.DiscoverSkills(new Type[] { typeof(ClimateSkill) });
 
     // You can limit request bodies to 50% of currently available memory to avoid possible memory pressure or ddos
-    // You can leave the -1 default value to ignore the check
+    // Any negative value disables the check; the default is -1
     SkillDiscoveryController.MaximumRequestBodySize = nanoFramework.Runtime.Native.GC.Run(false) / 2;
 
     // Start WebServer with Skills Discovery support

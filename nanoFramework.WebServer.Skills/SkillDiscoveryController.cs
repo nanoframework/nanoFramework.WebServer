@@ -38,7 +38,7 @@ namespace nanoFramework.WebServer.Skills
         public static string AgentUrl { get; set; } = string.Empty;
 
         /// <summary>
-        /// Gets or sets the maximum request body size in bytes. A value of -1 disables the check.
+        /// Gets or sets the maximum request body size in bytes. Any negative value disables the check.
         /// </summary>
         public static long MaximumRequestBodySize { get; set; } = -1;
 
@@ -184,8 +184,16 @@ namespace nanoFramework.WebServer.Skills
             try
             {
                 // Read the POST body
-                var requestStream = e.Context.Request.InputStream;
-                if (MaximumRequestBodySize >= 0 && requestStream.Length > MaximumRequestBodySize)
+                long contentLength = e.Context.Request.ContentLength64;
+                if (contentLength < 0)
+                {
+                    e.Context.Response.ContentType = "application/json";
+                    e.Context.Response.StatusCode = 411;
+                    WebServer.OutputAsStream(e.Context.Response, "{\"error\":{\"code\":-4,\"message\":\"Content-Length header required\"}}");
+                    return;
+                }
+
+                if (MaximumRequestBodySize >= 0 && contentLength > MaximumRequestBodySize)
                 {
                     e.Context.Response.ContentType = "application/json";
                     e.Context.Response.StatusCode = 413;
@@ -193,8 +201,15 @@ namespace nanoFramework.WebServer.Skills
                     return;
                 }
 
-                byte[] buffer = new byte[requestStream.Length];
-                requestStream.Read(buffer, 0, buffer.Length);
+                byte[] buffer = e.Context.Request.ReadBody(MaximumRequestBodySize);
+                if (buffer == null)
+                {
+                    e.Context.Response.ContentType = "application/json";
+                    e.Context.Response.StatusCode = 400;
+                    WebServer.OutputAsStream(e.Context.Response, "{\"error\":{\"code\":-4,\"message\":\"Unable to read request body\"}}");
+                    return;
+                }
+
                 string requestBody = Encoding.UTF8.GetString(buffer, 0, buffer.Length);
 
                 Debug.WriteLine($"Skill invoke request: {requestBody}");

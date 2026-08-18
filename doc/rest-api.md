@@ -249,6 +249,7 @@ public class DeviceController
 ```csharp
 public class ConfigController
 {
+    private const int MaximumRequestBodySize = 4 * 1024;
     private static DateTime _startTime = DateTime.UtcNow;
     private static DeviceInfo _deviceInfo;
     private static Sensor[] _sensors;
@@ -288,7 +289,7 @@ public class ConfigController
                 return;
             }
             
-            var body = e.Context.Request.ReadBody(nanoFramework.Runtime.Native.GC.Run(false) / 2);
+            var body = e.Context.Request.ReadBody(MaximumRequestBodySize);
             if (body == null)
             {
                 e.Context.Response.StatusCode = 413;
@@ -673,19 +674,23 @@ public class SearchController
 
 This section will explain how to handle forms submissions.
 
-`ReadBody()` does not check the body size by default. The unchecked form is appropriate when the server is reachable only by controlled internal clients and the protocol guarantees a small, fixed payload. For public, externally reachable, upload, or otherwise variable-size requests, pass a maximum size. The examples use 50% of currently available memory as a simple device-specific limit:
+`ReadBody()` does not check the body size by default. The unchecked form is appropriate when the server is reachable only by controlled internal clients and the protocol guarantees a small, fixed payload. For public, externally reachable, upload, or otherwise variable-size requests, pass a maximum size. Prefer a reusable schema-based constant so request handlers do not force a garbage collection:
 
 ```csharp
-var body = request.ReadBody(nanoFramework.Runtime.Native.GC.Run(false) / 2);
+private const int MaximumRequestBodySize = 4 * 1024;
+
+var body = request.ReadBody(MaximumRequestBodySize);
 ```
 
-Choose a smaller fixed limit when the request schema has a known maximum. `ReadBody()` returns `null` when the configured limit is exceeded or the body cannot be read, so checked examples return HTTP 413 before using the buffer. Authentication alone does not make an unchecked body safe; omit the limit only when the network path and client behavior are also controlled.
+If the schema does not have a practical fixed maximum, compute a device-specific limit once during startup, store it in a static field, and reuse it for every request. Do not call `nanoFramework.Runtime.Native.GC.Run(false)` inside a request handler. `ReadBody()` returns `null` when the configured limit is exceeded or the body cannot be read, so checked examples return HTTP 413 before using the buffer. Authentication alone does not make an unchecked body safe; omit the limit only when the network path and client behavior are also controlled.
 
 ### JSON Request Bodies
 
 ```csharp
 public class ProductController
 {
+    private const int MaximumRequestBodySize = 4 * 1024;
+
     public class ProductCreationResponse
     {
         public string Message { get; set; }
@@ -714,7 +719,7 @@ public class ProductController
             }
             
             // Read and parse JSON body
-            var body = e.Context.Request.ReadBody(nanoFramework.Runtime.Native.GC.Run(false) / 2);
+            var body = e.Context.Request.ReadBody(MaximumRequestBodySize);
             if (body == null)
             {
                 e.Context.Response.StatusCode = 413;
@@ -787,6 +792,8 @@ public class ProductController
 ```csharp
 public class UploadController
 {
+    private const int MaximumRequestBodySize = 16 * 1024;
+
     [Route("api/upload")]
     [Method("POST")]
     public void UploadFile(WebServerEventArgs e)
@@ -814,7 +821,7 @@ public class UploadController
             else if (contentType == "application/x-www-form-urlencoded")
             {
                 // Handle URL-encoded form data
-                var body = e.Context.Request.ReadBody(nanoFramework.Runtime.Native.GC.Run(false) / 2);
+                var body = e.Context.Request.ReadBody(MaximumRequestBodySize);
                 if (body == null)
                 {
                     e.Context.Response.StatusCode = 413;
@@ -1208,6 +1215,7 @@ Complete CRUD (Create, Read, Update, Delete) API for managing IoT devices:
 ```csharp
 public class IoTDeviceController
 {
+    private const int MaximumRequestBodySize = 4 * 1024;
     private static Hashtable _devices = new Hashtable();
 
     public class DeviceResponse
@@ -1324,7 +1332,7 @@ public class IoTDeviceController
     {
         try
         {
-            var body = e.Context.Request.ReadBody(nanoFramework.Runtime.Native.GC.Run(false) / 2);
+            var body = e.Context.Request.ReadBody(MaximumRequestBodySize);
             if (body == null)
             {
                 e.Context.Response.StatusCode = 413;
@@ -1379,7 +1387,7 @@ public class IoTDeviceController
         
         try
         {
-            var body = e.Context.Request.ReadBody(nanoFramework.Runtime.Native.GC.Run(false) / 2);
+            var body = e.Context.Request.ReadBody(MaximumRequestBodySize);
             if (body == null)
             {
                 e.Context.Response.StatusCode = 413;
@@ -1432,7 +1440,7 @@ public class IoTDeviceController
         
         try
         {
-            var body = e.Context.Request.ReadBody(nanoFramework.Runtime.Native.GC.Run(false) / 2);
+            var body = e.Context.Request.ReadBody(MaximumRequestBodySize);
             if (body == null)
             {
                 e.Context.Response.StatusCode = 413;
@@ -1536,13 +1544,15 @@ public class IoTDeviceController
 ```csharp
 public class BatchController
 {
+    private const int MaximumRequestBodySize = 16 * 1024;
+
     [Route("api/batch/sensors")]
     [Method("POST")]
     public void BatchUpdateSensors(WebServerEventArgs e)
     {
         try
         {
-            var body = e.Context.Request.ReadBody(nanoFramework.Runtime.Native.GC.Run(false) / 2);
+            var body = e.Context.Request.ReadBody(MaximumRequestBodySize);
             if (body == null)
             {
                 e.Context.Response.StatusCode = 413;

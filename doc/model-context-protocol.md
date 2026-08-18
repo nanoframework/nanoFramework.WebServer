@@ -394,7 +394,7 @@ public static void Main()
 }
 ```
 
-`MaximumRequestBodySize` is measured in bytes. Its default value is `-1`, which disables the size check. Set it before registering the controller; the authentication controllers inherit this setting.
+`MaximumRequestBodySize` is measured in bytes. Any negative value disables the size check; the default is `-1`. Set it before registering the controller; the authentication controllers inherit this setting.
 
 ### Custom Server Information
 
