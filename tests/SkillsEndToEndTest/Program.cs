@@ -39,6 +39,7 @@ namespace SkillsEndToEndTest
             SkillDiscoveryController.AgentVersion = "1.0.0";
 
             // Start the web server with the Skills Discovery controller
+            SkillDiscoveryController.MaximumRequestBodySize = nanoFramework.Runtime.Native.GC.Run(false) / 2;
             _server = new WebServer(80, HttpProtocol.Http, new Type[] { typeof(SkillDiscoveryController) });
             _server.CommandReceived += ServerCommandReceived;
             _server.Start();

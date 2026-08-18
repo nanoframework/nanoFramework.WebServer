@@ -252,7 +252,13 @@ public class PersonController
     {
         if (e.Context.Request.ContentLength64 > 0)
         {
-            var body = e.Context.Request.ReadBody();
+            var body = e.Context.Request.ReadBody(nanoFramework.Runtime.Native.GC.Run(false) / 2);
+            if (body == null)
+            {
+                e.Context.Response.StatusCode = 413;
+                return;
+            }
+
             var json = Encoding.UTF8.GetString(body, 0, body.Length);
             var person = JsonConvert.DeserializeObject(json, typeof(Person));
             
@@ -399,7 +405,13 @@ public void HandleUpload(WebServerEventArgs e)
         }
         else
         {
-            var body = e.Context.Request.ReadBody();
+            var body = e.Context.Request.ReadBody(nanoFramework.Runtime.Native.GC.Run(false) / 2);
+            if (body == null)
+            {
+                e.Context.Response.StatusCode = 413;
+                return;
+            }
+
             string content = Encoding.UTF8.GetString(body, 0, body.Length);
             Debug.WriteLine($"Body content: {content}");
         }

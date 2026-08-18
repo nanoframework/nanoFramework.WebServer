@@ -118,6 +118,9 @@ public class Program
         // Discover and register tools
         McpToolRegistry.DiscoverTools(new Type[] { typeof(SimpleMcpTools) });
 
+        // Limit request bodies to 50% of currently available memory
+        McpServerController.MaximumRequestBodySize = nanoFramework.Runtime.Native.GC.Run(false) / 2;
+
         // Start MCP server
         using (var server = new WebServer(80, HttpProtocol.Http, new Type[] { typeof(McpServerController) }))
         {
@@ -378,6 +381,9 @@ public static void Main()
         typeof(McpPrompts)
     });
 
+    // Limit request bodies to 50% of currently available memory
+    McpServerController.MaximumRequestBodySize = nanoFramework.Runtime.Native.GC.Run(false) / 2;
+
     // Step 3: Start WebServer with MCP support
     using (var server = new WebServer(80, HttpProtocol.Http, new Type[] { typeof(McpServerController) }))
     {
@@ -387,6 +393,8 @@ public static void Main()
     }
 }
 ```
+
+`MaximumRequestBodySize` is measured in bytes. Its default value is `-1`, which disables the size check. Set it before registering the controller; the authentication controllers inherit this setting.
 
 ### Custom Server Information
 

@@ -38,6 +38,11 @@ namespace nanoFramework.WebServer.Skills
         public static string AgentUrl { get; set; } = string.Empty;
 
         /// <summary>
+        /// Gets or sets the maximum request body size in bytes. A value of -1 disables the check.
+        /// </summary>
+        public static long MaximumRequestBodySize { get; set; } = -1;
+
+        /// <summary>
         /// Handles GET requests to .well-known/agent-card.json.
         /// Returns an A2A-compatible Agent Card with the registered skills.
         /// Supports optional query parameters: ?skill=id to filter by skill, ?tag=value to filter by tag.
@@ -180,6 +185,14 @@ namespace nanoFramework.WebServer.Skills
             {
                 // Read the POST body
                 var requestStream = e.Context.Request.InputStream;
+                if (MaximumRequestBodySize >= 0 && requestStream.Length > MaximumRequestBodySize)
+                {
+                    e.Context.Response.ContentType = "application/json";
+                    e.Context.Response.StatusCode = 413;
+                    WebServer.OutputAsStream(e.Context.Response, "{\"error\":{\"code\":-4,\"message\":\"Request body too large\"}}");
+                    return;
+                }
+
                 byte[] buffer = new byte[requestStream.Length];
                 requestStream.Read(buffer, 0, buffer.Length);
                 string requestBody = Encoding.UTF8.GetString(buffer, 0, buffer.Length);

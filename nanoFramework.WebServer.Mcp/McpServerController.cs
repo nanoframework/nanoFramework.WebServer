@@ -41,6 +41,11 @@ namespace nanoFramework.WebServer.Mcp
         public static string Instructions { get; set; } = "This is an embedded device and only 1 request at a time should be sent.";
 
         /// <summary>
+        /// Gets or sets the maximum request body size in bytes. A value of -1 disables the check.
+        /// </summary>
+        public static long MaximumRequestBodySize { get; set; } = -1;
+
+        /// <summary>
         /// Handles POST requests to the "mcp" route.
         /// Processes the incoming request, invokes the specified tool with provided parameters, and writes the result to the response stream in JSON format.
         /// </summary>
@@ -56,6 +61,13 @@ namespace nanoFramework.WebServer.Mcp
             {
                 // Read the POST body from the request stream
                 var requestStream = e.Context.Request.InputStream;
+                if (MaximumRequestBodySize >= 0 && requestStream.Length > MaximumRequestBodySize)
+                {
+                    e.Context.Response.StatusCode = 413;
+                    WebServer.OutputAsStream(e.Context.Response, "{\"error\":\"Request body too large\"}");
+                    return;
+                }
+
                 byte[] buffer = new byte[requestStream.Length];
                 requestStream.Read(buffer, 0, buffer.Length);
                 string requestBody = Encoding.UTF8.GetString(buffer, 0, buffer.Length);

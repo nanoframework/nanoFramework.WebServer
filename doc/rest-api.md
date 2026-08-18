@@ -62,7 +62,14 @@ public class ApiController
     {
         if (e.Context.Request.ContentLength64 > 0)
         {
+            // This sample assumes a trusted internal client with a fixed, small payload.
             var body = e.Context.Request.ReadBody();
+            if (body == null)
+            {
+                e.Context.Response.StatusCode = 500;
+                return;
+            }
+
             var content = System.Text.Encoding.UTF8.GetString(body, 0, body.Length);
             
             var response = $"{{\"message\":\"Hello, {content}!\"}}";
@@ -281,7 +288,13 @@ public class ConfigController
                 return;
             }
             
-            var body = e.Context.Request.ReadBody();
+            var body = e.Context.Request.ReadBody(nanoFramework.Runtime.Native.GC.Run(false) / 2);
+            if (body == null)
+            {
+                e.Context.Response.StatusCode = 413;
+                return;
+            }
+
             var json = System.Text.Encoding.UTF8.GetString(body, 0, body.Length);
             var config = JsonConvert.DeserializeObject(json, typeof(Hashtable)) as Hashtable;
             
@@ -342,7 +355,14 @@ public class LedController
     {
         try
         {
+            // The local controller is used only by a trusted client with a fixed payload.
             var body = e.Context.Request.ReadBody();
+            if (body == null)
+            {
+                e.Context.Response.StatusCode = 500;
+                return;
+            }
+
             var json = System.Text.Encoding.UTF8.GetString(body, 0, body.Length);
             var request = JsonConvert.DeserializeObject(json, typeof(Hashtable)) as Hashtable;
             
@@ -653,6 +673,14 @@ public class SearchController
 
 This section will explain how to handle forms submissions.
 
+`ReadBody()` does not check the body size by default. The unchecked form is appropriate when the server is reachable only by controlled internal clients and the protocol guarantees a small, fixed payload. For public, externally reachable, upload, or otherwise variable-size requests, pass a maximum size. The examples use 50% of currently available memory as a simple device-specific limit:
+
+```csharp
+var body = request.ReadBody(nanoFramework.Runtime.Native.GC.Run(false) / 2);
+```
+
+Choose a smaller fixed limit when the request schema has a known maximum. `ReadBody()` returns `null` when the configured limit is exceeded or the body cannot be read, so checked examples return HTTP 413 before using the buffer. Authentication alone does not make an unchecked body safe; omit the limit only when the network path and client behavior are also controlled.
+
 ### JSON Request Bodies
 
 ```csharp
@@ -686,7 +714,13 @@ public class ProductController
             }
             
             // Read and parse JSON body
-            var body = e.Context.Request.ReadBody();
+            var body = e.Context.Request.ReadBody(nanoFramework.Runtime.Native.GC.Run(false) / 2);
+            if (body == null)
+            {
+                e.Context.Response.StatusCode = 413;
+                return;
+            }
+
             var json = System.Text.Encoding.UTF8.GetString(body, 0, body.Length);
             var product = JsonConvert.DeserializeObject(json, typeof(Hashtable)) as Hashtable;
             
@@ -780,7 +814,13 @@ public class UploadController
             else if (contentType == "application/x-www-form-urlencoded")
             {
                 // Handle URL-encoded form data
-                var body = e.Context.Request.ReadBody();
+                var body = e.Context.Request.ReadBody(nanoFramework.Runtime.Native.GC.Run(false) / 2);
+                if (body == null)
+                {
+                    e.Context.Response.StatusCode = 413;
+                    return;
+                }
+
                 var formData = System.Text.Encoding.UTF8.GetString(body, 0, body.Length);
                 
                 // Parse form data (implement parsing logic)
@@ -1136,7 +1176,14 @@ public class SecureApiController
     [Authentication("ApiKey:special-admin-key")]
     public void UpdateConfig(WebServerEventArgs e)
     {
+        // This endpoint is limited to a controlled network and fixed internal client.
         var body = e.Context.Request.ReadBody();
+        if (body == null)
+        {
+            e.Context.Response.StatusCode = 500;
+            return;
+        }
+
         var json = System.Text.Encoding.UTF8.GetString(body, 0, body.Length);
         
         // Process configuration update
@@ -1277,7 +1324,13 @@ public class IoTDeviceController
     {
         try
         {
-            var body = e.Context.Request.ReadBody();
+            var body = e.Context.Request.ReadBody(nanoFramework.Runtime.Native.GC.Run(false) / 2);
+            if (body == null)
+            {
+                e.Context.Response.StatusCode = 413;
+                return;
+            }
+
             var json = System.Text.Encoding.UTF8.GetString(body, 0, body.Length);
             var deviceData = JsonConvert.DeserializeObject(json, typeof(Hashtable)) as Hashtable;
             
@@ -1326,7 +1379,13 @@ public class IoTDeviceController
         
         try
         {
-            var body = e.Context.Request.ReadBody();
+            var body = e.Context.Request.ReadBody(nanoFramework.Runtime.Native.GC.Run(false) / 2);
+            if (body == null)
+            {
+                e.Context.Response.StatusCode = 413;
+                return;
+            }
+
             var json = System.Text.Encoding.UTF8.GetString(body, 0, body.Length);
             var updateData = JsonConvert.DeserializeObject(json, typeof(Hashtable)) as Hashtable;
             
@@ -1373,7 +1432,13 @@ public class IoTDeviceController
         
         try
         {
-            var body = e.Context.Request.ReadBody();
+            var body = e.Context.Request.ReadBody(nanoFramework.Runtime.Native.GC.Run(false) / 2);
+            if (body == null)
+            {
+                e.Context.Response.StatusCode = 413;
+                return;
+            }
+
             var json = System.Text.Encoding.UTF8.GetString(body, 0, body.Length);
             var sensorUpdate = JsonConvert.DeserializeObject(json, typeof(Hashtable)) as Hashtable;
             
@@ -1477,7 +1542,13 @@ public class BatchController
     {
         try
         {
-            var body = e.Context.Request.ReadBody();
+            var body = e.Context.Request.ReadBody(nanoFramework.Runtime.Native.GC.Run(false) / 2);
+            if (body == null)
+            {
+                e.Context.Response.StatusCode = 413;
+                return;
+            }
+
             var json = System.Text.Encoding.UTF8.GetString(body, 0, body.Length);
             var batchRequest = JsonConvert.DeserializeObject(json, typeof(Hashtable)) as Hashtable;
             

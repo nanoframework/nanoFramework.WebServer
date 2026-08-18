@@ -24,10 +24,11 @@ namespace nanoFramework.WebServer
         /// Reads a body from the HttpListenerRequest inputstream.
         /// </summary>
         /// <param name="httpListenerRequest">The request to read the body from</param>
+        /// <param name="maximumBodySize">The maximum body size in bytes. A value of -1 disables the check.</param>
         /// <returns>
         /// A byte[] containing the body of the request, or <see langword="null"/> if the body could not be read.
         /// </returns>
-        public static byte[] ReadBody(this HttpListenerRequest httpListenerRequest)
+        public static byte[] ReadBody(this HttpListenerRequest httpListenerRequest, long maximumBodySize = -1)
         {
             long contentLength = httpListenerRequest.ContentLength64;
 
@@ -35,6 +36,11 @@ namespace nanoFramework.WebServer
             if (contentLength <= 0)
             {
                 return new byte[0];
+            }
+
+            if (maximumBodySize >= 0 && contentLength > maximumBodySize)
+            {
+                return null;
             }
 
             // Sanity check for huge content-length
