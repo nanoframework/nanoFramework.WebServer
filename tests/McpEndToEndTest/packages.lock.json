@@ -24,7 +24,7 @@
         "type": "Direct",
         "requested": "[1.7.11, 1.7.11]",
         "resolved": "1.7.11",
-        "contentHash": "w8D/ioNNNvhO80zkPX7WmQ130s5L1eQU4XR2eMkR7tBCG1m+jCOxXSgrCxBxIJnG76Rj7h8e1RlCg5W7SwVCCw=="
+        "contentHash": "XPSTltZ9KeBruogVmjQpCphi1nLoJH49mpyp2eGBs8BTjKuL5TkMO20MoI8r73F/PW5AppTq49HvIZZavU5nPQ=="
       },
       "nanoFramework.System.Collections": {
         "type": "Direct",
