@@ -62,7 +62,14 @@ public class ApiController
     {
         if (e.Context.Request.ContentLength64 > 0)
         {
+            // This sample assumes a trusted internal client with a fixed, small payload.
             var body = e.Context.Request.ReadBody();
+            if (body == null)
+            {
+                e.Context.Response.StatusCode = 500;
+                return;
+            }
+
             var content = System.Text.Encoding.UTF8.GetString(body, 0, body.Length);
             
             var response = $"{{\"message\":\"Hello, {content}!\"}}";
@@ -242,6 +249,7 @@ public class DeviceController
 ```csharp
 public class ConfigController
 {
+    private const int MaximumRequestBodySize = 4 * 1024;
     private static DateTime _startTime = DateTime.UtcNow;
     private static DeviceInfo _deviceInfo;
     private static Sensor[] _sensors;
@@ -281,7 +289,13 @@ public class ConfigController
                 return;
             }
             
-            var body = e.Context.Request.ReadBody();
+            var body = e.Context.Request.ReadBody(MaximumRequestBodySize);
+            if (body == null)
+            {
+                e.Context.Response.StatusCode = 413;
+                return;
+            }
+
             var json = System.Text.Encoding.UTF8.GetString(body, 0, body.Length);
             var config = JsonConvert.DeserializeObject(json, typeof(Hashtable)) as Hashtable;
             
@@ -342,7 +356,14 @@ public class LedController
     {
         try
         {
+            // The local controller is used only by a trusted client with a fixed payload.
             var body = e.Context.Request.ReadBody();
+            if (body == null)
+            {
+                e.Context.Response.StatusCode = 500;
+                return;
+            }
+
             var json = System.Text.Encoding.UTF8.GetString(body, 0, body.Length);
             var request = JsonConvert.DeserializeObject(json, typeof(Hashtable)) as Hashtable;
             
@@ -653,11 +674,23 @@ public class SearchController
 
 This section will explain how to handle forms submissions.
 
+`ReadBody()` does not check the body size by default. The unchecked form is appropriate when the server is reachable only by controlled internal clients and the protocol guarantees a small, fixed payload. For public, externally reachable, upload, or otherwise variable-size requests, pass a maximum size. Prefer a reusable schema-based constant so request handlers do not force a garbage collection:
+
+```csharp
+private const int MaximumRequestBodySize = 4 * 1024;
+
+var body = request.ReadBody(MaximumRequestBodySize);
+```
+
+If the schema does not have a practical fixed maximum, compute a device-specific limit once during startup, store it in a static field, and reuse it for every request. Do not call `nanoFramework.Runtime.Native.GC.Run(false)` inside a request handler. `ReadBody()` returns `null` when the configured limit is exceeded or the body cannot be read, so checked examples return HTTP 413 before using the buffer. Authentication alone does not make an unchecked body safe; omit the limit only when the network path and client behavior are also controlled.
+
 ### JSON Request Bodies
 
 ```csharp
 public class ProductController
 {
+    private const int MaximumRequestBodySize = 4 * 1024;
+
     public class ProductCreationResponse
     {
         public string Message { get; set; }
@@ -686,7 +719,19 @@ public class ProductController
             }
             
             // Read and parse JSON body
-            var body = e.Context.Request.ReadBody();
+            if (e.Context.Request.ContentLength64 == 0)
+            {
+                e.Context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                return;
+            }
+
+            var body = e.Context.Request.ReadBody(MaximumRequestBodySize);
+            if (body == null)
+            {
+                e.Context.Response.StatusCode = 413;
+                return;
+            }
+
             var json = System.Text.Encoding.UTF8.GetString(body, 0, body.Length);
             var product = JsonConvert.DeserializeObject(json, typeof(Hashtable)) as Hashtable;
             
@@ -753,6 +798,8 @@ public class ProductController
 ```csharp
 public class UploadController
 {
+    private const int MaximumRequestBodySize = 16 * 1024;
+
     [Route("api/upload")]
     [Method("POST")]
     public void UploadFile(WebServerEventArgs e)
@@ -780,7 +827,13 @@ public class UploadController
             else if (contentType == "application/x-www-form-urlencoded")
             {
                 // Handle URL-encoded form data
-                var body = e.Context.Request.ReadBody();
+                var body = e.Context.Request.ReadBody(MaximumRequestBodySize);
+                if (body == null)
+                {
+                    e.Context.Response.StatusCode = 413;
+                    return;
+                }
+
                 var formData = System.Text.Encoding.UTF8.GetString(body, 0, body.Length);
                 
                 // Parse form data (implement parsing logic)
@@ -1136,7 +1189,14 @@ public class SecureApiController
     [Authentication("ApiKey:special-admin-key")]
     public void UpdateConfig(WebServerEventArgs e)
     {
+        // This endpoint is limited to a controlled network and fixed internal client.
         var body = e.Context.Request.ReadBody();
+        if (body == null)
+        {
+            e.Context.Response.StatusCode = 500;
+            return;
+        }
+
         var json = System.Text.Encoding.UTF8.GetString(body, 0, body.Length);
         
         // Process configuration update
@@ -1161,6 +1221,7 @@ Complete CRUD (Create, Read, Update, Delete) API for managing IoT devices:
 ```csharp
 public class IoTDeviceController
 {
+    private const int MaximumRequestBodySize = 4 * 1024;
     private static Hashtable _devices = new Hashtable();
 
     public class DeviceResponse
@@ -1277,7 +1338,13 @@ public class IoTDeviceController
     {
         try
         {
-            var body = e.Context.Request.ReadBody();
+            var body = e.Context.Request.ReadBody(MaximumRequestBodySize);
+            if (body == null)
+            {
+                e.Context.Response.StatusCode = 413;
+                return;
+            }
+
             var json = System.Text.Encoding.UTF8.GetString(body, 0, body.Length);
             var deviceData = JsonConvert.DeserializeObject(json, typeof(Hashtable)) as Hashtable;
             
@@ -1326,7 +1393,13 @@ public class IoTDeviceController
         
         try
         {
-            var body = e.Context.Request.ReadBody();
+            var body = e.Context.Request.ReadBody(MaximumRequestBodySize);
+            if (body == null)
+            {
+                e.Context.Response.StatusCode = 413;
+                return;
+            }
+
             var json = System.Text.Encoding.UTF8.GetString(body, 0, body.Length);
             var updateData = JsonConvert.DeserializeObject(json, typeof(Hashtable)) as Hashtable;
             
@@ -1373,7 +1446,13 @@ public class IoTDeviceController
         
         try
         {
-            var body = e.Context.Request.ReadBody();
+            var body = e.Context.Request.ReadBody(MaximumRequestBodySize);
+            if (body == null)
+            {
+                e.Context.Response.StatusCode = 413;
+                return;
+            }
+
             var json = System.Text.Encoding.UTF8.GetString(body, 0, body.Length);
             var sensorUpdate = JsonConvert.DeserializeObject(json, typeof(Hashtable)) as Hashtable;
             
@@ -1471,13 +1550,27 @@ public class IoTDeviceController
 ```csharp
 public class BatchController
 {
+    private const int MaximumRequestBodySize = 16 * 1024;
+
     [Route("api/batch/sensors")]
     [Method("POST")]
     public void BatchUpdateSensors(WebServerEventArgs e)
     {
         try
         {
-            var body = e.Context.Request.ReadBody();
+            if (e.Context.Request.ContentLength64 == 0)
+            {
+                e.Context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                return;
+            }
+
+            var body = e.Context.Request.ReadBody(MaximumRequestBodySize);
+            if (body == null)
+            {
+                e.Context.Response.StatusCode = 413;
+                return;
+            }
+
             var json = System.Text.Encoding.UTF8.GetString(body, 0, body.Length);
             var batchRequest = JsonConvert.DeserializeObject(json, typeof(Hashtable)) as Hashtable;
             

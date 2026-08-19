@@ -215,6 +215,7 @@ The following example shows the key principles for a REST API using GET, POST an
 ```csharp
 public class PersonController
 {
+    private const int MaximumRequestBodySize = 4 * 1024;
     private static ArrayList persons = new ArrayList();
 
     [Route("api/persons")]
@@ -252,7 +253,13 @@ public class PersonController
     {
         if (e.Context.Request.ContentLength64 > 0)
         {
-            var body = e.Context.Request.ReadBody();
+            var body = e.Context.Request.ReadBody(MaximumRequestBodySize);
+            if (body == null)
+            {
+                e.Context.Response.StatusCode = 413;
+                return;
+            }
+
             var json = Encoding.UTF8.GetString(body, 0, body.Length);
             var person = JsonConvert.DeserializeObject(json, typeof(Person));
             
@@ -386,6 +393,8 @@ public void GetRequestInfo(WebServerEventArgs e)
 [Method("POST")]
 public void HandleUpload(WebServerEventArgs e)
 {
+    const int MaximumRequestBodySize = 16 * 1024;
+
     if (e.Context.Request.ContentLength64 > 0)
     {
         var contentTypes = e.Context.Request.Headers?.GetValues("Content-Type");
@@ -399,7 +408,13 @@ public void HandleUpload(WebServerEventArgs e)
         }
         else
         {
-            var body = e.Context.Request.ReadBody();
+            var body = e.Context.Request.ReadBody(MaximumRequestBodySize);
+            if (body == null)
+            {
+                e.Context.Response.StatusCode = 413;
+                return;
+            }
+
             string content = Encoding.UTF8.GetString(body, 0, body.Length);
             Debug.WriteLine($"Body content: {content}");
         }

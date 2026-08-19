@@ -84,6 +84,9 @@ public class Program
         // Discover and register skills
         SkillRegistry.DiscoverSkills(new Type[] { typeof(HelloSkill) });
 
+        // Limit request bodies to 50% of currently available memory
+        SkillDiscoveryController.MaximumRequestBodySize = nanoFramework.Runtime.Native.GC.Run(false) / 2;
+
         // Start server
         using (var server = new WebServer(80, HttpProtocol.Http,
             new Type[] { typeof(SkillDiscoveryController) }))
@@ -282,6 +285,9 @@ SkillRegistry.DiscoverSkills(new Type[]
     typeof(ConfigSkill)
 });
 
+// Limit request bodies to 50% of currently available memory
+SkillDiscoveryController.MaximumRequestBodySize = nanoFramework.Runtime.Native.GC.Run(false) / 2;
+
 // Start server
 using (var server = new WebServer(80, HttpProtocol.Http,
     new Type[] { typeof(SkillDiscoveryController) }))
@@ -290,6 +296,8 @@ using (var server = new WebServer(80, HttpProtocol.Http,
     Thread.Sleep(Timeout.Infinite);
 }
 ```
+
+`MaximumRequestBodySize` is measured in bytes. Any negative value disables the size check; the default is `-1`. Set it before registering the controller; the authentication controllers inherit this setting.
 
 ### Custom Agent Card Information
 
