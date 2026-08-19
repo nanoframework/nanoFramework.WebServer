@@ -75,7 +75,8 @@ namespace nanoFramework.WebServer.Mcp
                     return;
                 }
 
-                if (MaximumRequestBodySize >= 0 && contentLength > MaximumRequestBodySize)
+                if (contentLength > int.MaxValue
+                    || (MaximumRequestBodySize >= 0 && contentLength > MaximumRequestBodySize))
                 {
                     e.Context.Response.StatusCode = 413;
                     WebServer.OutputAsStream(e.Context.Response, "{\"error\":\"Request body too large\"}");

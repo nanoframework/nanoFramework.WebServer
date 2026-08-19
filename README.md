@@ -164,7 +164,7 @@ public static void Main()
     // Discover and register MCP prompts
     McpPromptRegistry.DiscoverPrompts(new Type[] { typeof(McpPrompts) });
 
-    // You can limit request bodies to 50% of currently available memory to avoid possible memory pressure or ddos
+    // You can limit request bodies to 50% of currently available memory to avoid possible memory pressure or DDoS
     // Any negative value disables the check; the default is -1
     McpServerController.MaximumRequestBodySize = nanoFramework.Runtime.Native.GC.Run(false) / 2;
     
@@ -257,7 +257,7 @@ public static void Main()
     // Discover and register skills
     SkillRegistry.DiscoverSkills(new Type[] { typeof(ClimateSkill) });
 
-    // You can limit request bodies to 50% of currently available memory to avoid possible memory pressure or ddos
+    // You can limit request bodies to 50% of currently available memory to avoid possible memory pressure or DDoS
     // Any negative value disables the check; the default is -1
     SkillDiscoveryController.MaximumRequestBodySize = nanoFramework.Runtime.Native.GC.Run(false) / 2;
 

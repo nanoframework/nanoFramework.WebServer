@@ -201,7 +201,8 @@ namespace nanoFramework.WebServer.Skills
                     return;
                 }
 
-                if (MaximumRequestBodySize >= 0 && contentLength > MaximumRequestBodySize)
+                if (contentLength > int.MaxValue
+                    || (MaximumRequestBodySize >= 0 && contentLength > MaximumRequestBodySize))
                 {
                     e.Context.Response.ContentType = "application/json";
                     e.Context.Response.StatusCode = 413;
