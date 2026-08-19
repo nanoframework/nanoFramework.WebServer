@@ -13,4 +13,5 @@ jobs:
   compose_changelog:
     name: nanoFramework
     uses: nanoframework/nf-tools/.github/workflows/generate-changelog.yml@main
-    secrets: inherit
+    secrets:
+      GIT_TOKEN: ${{ secrets.GIT_TOKEN }}
