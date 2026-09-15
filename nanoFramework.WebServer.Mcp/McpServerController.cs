@@ -175,6 +175,19 @@ namespace nanoFramework.WebServer.Mcp
                         string result = McpPromptRegistry.InvokePrompt(promptName, arguments);
                         sb.Append($",\"result\":{result}}}");
                     }
+                    else if (request["method"].ToString() == "resources/list")
+                    {
+                        // This is a request for the list of resources
+                        string resourceListJson = McpResourceRegistry.GetResourceMetadataJson();
+                        sb.Append($",\"result\":{{{resourceListJson}}}}}");
+                    }
+                    else if (request["method"].ToString() == "resources/read")
+                    {
+                        string uri = ((Hashtable)request["params"])["uri"].ToString();
+
+                        string result = McpResourceRegistry.ReadResource(uri);
+                        sb.Append($",\"result\":{result}}}");
+                    }
                     else
                     {
                         sb.Append($",\"error\":{{\"code\":-32601,\"message\":\"Method not found\"}}}}");
