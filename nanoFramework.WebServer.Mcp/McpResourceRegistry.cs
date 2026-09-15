@@ -113,13 +113,9 @@ namespace nanoFramework.WebServer.Mcp
                                 continue;
                             }
 
-                            string resourceUri = CombineResourceUri(uriPrefix, attribute.Uri);
-                            if (!IsAbsoluteRfc3986Uri(resourceUri))
-                            {
-                                continue;
-                            }
+                            Uri resourceUri = CombineResourceUri(uriPrefix, attribute.Uri);
 
-                            resources.Add(resourceUri, new ResourceMetadata
+                            resources.Add(resourceUri.AbsoluteUri, new ResourceMetadata
                             {
                                 Uri = resourceUri,
                                 Name = attribute.Name,
@@ -180,11 +176,22 @@ namespace nanoFramework.WebServer.Mcp
         /// <exception cref="Exception">Thrown when the specified resource is not found in the registry.</exception>
         public static string ReadResource(string uri)
         {
-            if (resources.Contains(uri))
+            Uri resourceUri;
+
+            try
             {
-                ResourceMetadata resourceMetadata = (ResourceMetadata)resources[uri];
+                resourceUri = new Uri(uri, UriKind.Absolute);
+            }
+            catch (Exception)
+            {
+                throw new ResourceNotFoundException(uri);
+            }
+
+            if (resources.Contains(resourceUri.AbsoluteUri))
+            {
+                ResourceMetadata resourceMetadata = (ResourceMetadata)resources[resourceUri.AbsoluteUri];
                 MethodInfo method = resourceMetadata.Method;
-                Debug.WriteLine($"Resource uri: {uri}, method: {method.Name}");
+                Debug.WriteLine($"Resource uri: {resourceUri.AbsoluteUri}, method: {method.Name}");
 
                 object result = method.Invoke(resourceMetadata.Target, null);
 
@@ -194,7 +201,7 @@ namespace nanoFramework.WebServer.Mcp
                     JsonConvert.SerializeObject(JsonConvert.SerializeObject(result));
 
                 StringBuilder sb = new StringBuilder();
-                sb.Append($"{{\"contents\":[{{\"uri\":{JsonConvert.SerializeObject(resourceMetadata.Uri)},\"mimeType\":{JsonConvert.SerializeObject(resourceMetadata.MimeType)},\"text\":{text}}}]}}");
+                sb.Append($"{{\"contents\":[{{\"uri\":{JsonConvert.SerializeObject(resourceMetadata.Uri.AbsoluteUri)},\"mimeType\":{JsonConvert.SerializeObject(resourceMetadata.MimeType)},\"text\":{text}}}]}}");
                 return sb.ToString();
             }
 
@@ -222,86 +229,17 @@ namespace nanoFramework.WebServer.Mcp
             public string Uri { get; }
         }
 
-        private static string CombineResourceUri(string uriPrefix, string uri)
+        private static Uri CombineResourceUri(string uriPrefix, Uri uri)
         {
             if (string.IsNullOrEmpty(uriPrefix))
             {
                 return uri;
             }
 
-            StringBuilder builder = new StringBuilder(uriPrefix.Length + uri.Length);
+            StringBuilder builder = new StringBuilder(uriPrefix.Length + uri.OriginalString.Length);
             builder.Append(uriPrefix);
-            builder.Append(uri);
-            return builder.ToString();
-        }
-
-        private static bool IsAbsoluteRfc3986Uri(string uri)
-        {
-            if (string.IsNullOrEmpty(uri) || !IsAsciiLetter(uri[0]))
-            {
-                return false;
-            }
-
-            int colonIndex = uri.IndexOf(':');
-            if (colonIndex < 1)
-            {
-                return false;
-            }
-
-            for (int i = 1; i < colonIndex; i++)
-            {
-                char character = uri[i];
-                if (!IsAsciiLetter(character) && !IsAsciiDigit(character) && character != '+' && character != '-' && character != '.')
-                {
-                    return false;
-                }
-            }
-
-            for (int i = colonIndex + 1; i < uri.Length; i++)
-            {
-                char character = uri[i];
-                if (!IsUriCharacter(character))
-                {
-                    return false;
-                }
-
-                if (character == '%')
-                {
-                    if (i + 2 >= uri.Length || !IsHexadecimalDigit(uri[i + 1]) || !IsHexadecimalDigit(uri[i + 2]))
-                    {
-                        return false;
-                    }
-
-                    i += 2;
-                }
-            }
-
-            return true;
-        }
-
-        private static bool IsUriCharacter(char character)
-        {
-            return IsAsciiLetter(character) || IsAsciiDigit(character) || character == '-' || character == '.' ||
-                   character == '_' || character == '~' || character == ':' || character == '/' || character == '?' ||
-                   character == '#' || character == '[' || character == ']' || character == '@' || character == '!' ||
-                   character == '$' || character == '&' || character == '\'' || character == '(' || character == ')' ||
-                   character == '*' || character == '+' || character == ',' || character == ';' || character == '=' ||
-                   character == '%';
-        }
-
-        private static bool IsAsciiLetter(char character)
-        {
-            return (character >= 'A' && character <= 'Z') || (character >= 'a' && character <= 'z');
-        }
-
-        private static bool IsAsciiDigit(char character)
-        {
-            return character >= '0' && character <= '9';
-        }
-
-        private static bool IsHexadecimalDigit(char character)
-        {
-            return IsAsciiDigit(character) || (character >= 'A' && character <= 'F') || (character >= 'a' && character <= 'f');
+            builder.Append(uri.OriginalString);
+            return new Uri(builder.ToString(), UriKind.Absolute);
         }
 
         private static bool IsSimpleResourceType(Type type)

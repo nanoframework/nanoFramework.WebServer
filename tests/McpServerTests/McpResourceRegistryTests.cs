@@ -96,6 +96,24 @@ namespace McpServerTests
         }
 
         [TestMethod]
+        public void TestResourceAttributeStoresAnAbsoluteUri()
+        {
+            McpServerResourceAttribute attribute = new McpServerResourceAttribute("device://info", "Device info");
+
+            Assert.IsTrue(attribute.Uri.IsAbsoluteUri, "Resource URI should be absolute");
+            Assert.IsTrue(attribute.Uri.AbsoluteUri.Contains("device://info"), "Resource URI should retain its value");
+        }
+
+        [TestMethod]
+        public void TestResourceAttributeRejectsRelativeUri()
+        {
+            Assert.ThrowsException(typeof(FormatException), () =>
+            {
+                new McpServerResourceAttribute("relative/path", "Relative");
+            }, "Resource URI should be an absolute URI");
+        }
+
+        [TestMethod]
         public void TestReadStaticResource()
         {
             // Arrange
@@ -215,7 +233,7 @@ namespace McpServerTests
         {
             ResourceMetadata metadata = new ResourceMetadata
             {
-                Uri = "escape://quote\"",
+                Uri = new Uri("escape://quote/path?value=%22"),
                 Name = "name\\value",
                 Description = "line\nvalue",
                 MimeType = "text/\"plain",
@@ -223,7 +241,7 @@ namespace McpServerTests
 
             string metadataJson = metadata.ToString();
 
-            Assert.IsTrue(metadataJson.Contains("escape://quote\\\""), "URI should be JSON escaped");
+            Assert.IsTrue(metadataJson.Contains("escape://quote/path?value=%22"), "URI should be serialized as its absolute URI");
             Assert.IsTrue(metadataJson.Contains("name\\\\value"), "Name should be JSON escaped");
             Assert.IsTrue(metadataJson.Contains("line\\nvalue"), "Description should be JSON escaped");
             Assert.IsTrue(metadataJson.Contains("text/\\\"plain"), "MIME type should be JSON escaped");

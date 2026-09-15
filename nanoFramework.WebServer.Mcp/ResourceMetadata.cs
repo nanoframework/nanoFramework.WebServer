@@ -13,9 +13,9 @@ namespace nanoFramework.WebServer.Mcp
     public class ResourceMetadata
     {
         /// <summary>
-        /// Gets or sets the unique URI of the resource.
+        /// Gets or sets the unique absolute URI of the resource.
         /// </summary>
-        public string Uri { get; set; }
+        public Uri Uri { get; set; }
 
         /// <summary>
         /// Gets or sets the name of the resource.
@@ -48,7 +48,7 @@ namespace nanoFramework.WebServer.Mcp
         /// <returns>A JSON string containing the resource's URI, name, description, and MIME type.</returns>
         public override string ToString()
         {
-            string output = $"{{\"uri\":{JsonConvert.SerializeObject(Uri)},\"name\":{JsonConvert.SerializeObject(Name)}";
+            string output = $"{{\"uri\":{JsonConvert.SerializeObject(Uri.AbsoluteUri)},\"name\":{JsonConvert.SerializeObject(Name)}";
             output += string.IsNullOrEmpty(Description) ? string.Empty : $",\"description\":{JsonConvert.SerializeObject(Description)}";
             output += string.IsNullOrEmpty(MimeType) ? string.Empty : $",\"mimeType\":{JsonConvert.SerializeObject(MimeType)}";
             output += "}";
