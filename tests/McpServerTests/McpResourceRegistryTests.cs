@@ -39,6 +39,21 @@ namespace McpServerTests
         public int NonString() => 42;
     }
 
+    public class InvalidUriResourceProvider
+    {
+        [McpServerResource("relative/path", "Relative")]
+        public string Relative() => "invalid";
+
+        [McpServerResource("sensor://reading", "Invalid prefix")]
+        public string InvalidPrefix() => "invalid";
+    }
+
+    public class EscapedResourceProvider
+    {
+        [McpServerResource("escape://content", "Escaped")]
+        public string Read() => "line\n\"quoted\"\\path";
+    }
+
     [TestClass]
     public class McpResourceRegistryTests
     {
@@ -100,12 +115,12 @@ namespace McpServerTests
             // Act - instance discovery is additive and ungated
             McpResourceRegistry.DiscoverResources(
                 new object[] { new InstanceResourceProvider("42") },
-                new string[] { "a_" });
+                new string[] { "a-" });
             string metadataJson = McpResourceRegistry.GetResourceMetadataJson();
 
             // Assert
             Assert.IsNotNull(metadataJson, "Metadata JSON should not be null");
-            Assert.IsTrue(metadataJson.Contains("a_sensor://reading"), "Metadata should contain the prefixed instance resource uri");
+            Assert.IsTrue(metadataJson.Contains("a-sensor://reading"), "Metadata should contain the prefixed instance resource uri");
             Assert.IsTrue(metadataJson.Contains("device://info"), "Static resources should still be present after instance discovery");
         }
 
@@ -115,10 +130,10 @@ namespace McpServerTests
             // Arrange - a distinct prefix keeps this test's resource isolated from the shared static registry
             McpResourceRegistry.DiscoverResources(
                 new object[] { new InstanceResourceProvider("42") },
-                new string[] { "read_" });
+                new string[] { "read-" });
 
             // Act
-            string result = McpResourceRegistry.ReadResource("read_sensor://reading");
+            string result = McpResourceRegistry.ReadResource("read-sensor://reading");
 
             // Assert - proves the stored instance (state = 42), not a static, was used as the invocation target
             Assert.IsNotNull(result, "Result should not be null");
@@ -131,11 +146,11 @@ namespace McpServerTests
             // Arrange - two instances of the same class, distinct prefixes and distinct state
             McpResourceRegistry.DiscoverResources(
                 new object[] { new InstanceResourceProvider("10"), new InstanceResourceProvider("20") },
-                new string[] { "ta_", "tb_" });
+                new string[] { "ta-", "tb-" });
 
             // Act
-            string a = McpResourceRegistry.ReadResource("ta_sensor://reading");
-            string b = McpResourceRegistry.ReadResource("tb_sensor://reading");
+            string a = McpResourceRegistry.ReadResource("ta-sensor://reading");
+            string b = McpResourceRegistry.ReadResource("tb-sensor://reading");
 
             // Assert - each prefixed resource reads against its own independent target
             Assert.IsTrue(a.Contains("10"), "Instance a should report its own state (10)");
@@ -148,12 +163,55 @@ namespace McpServerTests
             // Act - a method with a parameter and a method returning non-string must be skipped at discovery
             McpResourceRegistry.DiscoverResources(
                 new object[] { new InvalidResourceProvider() },
-                new string[] { "inv_" });
+                new string[] { "inv-" });
             string metadataJson = McpResourceRegistry.GetResourceMetadataJson();
 
             // Assert
             Assert.IsFalse(metadataJson.Contains("bad://withparam"), "Resource method taking a parameter should not be registered");
             Assert.IsFalse(metadataJson.Contains("bad://nonstring"), "Resource method returning non-string should not be registered");
+        }
+
+        [TestMethod]
+        public void TestInvalidResourceUrisNotRegistered()
+        {
+            McpResourceRegistry.DiscoverResources(
+                new object[] { new InvalidUriResourceProvider(), new InvalidUriResourceProvider() },
+                new string[] { null, "invalid_" });
+            string metadataJson = McpResourceRegistry.GetResourceMetadataJson();
+
+            Assert.IsFalse(metadataJson.Contains("relative/path"), "Relative resource URIs should not be registered");
+            Assert.IsFalse(metadataJson.Contains("invalid_sensor://reading"), "Prefixes that produce invalid URI schemes should not be registered");
+        }
+
+        [TestMethod]
+        public void TestResourceJsonValuesAreEscaped()
+        {
+            ResourceMetadata metadata = new ResourceMetadata
+            {
+                Uri = "escape://quote\"",
+                Name = "name\\value",
+                Description = "line\nvalue",
+                MimeType = "text/\"plain",
+            };
+
+            string metadataJson = metadata.ToString();
+
+            Assert.IsTrue(metadataJson.Contains("escape://quote\\\""), "URI should be JSON escaped");
+            Assert.IsTrue(metadataJson.Contains("name\\\\value"), "Name should be JSON escaped");
+            Assert.IsTrue(metadataJson.Contains("line\\nvalue"), "Description should be JSON escaped");
+            Assert.IsTrue(metadataJson.Contains("text/\\\"plain"), "MIME type should be JSON escaped");
+        }
+
+        [TestMethod]
+        public void TestReadResourceEscapesReturnedText()
+        {
+            McpResourceRegistry.DiscoverResources(
+                new object[] { new EscapedResourceProvider() },
+                new string[] { "escaped-" });
+
+            string result = McpResourceRegistry.ReadResource("escaped-escape://content");
+
+            Assert.IsTrue(result.Contains("line\\n\\\"quoted\\\"\\\\path"), "Resource text should be JSON escaped");
         }
     }
 }

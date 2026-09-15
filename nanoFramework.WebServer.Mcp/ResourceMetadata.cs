@@ -3,6 +3,7 @@
 
 using System;
 using System.Reflection;
+using nanoFramework.Json;
 
 namespace nanoFramework.WebServer.Mcp
 {
@@ -47,9 +48,9 @@ namespace nanoFramework.WebServer.Mcp
         /// <returns>A JSON string containing the resource's URI, name, description, and MIME type.</returns>
         public override string ToString()
         {
-            string output = $"{{\"uri\":\"{Uri}\",\"name\":\"{Name}\"";
-            output += string.IsNullOrEmpty(Description) ? string.Empty : $",\"description\":\"{Description}\"";
-            output += string.IsNullOrEmpty(MimeType) ? string.Empty : $",\"mimeType\":\"{MimeType}\"";
+            string output = $"{{\"uri\":{JsonConvert.SerializeObject(Uri)},\"name\":{JsonConvert.SerializeObject(Name)}";
+            output += string.IsNullOrEmpty(Description) ? string.Empty : $",\"description\":{JsonConvert.SerializeObject(Description)}";
+            output += string.IsNullOrEmpty(MimeType) ? string.Empty : $",\"mimeType\":{JsonConvert.SerializeObject(MimeType)}";
             output += "}";
             return output;
         }

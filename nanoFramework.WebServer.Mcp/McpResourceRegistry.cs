@@ -6,6 +6,7 @@ using System.Collections;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text;
+using nanoFramework.Json;
 
 namespace nanoFramework.WebServer.Mcp
 {
@@ -55,7 +56,7 @@ namespace nanoFramework.WebServer.Mcp
         /// This overload is additive and can be called in addition to the static <see cref="DiscoverResources(Type[])"/> discovery.
         /// </summary>
         /// <param name="resourceInstances">An array of object instances to scan for MCP resources.</param>
-        /// <param name="uriPrefixes">An optional parallel array of URI prefixes; a null or empty entry means no prefix. May be null to apply no prefixes.</param>
+        /// <param name="uriPrefixes">An optional parallel array of URI prefixes; a null or empty entry means no prefix. Each prefix must produce an absolute RFC 3986 URI when prepended to the resource URI (for example, <c>instance-</c> with <c>sensor://reading</c>). May be null to apply no prefixes.</param>
         public static void DiscoverResources(object[] resourceInstances, string[] uriPrefixes)
         {
             if (resourceInstances == null)
@@ -81,7 +82,7 @@ namespace nanoFramework.WebServer.Mcp
         /// </summary>
         /// <param name="mcpResource">The type to scan.</param>
         /// <param name="target">The instance to invoke discovered instance methods against, or null for static-only discovery.</param>
-        /// <param name="uriPrefix">An optional prefix prepended to every discovered resource URI; null or empty means no prefix.</param>
+        /// <param name="uriPrefix">An optional prefix prepended to every discovered resource URI; null or empty means no prefix. The resulting resource URI must be an absolute RFC 3986 URI.</param>
         private static void RegisterResources(Type mcpResource, object target, string uriPrefix)
         {
             MethodInfo[] methods = mcpResource.GetMethods();
@@ -112,7 +113,11 @@ namespace nanoFramework.WebServer.Mcp
                                 continue;
                             }
 
-                            string resourceUri = string.IsNullOrEmpty(uriPrefix) ? attribute.Uri : uriPrefix + attribute.Uri;
+                            string resourceUri = CombineResourceUri(uriPrefix, attribute.Uri);
+                            if (!IsAbsoluteRfc3986Uri(resourceUri))
+                            {
+                                continue;
+                            }
 
                             resources.Add(resourceUri, new ResourceMetadata
                             {
@@ -181,15 +186,117 @@ namespace nanoFramework.WebServer.Mcp
 
                 object result = method.Invoke(resourceMetadata.Target, null);
 
-                // Wrap the string result with quotes, mirroring how McpToolRegistry.InvokeTool serializes string returns.
-                string text = "\"" + (result == null ? string.Empty : result.ToString()) + "\"";
+                string text = JsonConvert.SerializeObject(result == null ? string.Empty : result.ToString());
 
                 StringBuilder sb = new StringBuilder();
-                sb.Append($"{{\"contents\":[{{\"uri\":\"{resourceMetadata.Uri}\",\"mimeType\":\"{resourceMetadata.MimeType}\",\"text\":{text}}}]}}");
+                sb.Append($"{{\"contents\":[{{\"uri\":{JsonConvert.SerializeObject(resourceMetadata.Uri)},\"mimeType\":{JsonConvert.SerializeObject(resourceMetadata.MimeType)},\"text\":{text}}}]}}");
                 return sb.ToString();
             }
 
-            throw new Exception("Resource not found");
+            throw new ResourceNotFoundException(uri);
+        }
+
+        /// <summary>
+        /// Represents a request for a resource that is not registered.
+        /// </summary>
+        public class ResourceNotFoundException : Exception
+        {
+            /// <summary>
+            /// Initializes a new instance of the <see cref="ResourceNotFoundException"/> class.
+            /// </summary>
+            /// <param name="uri">The URI that was not registered.</param>
+            public ResourceNotFoundException(string uri)
+                : base("Resource not found")
+            {
+                Uri = uri;
+            }
+
+            /// <summary>
+            /// Gets the URI that was not registered.
+            /// </summary>
+            public string Uri { get; }
+        }
+
+        private static string CombineResourceUri(string uriPrefix, string uri)
+        {
+            if (string.IsNullOrEmpty(uriPrefix))
+            {
+                return uri;
+            }
+
+            StringBuilder builder = new StringBuilder(uriPrefix.Length + uri.Length);
+            builder.Append(uriPrefix);
+            builder.Append(uri);
+            return builder.ToString();
+        }
+
+        private static bool IsAbsoluteRfc3986Uri(string uri)
+        {
+            if (string.IsNullOrEmpty(uri) || !IsAsciiLetter(uri[0]))
+            {
+                return false;
+            }
+
+            int colonIndex = uri.IndexOf(':');
+            if (colonIndex < 1)
+            {
+                return false;
+            }
+
+            for (int i = 1; i < colonIndex; i++)
+            {
+                char character = uri[i];
+                if (!IsAsciiLetter(character) && !IsAsciiDigit(character) && character != '+' && character != '-' && character != '.')
+                {
+                    return false;
+                }
+            }
+
+            for (int i = colonIndex + 1; i < uri.Length; i++)
+            {
+                char character = uri[i];
+                if (!IsUriCharacter(character))
+                {
+                    return false;
+                }
+
+                if (character == '%')
+                {
+                    if (i + 2 >= uri.Length || !IsHexadecimalDigit(uri[i + 1]) || !IsHexadecimalDigit(uri[i + 2]))
+                    {
+                        return false;
+                    }
+
+                    i += 2;
+                }
+            }
+
+            return true;
+        }
+
+        private static bool IsUriCharacter(char character)
+        {
+            return IsAsciiLetter(character) || IsAsciiDigit(character) || character == '-' || character == '.' ||
+                   character == '_' || character == '~' || character == ':' || character == '/' || character == '?' ||
+                   character == '#' || character == '[' || character == ']' || character == '@' || character == '!' ||
+                   character == '$' || character == '&' || character == '\'' || character == '(' || character == ')' ||
+                   character == '*' || character == '+' || character == ',' || character == ';' || character == '=' ||
+                   character == '%';
+        }
+
+        private static bool IsAsciiLetter(char character)
+        {
+            return (character >= 'A' && character <= 'Z') || (character >= 'a' && character <= 'z');
+        }
+
+        private static bool IsAsciiDigit(char character)
+        {
+            return character >= '0' && character <= '9';
+        }
+
+        private static bool IsHexadecimalDigit(char character)
+        {
+            return IsAsciiDigit(character) || (character >= 'A' && character <= 'F') || (character >= 'a' && character <= 'f');
         }
     }
 }
