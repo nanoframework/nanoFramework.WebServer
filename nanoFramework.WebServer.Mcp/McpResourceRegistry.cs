@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -195,7 +195,8 @@ namespace nanoFramework.WebServer.Mcp
 
                 object result = method.Invoke(resourceMetadata.Target, null);
 
-                bool isSimpleResult = result == null || IsSimpleResourceType(result.GetType());
+                // Match the content representation and MIME type chosen during discovery
+                bool isSimpleResult = IsSimpleResourceType(method.ReturnType);
                 string text = isSimpleResult ?
                     JsonConvert.SerializeObject(result == null ? string.Empty : result.ToString()) :
                     JsonConvert.SerializeObject(JsonConvert.SerializeObject(result));

@@ -44,6 +44,9 @@ namespace McpServerTests
 
         [McpServerResource("typed://object", "Object", mimeType: "text/plain")]
         public ResourceValue Object() => new ResourceValue { Value = 42 };
+
+        [McpServerResource("typed://object-string", "Object string")]
+        public object ObjectString() => "value";
     }
 
     public class ResourceValue
@@ -209,11 +212,14 @@ namespace McpServerTests
 
             string number = McpResourceRegistry.ReadResource("typed-typed://number");
             string resourceObject = McpResourceRegistry.ReadResource("typed-typed://object");
+            string objectString = McpResourceRegistry.ReadResource("typed-typed://object-string");
 
             Assert.IsTrue(number.Contains("\"mimeType\":\"text/custom\""), "Simple resource values should retain their configured MIME type");
             Assert.IsTrue(number.Contains("\"text\":\"42\""), "Simple resource values should be represented as text");
             Assert.IsTrue(resourceObject.Contains("\"mimeType\":\"application/json\""), "Object resource values should use the JSON MIME type");
             Assert.IsTrue(resourceObject.Contains("\\\"Value\\\":42"), "Object resource values should be serialized as JSON text");
+            Assert.IsTrue(objectString.Contains("\"mimeType\":\"application/json\""), "Object return types should use the JSON MIME type even when they contain a string");
+            Assert.IsTrue(objectString.Contains("\\\"value\\\""), "Object return types should serialize their string value as JSON text");
         }
 
         [TestMethod]
