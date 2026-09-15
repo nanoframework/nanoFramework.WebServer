@@ -219,7 +219,7 @@ namespace nanoFramework.WebServer.Mcp
             /// </summary>
             /// <param name="uri">The URI that was not registered.</param>
             public ResourceNotFoundException(string uri)
-                : base("Resource not found")
+                : base($"Resource not found: {uri}")
             {
                 Uri = uri;
             }
