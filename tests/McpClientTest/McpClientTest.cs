@@ -10,6 +10,7 @@ using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using ModelContextProtocol.Client;
+using ModelContextProtocol.Protocol;
 
 // Load environment variables from .env file
 DotNetEnv.Env.Load();
@@ -46,6 +47,38 @@ Console.WriteLine("// --");
 // Load them as AI functions in the kernel
 #pragma warning disable SKEXP0001
 kernel.Plugins.AddFromFunctions("nanoFramework", tools.Select(aiFunction => aiFunction.AsKernelFunction()));
+
+// Resources are not loaded into the model context automatically. Expose a function that issues a
+// new resources/read request on every invocation, so a model can explicitly ask for fresh state.
+var resources = await mcpToolboxClient.ListResourcesAsync().ConfigureAwait(false);
+
+Console.WriteLine("// Available resources:");
+foreach (var resource in resources)
+{
+    Console.WriteLine($"{resource.Uri}: {resource.Description}");
+}
+Console.WriteLine("// --");
+
+var resourceReadCount = 0;
+
+async Task<string> ReadResourceFreshAsync(string uri)
+{
+    var readNumber = ++resourceReadCount;
+    Console.WriteLine($"// resources/read #{readNumber}: {uri}");
+
+    var result = await mcpToolboxClient.ReadResourceAsync(uri).ConfigureAwait(false);
+    var contents = FormatResourceContents(result);
+
+    Console.WriteLine($"// resources/read #{readNumber} completed");
+    return contents;
+}
+
+Func<string, Task<string>> readResource = ReadResourceFreshAsync;
+var readResourceFunction = KernelFunctionFactory.CreateFromMethod(
+    method: readResource,
+    functionName: "read_resource",
+    description: "Read the current contents of an MCP resource URI. Every call sends a new resources/read request. Call this again when current data is needed; do not assume a previous result is still current.");
+kernel.Plugins.AddFromFunctions("mcp_resources", new[] { readResourceFunction });
 
 // Check available prompts
 Console.WriteLine("// Available prompts:");
@@ -117,6 +150,26 @@ string? userInput;
 
 while ((userInput = Console.ReadLine()) is not null)
 {
+    if (userInput.StartsWith(":read-twice ", StringComparison.Ordinal))
+    {
+        var uri = userInput.Substring(":read-twice ".Length).Trim();
+
+        if (string.IsNullOrEmpty(uri))
+        {
+            Console.WriteLine("Usage: :read-twice <resource-uri>");
+        }
+        else
+        {
+            var firstRead = await ReadResourceFreshAsync(uri);
+            var secondRead = await ReadResourceFreshAsync(uri);
+
+            Console.WriteLine($"// Two independent resources/read requests completed. Contents were {(string.Equals(firstRead, secondRead, StringComparison.Ordinal) ? "identical" : "different")}.");
+        }
+
+        Console.Write("User > ");
+        continue;
+    }
+
     // Add user input
     history.AddUserMessage(userInput);
 
@@ -140,4 +193,16 @@ while ((userInput = Console.ReadLine()) is not null)
 
     // Get user input again
     Console.Write("User > ");
+}
+
+static string FormatResourceContents(ReadResourceResult result)
+{
+    return string.Join(
+        "\n\n",
+        result.Contents.Select(content => content switch
+        {
+            TextResourceContents text => text.Text,
+            BlobResourceContents blob => $"[Binary resource content (base64): {blob.Blob}]",
+            _ => content.ToString() ?? string.Empty,
+        }));
 }
