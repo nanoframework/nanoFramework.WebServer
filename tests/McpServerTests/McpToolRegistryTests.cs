@@ -104,6 +104,15 @@ namespace McpServerTests
     [TestClass]
     public class McpToolRegistryTests
     {
+        [Setup]
+        public void Setup()
+        {
+            // Register the static test tools first so simple_tool (and the other TestToolsClass tools)
+            // exist regardless of test execution order. The isInitialized gate makes this the winning
+            // Type[] discovery, so a later DiscoverTools(EmptyToolsClass) call cannot close the gate empty.
+            McpToolRegistry.DiscoverTools(new Type[] { typeof(TestToolsClass) });
+        }
+
         [TestMethod]
         public void TestDiscoverToolsAndGetMetadataSimple()
         {

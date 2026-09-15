@@ -102,6 +102,12 @@ namespace nanoFramework.WebServer.Mcp
                         McpServerToolAttribute attribute = (McpServerToolAttribute)attrib;
                         if (attribute != null)
                         {
+                            // Skip instance methods when no target instance is available; they cannot be invoked.
+                            if (target == null && !method.IsStatic)
+                            {
+                                continue;
+                            }
+
                             var parameters = method.GetParameters();
                             string inputType = string.Empty;
                             // We only support either no parameters or one parameter for now
