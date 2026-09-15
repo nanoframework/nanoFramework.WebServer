@@ -29,14 +29,26 @@ namespace McpServerTests
         public string Read() => _state;
     }
 
-    // Resource class with invalid resource methods - none should be registered
+    // Resource class with an invalid resource method
     public class InvalidResourceProvider
     {
         [McpServerResource("bad://withparam", "With param", "Takes a parameter")]
         public string WithParam(string input) => input;
 
-        [McpServerResource("bad://nonstring", "Non string", "Returns non-string")]
-        public int NonString() => 42;
+    }
+
+    public class TypedResourceProvider
+    {
+        [McpServerResource("typed://number", "Number", mimeType: "text/custom")]
+        public int Number() => 42;
+
+        [McpServerResource("typed://object", "Object", mimeType: "text/plain")]
+        public ResourceValue Object() => new ResourceValue { Value = 42 };
+    }
+
+    public class ResourceValue
+    {
+        public int Value { get; set; }
     }
 
     public class InvalidUriResourceProvider
@@ -160,7 +172,7 @@ namespace McpServerTests
         [TestMethod]
         public void TestInvalidResourceMethodsNotRegistered()
         {
-            // Act - a method with a parameter and a method returning non-string must be skipped at discovery
+            // Act - a method with a parameter must be skipped at discovery
             McpResourceRegistry.DiscoverResources(
                 new object[] { new InvalidResourceProvider() },
                 new string[] { "inv-" });
@@ -168,7 +180,22 @@ namespace McpServerTests
 
             // Assert
             Assert.IsFalse(metadataJson.Contains("bad://withparam"), "Resource method taking a parameter should not be registered");
-            Assert.IsFalse(metadataJson.Contains("bad://nonstring"), "Resource method returning non-string should not be registered");
+        }
+
+        [TestMethod]
+        public void TestReadTypedResourcesUsesTextOrJsonMimeType()
+        {
+            McpResourceRegistry.DiscoverResources(
+                new object[] { new TypedResourceProvider() },
+                new string[] { "typed-" });
+
+            string number = McpResourceRegistry.ReadResource("typed-typed://number");
+            string resourceObject = McpResourceRegistry.ReadResource("typed-typed://object");
+
+            Assert.IsTrue(number.Contains("\"mimeType\":\"text/custom\""), "Simple resource values should retain their configured MIME type");
+            Assert.IsTrue(number.Contains("\"text\":\"42\""), "Simple resource values should be represented as text");
+            Assert.IsTrue(resourceObject.Contains("\"mimeType\":\"application/json\""), "Object resource values should use the JSON MIME type");
+            Assert.IsTrue(resourceObject.Contains("\\\"Value\\\":42"), "Object resource values should be serialized as JSON text");
         }
 
         [TestMethod]

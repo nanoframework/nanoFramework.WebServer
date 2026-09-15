@@ -107,8 +107,8 @@ namespace nanoFramework.WebServer.Mcp
                                 continue;
                             }
 
-                            // Resources are no-argument getters returning a string; skip anything else.
-                            if (method.GetParameters().Length > 0 || method.ReturnType != typeof(string))
+                            // Resources are no-argument getters. Their returned value is represented as text.
+                            if (method.GetParameters().Length > 0)
                             {
                                 continue;
                             }
@@ -124,7 +124,9 @@ namespace nanoFramework.WebServer.Mcp
                                 Uri = resourceUri,
                                 Name = attribute.Name,
                                 Description = attribute.Description,
-                                MimeType = attribute.MimeType,
+                                MimeType = IsSimpleResourceType(method.ReturnType) ?
+                                    (string.IsNullOrEmpty(attribute.MimeType) ? "text/plain" : attribute.MimeType) :
+                                    "application/json",
                                 Method = method,
                                 Target = (target != null && !method.IsStatic) ? target : null,
                             });
@@ -186,7 +188,10 @@ namespace nanoFramework.WebServer.Mcp
 
                 object result = method.Invoke(resourceMetadata.Target, null);
 
-                string text = JsonConvert.SerializeObject(result == null ? string.Empty : result.ToString());
+                bool isSimpleResult = result == null || IsSimpleResourceType(result.GetType());
+                string text = isSimpleResult ?
+                    JsonConvert.SerializeObject(result == null ? string.Empty : result.ToString()) :
+                    JsonConvert.SerializeObject(JsonConvert.SerializeObject(result));
 
                 StringBuilder sb = new StringBuilder();
                 sb.Append($"{{\"contents\":[{{\"uri\":{JsonConvert.SerializeObject(resourceMetadata.Uri)},\"mimeType\":{JsonConvert.SerializeObject(resourceMetadata.MimeType)},\"text\":{text}}}]}}");
@@ -297,6 +302,11 @@ namespace nanoFramework.WebServer.Mcp
         private static bool IsHexadecimalDigit(char character)
         {
             return IsAsciiDigit(character) || (character >= 'A' && character <= 'F') || (character >= 'a' && character <= 'f');
+        }
+
+        private static bool IsSimpleResourceType(Type type)
+        {
+            return McpToolJsonHelper.IsPrimitiveType(type) || type == typeof(string);
         }
     }
 }
