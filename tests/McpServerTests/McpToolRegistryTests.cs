@@ -76,9 +76,43 @@ namespace McpServerTests
             return "Not a tool";
         }
     }
+
+    // Instance tool class - tools are instance methods reading/mutating per-instance state
+    public class InstanceToolProvider
+    {
+        private int _counter;
+
+        public InstanceToolProvider(int start)
+        {
+            _counter = start;
+        }
+
+        [McpServerTool("counter_get", "Reads the current counter value")]
+        public int GetCounter()
+        {
+            return _counter;
+        }
+
+        [McpServerTool("counter_inc", "Increments the counter and returns the new value")]
+        public int Increment()
+        {
+            _counter++;
+            return _counter;
+        }
+    }
+
     [TestClass]
     public class McpToolRegistryTests
     {
+        [Setup]
+        public void Setup()
+        {
+            // Register the static test tools first so simple_tool (and the other TestToolsClass tools)
+            // exist regardless of test execution order. The isInitialized gate makes this the winning
+            // Type[] discovery, so a later DiscoverTools(EmptyToolsClass) call cannot close the gate empty.
+            McpToolRegistry.DiscoverTools(new Type[] { typeof(TestToolsClass) });
+        }
+
         [TestMethod]
         public void TestDiscoverToolsAndGetMetadataSimple()
         {
@@ -478,6 +512,102 @@ namespace McpServerTests
             Assert.IsTrue(result.StartsWith("{") || result.StartsWith("\""), "Result should be valid JSON");
             Assert.IsTrue(result.Contains("TestUser_processed"), "Should contain processed data");
             Assert.IsTrue(result.Contains("50"), "Should contain doubled value");
+        }
+
+        // Tests for instance-method tools (DiscoverTools object overloads + instance invocation)
+
+        [TestMethod]
+        public void TestDiscoverInstanceToolsRegistersMetadata()
+        {
+            // Arrange - a static class must have been discovered first so simple_tool exists
+            McpToolRegistry.DiscoverTools(new Type[] { typeof(TestToolsClass) });
+
+            // Act - instance discovery is additive and must not clobber the static tools
+            McpToolRegistry.DiscoverTools(new object[] { new InstanceToolProvider(5) }, new string[] { "disc_" });
+            string metadataJson = McpToolRegistry.GetToolMetadataJson();
+
+            // Assert
+            Assert.IsNotNull(metadataJson, "Metadata JSON should not be null");
+            Assert.IsTrue(metadataJson.Contains("disc_counter_get"), "Metadata should contain the prefixed instance tool");
+            Assert.IsTrue(metadataJson.Contains("disc_counter_inc"), "Metadata should contain the prefixed instance tool");
+            Assert.IsTrue(metadataJson.Contains("simple_tool"), "Static tools should still be present after instance discovery");
+        }
+
+        [TestMethod]
+        public void TestInvokeInstanceToolReadsInstanceState()
+        {
+            // Arrange - a distinct prefix keeps this test's tools isolated from the shared static registry
+            McpToolRegistry.DiscoverTools(new object[] { new InstanceToolProvider(7) }, new string[] { "read_" });
+
+            // Act
+            string result = McpToolRegistry.InvokeTool("read_counter_get", new Hashtable());
+
+            // Assert - proves the stored instance (start = 7), not a static, was used as the invocation target
+            Assert.IsNotNull(result, "Result should not be null");
+            Assert.IsTrue(result.Contains("7"), "Result should reflect the instance's own initial state (7)");
+        }
+
+        [TestMethod]
+        public void TestInvokeInstanceToolMutatesInstanceState()
+        {
+            // Arrange
+            McpToolRegistry.DiscoverTools(new object[] { new InstanceToolProvider(0) }, new string[] { "mut_" });
+
+            // Act - invoke the incrementing tool twice against the same instance
+            string first = McpToolRegistry.InvokeTool("mut_counter_inc", new Hashtable());
+            string second = McpToolRegistry.InvokeTool("mut_counter_inc", new Hashtable());
+
+            // Assert - the same instance is mutated across calls (0 -> 1 -> 2)
+            Assert.IsTrue(first.Contains("1"), "First increment should yield 1");
+            Assert.IsTrue(second.Contains("2"), "Second increment should yield 2, proving state persists on the instance");
+        }
+
+        [TestMethod]
+        public void TestTwoInstancesIndependent()
+        {
+            // Arrange - two instances of the same class, distinct prefixes and distinct starting state
+            McpToolRegistry.DiscoverTools(
+                new object[] { new InstanceToolProvider(10), new InstanceToolProvider(20) },
+                new string[] { "a_", "b_" });
+
+            // Act
+            string a = McpToolRegistry.InvokeTool("a_counter_get", new Hashtable());
+            string b = McpToolRegistry.InvokeTool("b_counter_get", new Hashtable());
+
+            // Assert - each prefixed tool invokes against its own independent target
+            Assert.IsTrue(a.Contains("10"), "Instance a should report its own state (10)");
+            Assert.IsTrue(b.Contains("20"), "Instance b should report its own state (20)");
+        }
+
+        [TestMethod]
+        public void TestInstanceStaticContractIntact()
+        {
+            // Arrange - ensure static tools are discovered, then register an instance
+            McpToolRegistry.DiscoverTools(new Type[] { typeof(TestToolsClass) });
+            McpToolRegistry.DiscoverTools(new object[] { new InstanceToolProvider(1) }, new string[] { "contract_" });
+
+            // Act - a second static discovery must still be ignored (isInitialized gate unaffected by instance discovery)
+            McpToolRegistry.DiscoverTools(new Type[] { typeof(EmptyToolsClass) });
+
+            Hashtable arguments = new Hashtable();
+            arguments.Add("value", "hello");
+            string result = McpToolRegistry.InvokeTool("simple_tool", arguments);
+
+            // Assert
+            Assert.IsTrue(result.Contains("Processed: hello"), "Static tool must remain invokable after instance discovery");
+        }
+
+        [TestMethod]
+        public void TestInstanceDuplicateNameSkipped()
+        {
+            // Arrange & Act - two instances share the same prefix, so their tool names collide
+            McpToolRegistry.DiscoverTools(
+                new object[] { new InstanceToolProvider(100), new InstanceToolProvider(200) },
+                new string[] { "dup_", "dup_" });
+
+            // Assert - discovery does not throw on the duplicate, and first registration wins (start = 100)
+            string result = McpToolRegistry.InvokeTool("dup_counter_get", new Hashtable());
+            Assert.IsTrue(result.Contains("100"), "First registration should win on a duplicate tool name");
         }
     }
 }

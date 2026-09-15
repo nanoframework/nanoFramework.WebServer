@@ -29,7 +29,7 @@ namespace McpEndToEndTest
 
             Debug.WriteLine($"Connected with wifi credentials. IP Address: {GetCurrentIPAddress()}");
 
-            McpToolRegistry.DiscoverTools(new Type[] { typeof(McpServerTests.McpTools) });
+            McpToolRegistry.DiscoverTools(new object[] { new McpServerTests.McpTools() });
             Debug.WriteLine("MCP Tools discovered and registered.");
 
             McpPromptRegistry.DiscoverPrompts(new Type[] { typeof(McpServerTests.McpPrompts) });
