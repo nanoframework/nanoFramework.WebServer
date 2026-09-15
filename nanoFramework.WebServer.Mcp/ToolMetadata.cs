@@ -47,6 +47,11 @@ namespace nanoFramework.WebServer.Mcp
         public Type MethodType { get; set; }
 
         /// <summary>
+        /// Gets or sets the owning instance for instance-method tools. Null for static tools.
+        /// </summary>
+        public object Target { get; set; }
+
+        /// <summary>
         /// Returns a JSON string representation of the tool metadata.
         /// </summary>
         /// <returns>A JSON string containing the tool's name, description, input, and output schema.</returns>
