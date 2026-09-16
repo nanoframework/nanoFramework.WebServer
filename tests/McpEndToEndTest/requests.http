@@ -60,7 +60,28 @@ Content-Type: application/json
 
 ###
 
-POST http://{{host}}/mcp HTTP/1.1 
+POST http://{{host}}/mcp HTTP/1.1
 Content-Type: application/json
 
 {"method":"tools/call","params":{"name":"get_default_address","arguments":{}},"id":5,"jsonrpc":"2.0"}
+
+### This will get the list of the resources available in the MCP server
+
+POST http://{{host}}/mcp HTTP/1.1
+Content-Type: application/json
+
+{"method":"resources/list","params":{},"id":13,"jsonrpc":"2.0"}
+
+### This reads the device_info resource, a simple text resource
+
+POST http://{{host}}/mcp HTTP/1.1
+Content-Type: application/json
+
+{"method":"resources/read","params":{"uri":"device://info"},"id":14,"jsonrpc":"2.0"}
+
+### This reads the default_person resource, a complex object serialized as JSON
+
+POST http://{{host}}/mcp HTTP/1.1
+Content-Type: application/json
+
+{"method":"resources/read","params":{"uri":"device://default-person"},"id":15,"jsonrpc":"2.0"}
