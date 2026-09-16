@@ -56,6 +56,12 @@ namespace nanoFramework.WebServer.Mcp
             e.Context.Response.ContentType = "application/json";
             int id = 0;
             StringBuilder sb = new StringBuilder();
+            string negotiatedProtocolVersion = SupportedVersion;
+            string[] protocolVersionHeaders = e.Context.Request.Headers.GetValues("MCP-Protocol-Version");
+            if (protocolVersionHeaders != null && protocolVersionHeaders.Length > 0 && !string.IsNullOrEmpty(protocolVersionHeaders[0]))
+            {
+                negotiatedProtocolVersion = protocolVersionHeaders[0];
+            }
 
             try
             {
@@ -124,6 +130,7 @@ namespace nanoFramework.WebServer.Mcp
                             if (initParams.ContainsKey("protocolVersion"))
                             {
                                 clientVersion = initParams["protocolVersion"].ToString();
+                                negotiatedProtocolVersion = clientVersion;
                                 if (!CheckProtocolVersion(clientVersion))
                                 {
                                     sb.Append($",\"error\":{{\"code\":-32602,\"message\":\"Unsupported protocol version\",\"data\":{{\"supported\":[");
@@ -174,6 +181,26 @@ namespace nanoFramework.WebServer.Mcp
 
                         string result = McpPromptRegistry.InvokePrompt(promptName, arguments);
                         sb.Append($",\"result\":{result}}}");
+                    }
+                    else if (request["method"].ToString() == "resources/list")
+                    {
+                        // This is a request for the list of resources
+                        string resourceListJson = McpResourceRegistry.GetResourceMetadataJson();
+                        sb.Append($",\"result\":{{{resourceListJson}}}}}");
+                    }
+                    else if (request["method"].ToString() == "resources/read")
+                    {
+                        string uri = ((Hashtable)request["params"])["uri"].ToString();
+
+                        try
+                        {
+                            string result = McpResourceRegistry.ReadResource(uri);
+                            sb.Append($",\"result\":{result}}}");
+                        }
+                        catch (McpResourceRegistry.ResourceNotFoundException)
+                        {
+                            sb.Append($",\"error\":{{\"code\":-32002,\"message\":\"Resource not found\",\"data\":{{\"uri\":{JsonConvert.SerializeObject(uri)}}}}}}}");
+                        }
                     }
                     else
                     {

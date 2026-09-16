@@ -10,6 +10,7 @@ The nanoFramework WebServer provides comprehensive support for the Model Context
 - [Installation](#installation)
 - [Quick Start](#quick-start)
 - [Defining MCP Tools](#defining-mcp-tools)
+- [Defining MCP Resources](#defining-mcp-resources)
 - [Complex Object Support](#complex-object-support)
 - [Server Setup](#server-setup)
 - [Authentication Options](#authentication-options)
@@ -27,8 +28,9 @@ The Model Context Protocol (MCP) is an open standard that enables seamless integ
 
 ### Key Features
 
-- **Automatic tool and prompt discovery** through reflection and attributes
+- **Automatic tool, prompt, and resource discovery** through reflection and attributes
 - **MCP Prompts**: Define reusable, high-level prompt workflows for AI agents, with support for parameters
+- **MCP Resources**: Expose read-only device data and state for AI agents to list and read
 - **JSON-RPC 2.0 compliant** request/response handling
 - **Type-safe parameter handling** with automatic deserialization from JSON to .NET objects
 - **Flexible authentication** options (none, basic auth, API key)
@@ -209,6 +211,50 @@ public class DocumentedTools
 }
 ```
 
+## Defining MCP Resources
+
+Resources expose read-only data (device state, sensor readings, configuration) that an AI agent can list and read. Use the `[McpServerResource]` attribute on a **parameterless method**. Primitive and `string` return values are exposed as text; other return types are serialized as JSON text with the `application/json` MIME type:
+
+```csharp
+using nanoFramework.WebServer.Mcp;
+
+public class IoTResources
+{
+    // McpServerResource(uri, name, description = "", mimeType = "text/plain")
+    [McpServerResource("device://temperature", "Temperature", "Current temperature reading")]
+    public static string GetTemperature()
+    {
+        return "23.5°C";
+    }
+}
+```
+
+The `uri` is the unique identifier the agent uses to read the resource. Methods must not take parameters.
+
+### Registering Resources
+
+Resources are discovered exactly like tools and prompts:
+
+```csharp
+// Static resources
+McpResourceRegistry.DiscoverResources(new Type[] { typeof(IoTResources) });
+```
+
+To expose **instance** methods bound to a live object, register the object instead of its type. An optional parallel array of URI prefixes lets you register several instances of the same class without URI collisions:
+
+```csharp
+var sensorA = new Thermometer();
+var sensorB = new Thermometer();
+McpResourceRegistry.DiscoverResources(
+    new object[] { sensorA, sensorB },
+    new string[] { "a/", "b/" });
+```
+
+### Limitations
+
+- **Text only**: resource contents are returned as text (no binary/blob).
+- **Static list**: `resources/templates/list` (parameterized URIs) and change notifications/subscriptions are not supported.
+
 ## Complex Object Support
 
 This MCP implementation supports complex types which can be implemented with classes and nested classes.
@@ -379,6 +425,11 @@ public static void Main()
     // Discover and register prompts
     McpPromptRegistry.DiscoverPrompts(new Type[] {
         typeof(McpPrompts)
+    });
+
+    // Discover and register resources
+    McpResourceRegistry.DiscoverResources(new Type[] {
+        typeof(IoTResources)
     });
 
     // Limit request bodies to 50% of currently available memory
@@ -751,6 +802,70 @@ POST /mcp
             }
         ],
         "nextCursor": null
+    }
+}
+```
+
+### Resource Discovery and Read
+
+List available resources:
+
+```json
+POST /mcp
+{
+    "jsonrpc": "2.0",
+    "method": "resources/list",
+    "id": 1
+}
+```
+
+**Response:**
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": 1,
+    "result": {
+        "resources": [
+            {
+                "uri": "device://temperature",
+                "name": "Temperature",
+                "description": "Current temperature reading",
+                "mimeType": "text/plain"
+            }
+        ]
+    }
+}
+```
+
+Read a resource by its `uri`:
+
+```json
+POST /mcp
+{
+    "jsonrpc": "2.0",
+    "method": "resources/read",
+    "params": {
+        "uri": "device://temperature"
+    },
+    "id": 2
+}
+```
+
+**Response:**
+
+```json
+{
+    "jsonrpc": "2.0",
+    "id": 2,
+    "result": {
+        "contents": [
+            {
+                "uri": "device://temperature",
+                "mimeType": "text/plain",
+                "text": "23.5°C"
+            }
+        ]
     }
 }
 ```

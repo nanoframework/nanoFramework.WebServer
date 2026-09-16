@@ -150,6 +150,25 @@ public class McpPrompts
 
 Prompts can be discovered and invoked by AI agents in the same way as tools. You can also define prompts with parameters using the `McpPromptParameter` attribute.
 
+### Defining MCP Resources
+
+Resources expose read-only data (such as sensor readings or device state) to AI agents. Mark a parameterless method that returns a `string` with the `McpServerResource` attribute:
+
+```csharp
+using nanoFramework.WebServer.Mcp;
+
+public class IoTResources
+{
+    [McpServerResource("device://temperature", "Temperature", "Current temperature reading")]
+    public static string GetTemperature()
+    {
+        return "23.5°C";
+    }
+}
+```
+
+Resources are discovered like tools and prompts. Register a live object instead of a `Type` (e.g. `DiscoverResources(new object[] { myDevice })`) to expose instance methods bound to that object.
+
 ### Setting Up MCP Server
 
 ```csharp
@@ -163,6 +182,9 @@ public static void Main()
 
     // Discover and register MCP prompts
     McpPromptRegistry.DiscoverPrompts(new Type[] { typeof(McpPrompts) });
+
+    // Discover and register MCP resources
+    McpResourceRegistry.DiscoverResources(new Type[] { typeof(IoTResources) });
 
     // You can limit request bodies to 50% of currently available memory to avoid possible memory pressure or DDoS
     // Any negative value disables the check; the default is -1

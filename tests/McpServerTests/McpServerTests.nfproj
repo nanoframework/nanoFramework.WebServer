@@ -28,6 +28,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="McpPromptRegistryTests.cs" />
+    <Compile Include="McpResourceRegistryTests.cs" />
     <Compile Include="McpToolRegistryTests.cs" />
     <Compile Include="McpToolsAttributeTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
