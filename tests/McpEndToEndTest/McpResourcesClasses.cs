@@ -5,27 +5,22 @@ using nanoFramework.WebServer.Mcp;
 
 namespace McpServerTests
 {
-    public class McpResources
+    public static class McpResources
     {
-        [McpServerResource("device://info", "device_info", "Basic information about the device running the MCP server.")]
-        public static string GetDeviceInfo() => "McpEndToEndTest device running nanoFramework.WebServer.Mcp";
+        [McpServerResource("device/info", "Device info", "Static nanoFramework device information", "text/plain")]
+        public static string GetDeviceInfo() => "nanoFramework device";
+    }
 
-        [McpServerResource("device://default-person", "default_person", "Returns the default person object as a resource.", "application/json")]
-        public Person GetDefaultPerson()
+    public class SensorResources
+    {
+        private readonly string _reading;
+
+        public SensorResources(string reading)
         {
-            return new Person
-            {
-                Name = "John",
-                Surname = "Doe",
-                Age = "30",
-                Address = new Address
-                {
-                    Street = "123 Main St",
-                    City = "Anytown",
-                    PostalCode = "12345",
-                    Country = "USA"
-                }
-            };
+            _reading = reading;
         }
+
+        [McpServerResource("sensor/reading", "Sensor reading", "Current sensor reading", "text/plain")]
+        public string GetReading() => _reading;
     }
 }
