@@ -15,7 +15,7 @@ namespace nanoFramework.WebServer.Mcp
     public class McpServerResourceAttribute : Attribute
     {
         /// <summary>
-        /// Gets the unique absolute URI of the resource.
+        /// Gets the unique relative URI of the resource.
         /// </summary>
         public Uri Uri { get; }
 
@@ -37,13 +37,19 @@ namespace nanoFramework.WebServer.Mcp
         /// <summary>
         /// Initializes a new instance of the <see cref="McpServerResourceAttribute"/> class with the specified URI, name, description, and MIME type.
         /// </summary>
-        /// <param name="uri">The unique absolute URI of the resource.</param>
+        /// <param name="uri">The unique relative URI of the resource.</param>
         /// <param name="name">The name of the resource.</param>
         /// <param name="description">The description of the resource.</param>
         /// <param name="mimeType">The MIME type of the resource.</param>
         public McpServerResourceAttribute(string uri, string name, string description = "", string mimeType = "text/plain")
         {
-            Uri = new Uri(uri, UriKind.Absolute);
+            Uri resourceUri = new Uri(uri, UriKind.RelativeOrAbsolute);
+            if (resourceUri.IsAbsoluteUri)
+            {
+                throw new FormatException("Resource URI must be relative.");
+            }
+
+            Uri = resourceUri;
             Name = name;
             Description = description;
             MimeType = mimeType;

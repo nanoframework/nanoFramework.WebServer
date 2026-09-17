@@ -15,6 +15,7 @@ namespace nanoFramework.WebServer.Mcp
     /// </summary>
     public class McpResourceRegistry : RegistryBase
     {
+        private const string ResourceUriPrefix = "mcp://";
         private static readonly Hashtable resources = new Hashtable();
         private static bool isInitialized = false;
 
@@ -56,7 +57,7 @@ namespace nanoFramework.WebServer.Mcp
         /// This overload is additive and can be called in addition to the static <see cref="DiscoverResources(Type[])"/> discovery.
         /// </summary>
         /// <param name="resourceInstances">An array of object instances to scan for MCP resources.</param>
-        /// <param name="uriPrefixes">An optional parallel array of URI prefixes; a null or empty entry means no prefix. Each prefix must produce an absolute RFC 3986 URI when prepended to the resource URI (for example, <c>instance-</c> with <c>sensor://reading</c>). May be null to apply no prefixes.</param>
+        /// <param name="uriPrefixes">An optional parallel array of relative URI prefixes; a null or empty entry means no prefix. May be null to apply no prefixes.</param>
         public static void DiscoverResources(object[] resourceInstances, string[] uriPrefixes)
         {
             if (resourceInstances == null)
@@ -82,7 +83,7 @@ namespace nanoFramework.WebServer.Mcp
         /// </summary>
         /// <param name="mcpResource">The type to scan.</param>
         /// <param name="target">The instance to invoke discovered instance methods against, or null for static-only discovery.</param>
-        /// <param name="uriPrefix">An optional prefix prepended to every discovered resource URI; null or empty means no prefix. The resulting resource URI must be an absolute RFC 3986 URI.</param>
+        /// <param name="uriPrefix">An optional relative prefix prepended to every discovered resource URI; null or empty means no prefix.</param>
         private static void RegisterResources(Type mcpResource, object target, string uriPrefix)
         {
             MethodInfo[] methods = mcpResource.GetMethods();
@@ -101,6 +102,11 @@ namespace nanoFramework.WebServer.Mcp
                         McpServerResourceAttribute attribute = (McpServerResourceAttribute)attrib;
                         if (attribute != null)
                         {
+                            if (attribute.Uri.IsAbsoluteUri)
+                            {
+                                continue;
+                            }
+
                             // Skip instance methods when no target instance is available; they cannot be invoked.
                             if (target == null && !method.IsStatic)
                             {
@@ -232,13 +238,13 @@ namespace nanoFramework.WebServer.Mcp
 
         private static Uri CombineResourceUri(string uriPrefix, Uri uri)
         {
-            if (string.IsNullOrEmpty(uriPrefix))
+            int prefixLength = string.IsNullOrEmpty(uriPrefix) ? 0 : uriPrefix.Length;
+            StringBuilder builder = new StringBuilder(ResourceUriPrefix.Length + prefixLength + uri.OriginalString.Length);
+            builder.Append(ResourceUriPrefix);
+            if (prefixLength > 0)
             {
-                return uri;
+                builder.Append(uriPrefix);
             }
-
-            StringBuilder builder = new StringBuilder(uriPrefix.Length + uri.OriginalString.Length);
-            builder.Append(uriPrefix);
             builder.Append(uri.OriginalString);
             return new Uri(builder.ToString(), UriKind.Absolute);
         }

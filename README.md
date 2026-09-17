@@ -159,7 +159,7 @@ using nanoFramework.WebServer.Mcp;
 
 public class IoTResources
 {
-    [McpServerResource("device://temperature", "Temperature", "Current temperature reading")]
+    [McpServerResource("device/temperature", "Temperature", "Current temperature reading")]
     public static string GetTemperature()
     {
         return "23.5°C";
