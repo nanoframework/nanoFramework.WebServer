@@ -213,7 +213,7 @@ public class DocumentedTools
 
 ## Defining MCP Resources
 
-Resources expose read-only data (device state, sensor readings, configuration) that an AI agent can list and read. Use the `[McpServerResource]` attribute on a **parameterless method that returns a `string`**:
+Resources expose read-only data (device state, sensor readings, configuration) that an AI agent can list and read. Use the `[McpServerResource]` attribute on a **parameterless method**. Primitive and `string` return values are exposed as text; other return types are serialized as JSON text with the `application/json` MIME type:
 
 ```csharp
 using nanoFramework.WebServer.Mcp;
