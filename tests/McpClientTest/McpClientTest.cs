@@ -2,7 +2,8 @@
 
 #:package DotNetEnv@3.1.1
 #:package ModelContextProtocol@0.2.0-preview.3
-#:package Microsoft.SemanticKernel@1.49.0
+#:package Microsoft.SemanticKernel@1.74.0
+#:property JsonSerializerIsReflectionEnabledByDefault=true
 
 // Note: this is .NET single file. Run with: dotnet run McpClientTest.cs
 
@@ -13,7 +14,26 @@ using ModelContextProtocol.Client;
 using ModelContextProtocol.Protocol;
 
 // Load environment variables from .env file
-DotNetEnv.Env.Load();
+var envPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ".env");
+if (!File.Exists(envPath))
+{
+    envPath = Path.Combine("tests", "McpClientTest", ".env");
+}
+
+DotNetEnv.Env.Load(envPath);
+
+var deploymentName = DotNetEnv.Env.GetString("AZUREAI_DEPLOYMENT_NAME");
+var deploymentEndpoint = DotNetEnv.Env.GetString("AZUREAI_DEPLOYMENT_ENDPOINT");
+var apiKey = DotNetEnv.Env.GetString("AZUREAI_DEPLOYMENT_API_KEY");
+
+if (string.IsNullOrWhiteSpace(deploymentName)
+    || string.IsNullOrWhiteSpace(deploymentEndpoint)
+    || string.IsNullOrWhiteSpace(apiKey))
+{
+    throw new InvalidOperationException(
+        $"Missing Azure OpenAI configuration in '{Path.GetFullPath(envPath)}'. " +
+        "Set AZUREAI_DEPLOYMENT_NAME, AZUREAI_DEPLOYMENT_ENDPOINT, and AZUREAI_DEPLOYMENT_API_KEY.");
+}
 
 //
 // 1. Create MCP Toolbox client (SSE/HTTP)
@@ -21,16 +41,16 @@ DotNetEnv.Env.Load();
 var mcpToolboxClient = await McpClientFactory.CreateAsync(
     new SseClientTransport(new SseClientTransportOptions()
     {
-        Endpoint = new Uri("http://192.168.1.139/mcp"),
+        Endpoint = new Uri("http://172.20.10.2/mcp"),
         TransportMode = HttpTransportMode.StreamableHttp,
-    }, new HttpClient()));
+    }, new HttpClient(new ContentLengthHandler(new HttpClientHandler()))));
 // --
 
 var kernel = Kernel.CreateBuilder()
                     .AddAzureOpenAIChatCompletion(
-                        DotNetEnv.Env.GetString("AZUREAI_DEPLOYMENT_NAME"),
-                        DotNetEnv.Env.GetString("AZUREAI_DEPLOYMENT_ENDPOINT"),
-                        DotNetEnv.Env.GetString("AZUREAI_DEPLOYMENT_API_KEY")
+                        deploymentName,
+                        deploymentEndpoint,
+                        apiKey
                     )
                     .Build();
 
@@ -205,4 +225,28 @@ static string FormatResourceContents(ReadResourceResult result)
             BlobResourceContents blob => $"[Binary resource content (base64): {blob.Blob}]",
             _ => content.ToString() ?? string.Empty,
         }));
+}
+
+sealed class ContentLengthHandler(HttpMessageHandler innerHandler) : DelegatingHandler(innerHandler)
+{
+    protected override async Task<HttpResponseMessage> SendAsync(
+        HttpRequestMessage request,
+        CancellationToken cancellationToken)
+    {
+        if (request.Content is { Headers.ContentLength: null } content)
+        {
+            var bufferedContent = new ByteArrayContent(
+                await content.ReadAsByteArrayAsync(cancellationToken).ConfigureAwait(false));
+
+            foreach (var header in content.Headers)
+            {
+                bufferedContent.Headers.TryAddWithoutValidation(header.Key, header.Value);
+            }
+
+            request.Content = bufferedContent;
+            content.Dispose();
+        }
+
+        return await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
+    }
 }
