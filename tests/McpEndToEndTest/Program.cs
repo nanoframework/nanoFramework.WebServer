@@ -35,7 +35,8 @@ namespace McpEndToEndTest
             McpPromptRegistry.DiscoverPrompts(new Type[] { typeof(McpServerTests.McpPrompts) });
             Debug.WriteLine("MCP Prompts discovered and registered.");
 
-            McpResourceRegistry.DiscoverResources(new object[] { new McpServerTests.McpResources() });
+            McpResourceRegistry.DiscoverResources(new Type[] { typeof(McpServerTests.McpResources) });
+            McpResourceRegistry.DiscoverResources(new object[] { new McpServerTests.SensorResources("42") });
             Debug.WriteLine("MCP Resources discovered and registered.");
 
             McpServerController.MaximumRequestBodySize = nanoFramework.Runtime.Native.GC.Run(false) / 2;

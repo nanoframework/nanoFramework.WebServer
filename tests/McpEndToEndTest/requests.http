@@ -15,12 +15,33 @@ Content-Type: application/json
 
 {"method":"tools/list","params":{},"id":2,"jsonrpc":"2.0"}
 
+### This will get the list of resources available in the MCP server
+
+POST http://{{host}}/mcp HTTP/1.1
+Content-Type: application/json
+
+{"method":"resources/list","params":{},"id":3,"jsonrpc":"2.0"}
+
+### This will read the static device information resource
+
+POST http://{{host}}/mcp HTTP/1.1
+Content-Type: application/json
+
+{"method":"resources/read","params":{"uri":"mcp://device/info"},"id":4,"jsonrpc":"2.0"}
+
+### This will read the instance-backed sensor resource
+
+POST http://{{host}}/mcp HTTP/1.1
+Content-Type: application/json
+
+{"method":"resources/read","params":{"uri":"mcp://sensor/reading"},"id":5,"jsonrpc":"2.0"}
+
 ### This is the initialization request to the MCP server.
 
 POST http://{{host}}/mcp HTTP/1.1 
 Content-Type: application/json
 
-{"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"McpClientTest","version":"1.0.0.0"}},"id":1,"jsonrpc":"2.0"}
+{"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"McpClientTest","version":"1.0.0.0"}},"id":1,"jsonrpc":"2.0"}
 
 ### This is the initialization request to the MCP server but with a wrong version not matching. Should return an error
 

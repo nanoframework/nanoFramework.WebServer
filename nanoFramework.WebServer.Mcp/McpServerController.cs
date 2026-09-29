@@ -199,6 +199,11 @@ namespace nanoFramework.WebServer.Mcp
                         }
                         catch (McpResourceRegistry.ResourceNotFoundException)
                         {
+                            if (negotiatedProtocolVersion == "2026-07-28")
+                            {
+                                throw;
+                            }
+
                             sb.Append($",\"error\":{{\"code\":-32002,\"message\":\"Resource not found\",\"data\":{{\"uri\":{JsonConvert.SerializeObject(uri)}}}}}}}");
                         }
                     }

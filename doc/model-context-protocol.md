@@ -221,7 +221,7 @@ using nanoFramework.WebServer.Mcp;
 public class IoTResources
 {
     // McpServerResource(uri, name, description = "", mimeType = "text/plain")
-    [McpServerResource("device://temperature", "Temperature", "Current temperature reading")]
+    [McpServerResource("device/temperature", "Temperature", "Current temperature reading")]
     public static string GetTemperature()
     {
         return "23.5°C";
@@ -229,7 +229,7 @@ public class IoTResources
 }
 ```
 
-The `uri` is the unique identifier the agent uses to read the resource. Methods must not take parameters.
+The `uri` must be relative to the MCP endpoint. The server advertises and accepts the corresponding absolute URI, for example `device/temperature` becomes `mcp://device/temperature`. Methods that take parameters are ignored during discovery.
 
 ### Registering Resources
 
