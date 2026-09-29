@@ -14,10 +14,15 @@ using ModelContextProtocol.Client;
 using ModelContextProtocol.Protocol;
 
 // Load environment variables from .env file
-var envPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ".env");
+var envPath = Path.Combine(Environment.CurrentDirectory, ".env");
 if (!File.Exists(envPath))
 {
-    envPath = Path.Combine("tests", "McpClientTest", ".env");
+    envPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ".env");
+}
+
+if (!File.Exists(envPath))
+{
+    envPath = Path.Combine(Environment.CurrentDirectory, "tests", "McpClientTest", ".env");
 }
 
 DotNetEnv.Env.Load(envPath);
@@ -41,7 +46,7 @@ if (string.IsNullOrWhiteSpace(deploymentName)
 var mcpToolboxClient = await McpClientFactory.CreateAsync(
     new SseClientTransport(new SseClientTransportOptions()
     {
-        Endpoint = new Uri("http://172.20.10.2/mcp"),
+        Endpoint = new Uri("http://192.168.1.81/mcp"),
         TransportMode = HttpTransportMode.StreamableHttp,
     }, new HttpClient(new ContentLengthHandler(new HttpClientHandler()))));
 // --
