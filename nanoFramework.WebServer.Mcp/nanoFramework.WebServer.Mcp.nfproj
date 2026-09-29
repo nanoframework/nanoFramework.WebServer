@@ -56,6 +56,9 @@
     <Compile Include="ToolMetadata.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IMcpResourceProvider.cs" />
+    <Compile Include="IMcpToolProvider.cs" />
+    <Compile Include="McpProviderMetadataHelper.cs" />
     <Reference Include="mscorlib">
       <HintPath>..\packages\nanoFramework.CoreLibrary.1.17.11\lib\mscorlib.dll</HintPath>
     </Reference>

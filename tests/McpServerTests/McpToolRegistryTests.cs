@@ -101,12 +101,32 @@ namespace McpServerTests
         }
     }
 
+    public class ExternalToolProvider : IMcpToolProvider
+    {
+        public string GetToolMetadataJson()
+        {
+            return "\"tools\":[{\"name\":\"external_tool\",\"description\":\"External tool\"}]";
+        }
+
+        public string InvokeTool(string toolName, Hashtable arguments)
+        {
+            if (toolName == "external_tool")
+            {
+                return "\"External result\"";
+            }
+
+            throw new Exception("Tool not found");
+        }
+    }
+
     [TestClass]
     public class McpToolRegistryTests
     {
         [Setup]
         public void Setup()
         {
+            McpServerController.ToolProvider = null;
+
             // Register the static test tools first so simple_tool (and the other TestToolsClass tools)
             // exist regardless of test execution order. The isInitialized gate makes this the winning
             // Type[] discovery, so a later DiscoverTools(EmptyToolsClass) call cannot close the gate empty.
@@ -608,6 +628,31 @@ namespace McpServerTests
             // Assert - discovery does not throw on the duplicate, and first registration wins (start = 100)
             string result = McpToolRegistry.InvokeTool("dup_counter_get", new Hashtable());
             Assert.IsTrue(result.Contains("100"), "First registration should win on a duplicate tool name");
+        }
+
+        [TestMethod]
+        public void TestProviderMetadataIsCombinedWithInternalTools()
+        {
+            McpServerController.ToolProvider = new ExternalToolProvider();
+
+            string metadataJson = McpToolRegistry.GetToolMetadataJson();
+
+            Assert.IsTrue(metadataJson.Contains("simple_tool"), "Metadata should contain internal tools");
+            Assert.IsTrue(metadataJson.Contains("external_tool"), "Metadata should contain provider tools");
+        }
+
+        [TestMethod]
+        public void TestProviderAndInternalToolsAreInvokable()
+        {
+            McpServerController.ToolProvider = new ExternalToolProvider();
+            Hashtable arguments = new Hashtable();
+            arguments.Add("value", "hello");
+
+            string internalResult = McpToolRegistry.InvokeTool("simple_tool", arguments);
+            string externalResult = McpToolRegistry.InvokeTool("external_tool", new Hashtable());
+
+            Assert.IsTrue(internalResult.Contains("Processed: hello"), "Internal tool should remain invokable");
+            Assert.IsTrue(externalResult.Contains("External result"), "Provider tool should be invokable");
         }
     }
 }

@@ -66,12 +66,32 @@ namespace McpServerTests
         public string Read() => "line\n\"quoted\"\\path";
     }
 
+    public class ExternalResourceProvider : IMcpResourceProvider
+    {
+        public string GetResourceMetadataJson()
+        {
+            return "\"resources\":[{\"uri\":\"mcp://external/info\",\"name\":\"External info\"}]";
+        }
+
+        public string ReadResource(string uri)
+        {
+            if (uri == "mcp://external/info")
+            {
+                return "{\"contents\":[{\"uri\":\"mcp://external/info\",\"mimeType\":\"text/plain\",\"text\":\"External resource\"}]}";
+            }
+
+            throw new McpResourceRegistry.ResourceNotFoundException(uri);
+        }
+    }
+
     [TestClass]
     public class McpResourceRegistryTests
     {
         [Setup]
         public void Setup()
         {
+            McpServerController.ResourceProvider = null;
+
             // Register the static test resources first so mcp://device/info exists regardless of test execution order.
             // The isInitialized gate makes this the winning Type[] discovery.
             McpResourceRegistry.DiscoverResources(new Type[] { typeof(TestResourcesClass) });
@@ -259,6 +279,29 @@ namespace McpServerTests
             string result = McpResourceRegistry.ReadResource("mcp://escaped-escape/content");
 
             Assert.IsTrue(result.Contains("line\\n\\\"quoted\\\"\\\\path"), "Resource text should be JSON escaped");
+        }
+
+        [TestMethod]
+        public void TestProviderMetadataIsCombinedWithInternalResources()
+        {
+            McpServerController.ResourceProvider = new ExternalResourceProvider();
+
+            string metadataJson = McpResourceRegistry.GetResourceMetadataJson();
+
+            Assert.IsTrue(metadataJson.Contains("mcp://device/info"), "Metadata should contain internal resources");
+            Assert.IsTrue(metadataJson.Contains("mcp://external/info"), "Metadata should contain provider resources");
+        }
+
+        [TestMethod]
+        public void TestProviderAndInternalResourcesAreReadable()
+        {
+            McpServerController.ResourceProvider = new ExternalResourceProvider();
+
+            string internalResult = McpResourceRegistry.ReadResource("mcp://device/info");
+            string externalResult = McpResourceRegistry.ReadResource("mcp://external/info");
+
+            Assert.IsTrue(internalResult.Contains("nanoFramework device"), "Internal resource should remain readable");
+            Assert.IsTrue(externalResult.Contains("External resource"), "Provider resource should be readable");
         }
     }
 }

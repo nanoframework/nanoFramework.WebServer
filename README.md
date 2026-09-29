@@ -203,6 +203,24 @@ public static void Main()
 }
 ```
 
+### Dynamic MCP Providers
+
+Applications that discover capabilities at runtime can supply tools and
+resources without adding MCP attributes. Implement `IMcpToolProvider` and/or
+`IMcpResourceProvider`, then assign the provider before starting the server:
+
+```csharp
+DynamicMcpProvider provider = new DynamicMcpProvider(device);
+McpServerController.ToolProvider = provider;
+McpServerController.ResourceProvider = provider;
+```
+
+When a provider is not assigned, the controller continues to use
+`McpToolRegistry` or `McpResourceRegistry`. Assigning a provider combines its
+tools or resources with the corresponding attribute registry. See the
+[detailed MCP documentation](doc/model-context-protocol.md#dynamic-tool-and-resource-providers)
+for the provider contracts and a complete example.
+
 ### AI Agent Integration
 
 Once running, AI agents can discover and invoke your tools:

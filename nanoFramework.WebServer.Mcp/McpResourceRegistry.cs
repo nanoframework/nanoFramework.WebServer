@@ -19,6 +19,8 @@ namespace nanoFramework.WebServer.Mcp
         private static readonly Hashtable resources = new Hashtable();
         private static bool isInitialized = false;
 
+        internal static IMcpResourceProvider Provider { get; set; }
+
         /// <summary>
         /// Discovers MCP resources by scanning the provided types for methods decorated with the <see cref="McpServerResourceAttribute"/>.
         /// This method should be called once to populate the resource registry.
@@ -166,7 +168,10 @@ namespace nanoFramework.WebServer.Mcp
                     sb.Remove(sb.Length - 1, 1);
                 }
                 sb.Append("]");
-                return sb.ToString();
+                string registryMetadata = sb.ToString();
+                return Provider == null
+                    ? registryMetadata
+                    : McpProviderMetadataHelper.Merge("resources", registryMetadata, Provider.GetResourceMetadataJson());
             }
             catch (Exception)
             {
@@ -210,6 +215,11 @@ namespace nanoFramework.WebServer.Mcp
                 StringBuilder sb = new StringBuilder();
                 sb.Append($"{{\"contents\":[{{\"uri\":{JsonConvert.SerializeObject(resourceMetadata.Uri.AbsoluteUri)},\"mimeType\":{JsonConvert.SerializeObject(resourceMetadata.MimeType)},\"text\":{text}}}]}}");
                 return sb.ToString();
+            }
+
+            if (Provider != null)
+            {
+                return Provider.ReadResource(uri);
             }
 
             throw new ResourceNotFoundException(uri);

@@ -46,6 +46,24 @@ namespace nanoFramework.WebServer.Mcp
         public static long MaximumRequestBodySize { get; set; } = -1;
 
         /// <summary>
+        /// Gets or sets the dynamic tool provider combined with the attribute registry.
+        /// </summary>
+        public static IMcpToolProvider ToolProvider
+        {
+            get => McpToolRegistry.Provider;
+            set => McpToolRegistry.Provider = value;
+        }
+
+        /// <summary>
+        /// Gets or sets the dynamic resource provider combined with the attribute registry.
+        /// </summary>
+        public static IMcpResourceProvider ResourceProvider
+        {
+            get => McpResourceRegistry.Provider;
+            set => McpResourceRegistry.Provider = value;
+        }
+
+        /// <summary>
         /// Handles POST requests to the "mcp" route.
         /// Processes the incoming request, invokes the specified tool with provided parameters, and writes the result to the response stream in JSON format.
         /// </summary>

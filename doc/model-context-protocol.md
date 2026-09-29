@@ -11,6 +11,7 @@ The nanoFramework WebServer provides comprehensive support for the Model Context
 - [Quick Start](#quick-start)
 - [Defining MCP Tools](#defining-mcp-tools)
 - [Defining MCP Resources](#defining-mcp-resources)
+- [Dynamic Tool and Resource Providers](#dynamic-tool-and-resource-providers)
 - [Complex Object Support](#complex-object-support)
 - [Server Setup](#server-setup)
 - [Authentication Options](#authentication-options)
@@ -29,6 +30,7 @@ The Model Context Protocol (MCP) is an open standard that enables seamless integ
 ### Key Features
 
 - **Automatic tool, prompt, and resource discovery** through reflection and attributes
+- **Dynamic tool and resource providers** for application-defined runtime discovery and invocation
 - **MCP Prompts**: Define reusable, high-level prompt workflows for AI agents, with support for parameters
 - **MCP Resources**: Expose read-only device data and state for AI agents to list and read
 - **JSON-RPC 2.0 compliant** request/response handling
@@ -254,6 +256,186 @@ McpResourceRegistry.DiscoverResources(
 
 - **Text only**: resource contents are returned as text (no binary/blob).
 - **Static list**: `resources/templates/list` (parameterized URIs) and change notifications/subscriptions are not supported.
+
+## Dynamic Tool and Resource Providers
+
+Applications can provide MCP tools and resources dynamically instead of using
+`McpServerTool` and `McpServerResource` attributes. This is useful when another
+metadata system discovers device capabilities at runtime or when the available
+capabilities depend on connected hardware.
+
+Implement either or both provider interfaces:
+
+```csharp
+public interface IMcpToolProvider
+{
+        string GetToolMetadataJson();
+
+        string InvokeTool(string toolName, Hashtable arguments);
+}
+
+public interface IMcpResourceProvider
+{
+        string GetResourceMetadataJson();
+
+        string ReadResource(string uri);
+}
+```
+
+Assign providers before starting the server:
+
+```csharp
+DeviceMcpProvider provider = new DeviceMcpProvider();
+McpServerController.ToolProvider = provider;
+McpServerController.ResourceProvider = provider;
+```
+
+The tool and resource providers are independent. An application can configure
+only one and continue using the attribute registry for the other. When a
+provider is assigned, its metadata is combined with the corresponding attribute
+registry. Requests for internally registered names or URIs use the internal
+entry; other requests are delegated to the provider. Prompt registration is
+unaffected.
+
+Provider and internal identifiers should be unique. If both sources advertise
+the same tool name or resource URI, both metadata entries are listed while
+invocation or reading resolves to the internal entry.
+
+Provider properties are static and remain active for the lifetime of the
+application. Configure them during startup before accepting MCP requests.
+
+### Provider Return Formats
+
+`GetToolMetadataJson` returns the `tools` JSON member without an enclosing
+result object:
+
+```json
+"tools":[
+    {
+        "name":"set_sampling_rate",
+        "description":"Sets the sampling rate",
+        "inputSchema":{
+            "type":"object",
+            "properties":{"value":{"type":"number"}},
+            "required":["value"]
+        }
+    }
+]
+```
+
+`InvokeTool` returns a JSON value. Strings must therefore include JSON quotes,
+for example `"\"Sampling rate updated\""`. The controller places this value
+in the MCP text-content response. Dynamic providers are responsible for
+validating arguments and converting them to the types required by the target
+operation.
+
+`GetResourceMetadataJson` returns the `resources` JSON member:
+
+```json
+"resources":[
+    {
+        "uri":"mcp://device/sampling-rate",
+        "name":"Sampling rate",
+        "description":"Current sampling rate",
+        "mimeType":"text/plain"
+    }
+]
+```
+
+`ReadResource` returns the complete MCP resource-read result:
+
+```json
+{
+    "contents":[
+        {
+            "uri":"mcp://device/sampling-rate",
+            "mimeType":"text/plain",
+            "text":"10"
+        }
+    ]
+}
+```
+
+Throw `McpResourceRegistry.ResourceNotFoundException` for an unknown resource
+URI so the controller returns the protocol-specific resource-not-found error.
+
+### Complete Dynamic Provider Example
+
+The following provider exposes mutable state without MCP attributes:
+
+```csharp
+using System;
+using System.Collections;
+using System.Threading;
+using nanoFramework.WebServer;
+using nanoFramework.WebServer.Mcp;
+
+public class DeviceMcpProvider : IMcpToolProvider, IMcpResourceProvider
+{
+        private int _samplingRate = 10;
+
+        public string GetToolMetadataJson()
+        {
+                return "\"tools\":[{\"name\":\"set_sampling_rate\","
+                        + "\"description\":\"Sets the sampling rate\","
+                        + "\"inputSchema\":{\"type\":\"object\","
+                        + "\"properties\":{\"value\":{\"type\":\"number\"}},"
+                        + "\"required\":[\"value\"]}}]";
+        }
+
+        public string InvokeTool(string toolName, Hashtable arguments)
+        {
+                if (toolName != "set_sampling_rate")
+                {
+                        throw new ArgumentException("Tool not found");
+                }
+
+                _samplingRate = Convert.ToInt32(arguments["value"].ToString());
+                return "\"Sampling rate updated\"";
+        }
+
+        public string GetResourceMetadataJson()
+        {
+                return "\"resources\":[{\"uri\":\"mcp://device/sampling-rate\","
+                        + "\"name\":\"Sampling rate\","
+                        + "\"description\":\"Current sampling rate\","
+                        + "\"mimeType\":\"text/plain\"}]";
+        }
+
+        public string ReadResource(string uri)
+        {
+                if (uri != "mcp://device/sampling-rate")
+                {
+                        throw new McpResourceRegistry.ResourceNotFoundException(uri);
+                }
+
+                return "{\"contents\":[{\"uri\":\"mcp://device/sampling-rate\","
+                        + "\"mimeType\":\"text/plain\",\"text\":\""
+                        + _samplingRate.ToString() + "\"}]}";
+        }
+}
+```
+
+Register the provider and start the existing controller normally:
+
+```csharp
+DeviceMcpProvider provider = new DeviceMcpProvider();
+McpServerController.ToolProvider = provider;
+McpServerController.ResourceProvider = provider;
+
+using (WebServer server = new WebServer(
+        80,
+        HttpProtocol.Http,
+        new Type[] { typeof(McpServerController) }))
+{
+        server.Start();
+        Thread.Sleep(Timeout.Infinite);
+}
+```
+
+Existing applications require no changes. If both provider properties remain
+`null`, `McpServerController` uses only the attribute-backed entries in
+`McpToolRegistry` and `McpResourceRegistry`, exactly as before.
 
 ## Complex Object Support
 

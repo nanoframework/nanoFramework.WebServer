@@ -19,6 +19,8 @@ namespace nanoFramework.WebServer.Mcp
         private static readonly Hashtable tools = new Hashtable();
         private static bool isInitialized = false;
 
+        internal static IMcpToolProvider Provider { get; set; }
+
         /// <summary>
         /// Discovers MCP tools by scanning the provided types for methods decorated with the McpServerToolAttribute.
         /// This method should be called once to populate the tool registry.
@@ -168,7 +170,10 @@ namespace nanoFramework.WebServer.Mcp
                     sb.Remove(sb.Length - 1, 1);
                 }
                 sb.Append("]");
-                return sb.ToString();
+                string registryMetadata = sb.ToString();
+                return Provider == null
+                    ? registryMetadata
+                    : McpProviderMetadataHelper.Merge("tools", registryMetadata, Provider.GetToolMetadataJson());
             }
             catch (Exception)
             {
@@ -235,6 +240,11 @@ namespace nanoFramework.WebServer.Mcp
                     string jsonResult = JsonConvert.SerializeObject(result);
                     return JsonConvert.SerializeObject(jsonResult);
                 }
+            }
+
+            if (Provider != null)
+            {
+                return Provider.InvokeTool(toolName, parameter);
             }
 
             throw new Exception("Tool not found");
