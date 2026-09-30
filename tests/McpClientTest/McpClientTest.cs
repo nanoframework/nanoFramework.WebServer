@@ -98,12 +98,27 @@ async Task<string> ReadResourceFreshAsync(string uri)
     return contents;
 }
 
-Func<string, Task<string>> readResource = ReadResourceFreshAsync;
-var readResourceFunction = KernelFunctionFactory.CreateFromMethod(
-    method: readResource,
-    functionName: "read_resource",
-    description: "Read the current contents of an MCP resource URI. Every call sends a new resources/read request. Call this again when current data is needed; do not assume a previous result is still current.");
-kernel.Plugins.AddFromFunctions("mcp_resources", new[] { readResourceFunction });
+var resourceFunctions = new List<KernelFunction>();
+
+foreach (var resource in resources)
+{
+    var resourceUri = resource.Uri.ToString();
+    var functionName = CreateResourceFunctionName(resource.Uri);
+    var description = $"Read the current value of MCP resource '{resourceUri}'. {resource.Description} " +
+        "Every invocation fetches fresh state; do not assume a previous result is still current.";
+
+    resourceFunctions.Add(KernelFunctionFactory.CreateFromMethod(
+        method: () => ReadResourceFreshAsync(resourceUri),
+        functionName: functionName,
+        description: description));
+
+    Console.WriteLine($"Registered resource function {functionName} for {resourceUri}");
+}
+
+if (resourceFunctions.Count > 0)
+{
+    kernel.Plugins.AddFromFunctions("mcp_resources", resourceFunctions);
+}
 
 // Check available prompts
 Console.WriteLine("// Available prompts:");
@@ -230,6 +245,13 @@ static string FormatResourceContents(ReadResourceResult result)
             BlobResourceContents blob => $"[Binary resource content (base64): {blob.Blob}]",
             _ => content.ToString() ?? string.Empty,
         }));
+}
+
+static string CreateResourceFunctionName(string uri)
+{
+    var resourceUri = new Uri(uri);
+    var name = $"read_{resourceUri.Host}_{resourceUri.AbsolutePath.Trim('/')}".ToLowerInvariant();
+    return string.Concat(name.Select(character => char.IsLetterOrDigit(character) ? character : '_'));
 }
 
 sealed class ContentLengthHandler(HttpMessageHandler innerHandler) : DelegatingHandler(innerHandler)
