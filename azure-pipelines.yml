@@ -32,7 +32,7 @@ resources:
       endpoint: nanoframework
 
 pool:
-  vmImage: 'windows-latest'
+  vmImage: 'windows-2025-vs2026'
 
 variables:
   - group: sign-client-credentials
@@ -54,6 +54,7 @@ steps:
   - template: azure-pipelines-templates/class-lib-build-only.yml@templates
     parameters:
       sonarCloudProject: 'nanoframework_lib-nanoframework.WebServer'
+      usePreviewBuild: true
   
   # build the 3 libs step
   - template: azure-pipelines-templates/class-lib-package.yml@templates  

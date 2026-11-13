@@ -39,7 +39,7 @@ namespace McpEndToEndTest
             McpResourceRegistry.DiscoverResources(new object[] { new McpServerTests.SensorResources("42") });
             Debug.WriteLine("MCP Resources discovered and registered.");
 
-            McpServerController.MaximumRequestBodySize = nanoFramework.Runtime.Native.GC.Run(false) / 2;
+            McpServerController.MaximumRequestBodySize = System.GC.GetTotalMemory(false) / 2;
             _server = new WebServer(80, HttpProtocol.Http, new Type[] { typeof(McpServerController) });
             _server.CommandReceived += ServerCommandReceived;
             // Start the server.

@@ -21,9 +21,11 @@ This comes also with the nanoFramework WebServer. Allowing to create a REST API 
 </description>
     <tags>http https webserver net netmf nf nanoframework mcp ai agent model context protocol</tags>
     <dependencies>
-      <dependency id="nanoFramework.CoreLibrary" version="1.17.11" />
-      <dependency id="nanoFramework.System.Net.Http.Server" version="1.5.214" />
-      <dependency id="nanoFramework.Json" version="2.2.213" />
+      <group targetFramework=".NETnanoFramework1.0">
+        <dependency id="nanoFramework.CoreLibrary" version="2.0.0-preview.67" />
+        <dependency id="nanoFramework.System.Net.Http.Server" version="2.0.0-preview.27" />
+        <dependency id="nanoFramework.Json" version="3.0.0-preview.25" />
+      </group>
     </dependencies>
   </metadata>
   <files>
