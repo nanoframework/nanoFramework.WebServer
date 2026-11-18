@@ -1,5 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\..\packages\Microsoft.SourceLink.GitHub.10.0.404\build\Microsoft.SourceLink.GitHub.props" Condition="Exists('..\..\packages\Microsoft.SourceLink.GitHub.10.0.404\build\Microsoft.SourceLink.GitHub.props')" />
+  <Import Project="..\..\packages\Microsoft.SourceLink.Common.10.0.404\build\Microsoft.SourceLink.Common.props" Condition="Exists('..\..\packages\Microsoft.SourceLink.Common.10.0.404\build\Microsoft.SourceLink.Common.props')" />
+  <Import Project="..\..\packages\Microsoft.Build.Tasks.Git.10.0.404\build\Microsoft.Build.Tasks.Git.props" Condition="Exists('..\..\packages\Microsoft.Build.Tasks.Git.10.0.404\build\Microsoft.Build.Tasks.Git.props')" />
   <PropertyGroup Label="Globals">
     <NanoFrameworkProjectSystemPath>$(MSBuildExtensionsPath)\nanoFramework\v1.0\</NanoFrameworkProjectSystemPath>
   </PropertyGroup>
@@ -38,7 +41,7 @@
       <HintPath>..\..\packages\nanoFramework.CoreLibrary.2.0.0-preview.67\lib\netnano1.0\mscorlib.dll</HintPath>
     </Reference>
     <Reference Include="nanoFramework.Json, Version=3.0.0.0, Culture=neutral, PublicKeyToken=c07d481e9758c731">
-      <HintPath>..\..\packages\nanoFramework.Json.3.0.0-preview.25\lib\netnano1.0\nanoFramework.Json.dll</HintPath>
+      <HintPath>..\..\packages\nanoFramework.Json.3.0.0-preview.35\lib\netnano1.0\nanoFramework.Json.dll</HintPath>
     </Reference>
     <Reference Include="nanoFramework.Runtime.Events, Version=2.0.0.0, Culture=neutral, PublicKeyToken=c07d481e9758c731">
       <HintPath>..\..\packages\nanoFramework.Runtime.Events.2.0.0-preview.19\lib\netnano1.0\nanoFramework.Runtime.Events.dll</HintPath>
@@ -79,4 +82,18 @@
     <Content Include="packages.lock.json" />
   </ItemGroup>
   <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.CSharp.targets" Condition="Exists('$(NanoFrameworkProjectSystemPath)NFProjectSystem.CSharp.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105.The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\..\packages\Microsoft.Build.Tasks.Git.10.0.404\build\Microsoft.Build.Tasks.Git.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Build.Tasks.Git.10.0.404\build\Microsoft.Build.Tasks.Git.props'))" />
+    <Error Condition="!Exists('..\..\packages\Microsoft.Build.Tasks.Git.10.0.404\build\Microsoft.Build.Tasks.Git.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Build.Tasks.Git.10.0.404\build\Microsoft.Build.Tasks.Git.targets'))" />
+    <Error Condition="!Exists('..\..\packages\Microsoft.SourceLink.Common.10.0.404\build\Microsoft.SourceLink.Common.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.SourceLink.Common.10.0.404\build\Microsoft.SourceLink.Common.props'))" />
+    <Error Condition="!Exists('..\..\packages\Microsoft.SourceLink.Common.10.0.404\build\Microsoft.SourceLink.Common.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.SourceLink.Common.10.0.404\build\Microsoft.SourceLink.Common.targets'))" />
+    <Error Condition="!Exists('..\..\packages\Microsoft.SourceLink.GitHub.10.0.404\build\Microsoft.SourceLink.GitHub.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.SourceLink.GitHub.10.0.404\build\Microsoft.SourceLink.GitHub.props'))" />
+    <Error Condition="!Exists('..\..\packages\Microsoft.SourceLink.GitHub.10.0.404\build\Microsoft.SourceLink.GitHub.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.SourceLink.GitHub.10.0.404\build\Microsoft.SourceLink.GitHub.targets'))" />
+  </Target>
+  <Import Project="..\..\packages\Microsoft.Build.Tasks.Git.10.0.404\build\Microsoft.Build.Tasks.Git.targets" Condition="Exists('..\..\packages\Microsoft.Build.Tasks.Git.10.0.404\build\Microsoft.Build.Tasks.Git.targets')" />
+  <Import Project="..\..\packages\Microsoft.SourceLink.Common.10.0.404\build\Microsoft.SourceLink.Common.targets" Condition="Exists('..\..\packages\Microsoft.SourceLink.Common.10.0.404\build\Microsoft.SourceLink.Common.targets')" />
+  <Import Project="..\..\packages\Microsoft.SourceLink.GitHub.10.0.404\build\Microsoft.SourceLink.GitHub.targets" Condition="Exists('..\..\packages\Microsoft.SourceLink.GitHub.10.0.404\build\Microsoft.SourceLink.GitHub.targets')" />
 </Project>

@@ -10,9 +10,9 @@
       },
       "nanoFramework.Json": {
         "type": "Direct",
-        "requested": "[3.0.0-preview.25, 3.0.0-preview.25]",
-        "resolved": "3.0.0-preview.25",
-        "contentHash": "wq1YfMn9xka+Y5/ViBuc0zPPVtDYCFMa0KklfQFz73fYRFx51q/hzfSc3uSB0dXzN+xJJTlcZH1LtlpPbubTiA=="
+        "requested": "[3.0.0-preview.35, 3.0.0-preview.35]",
+        "resolved": "3.0.0-preview.35",
+        "contentHash": "gpD91GGXuahzNAufP1h03O92C71E1cqBfMSTkOr4GDstom8AmO6jitKKB5/gY1P8gtKbtUzPT0HOWFMlQUMncg=="
       },
       "nanoFramework.Runtime.Events": {
         "type": "Direct",
