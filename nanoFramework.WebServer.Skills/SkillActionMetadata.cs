@@ -45,6 +45,8 @@ namespace nanoFramework.WebServer.Skills
         /// </summary>
         public MethodInfo Method { get; set; }
 
+        internal Type Owner { get; set; }
+
         /// <summary>
         /// Gets or sets the type of the parameter, or null if parameterless.
         /// </summary>

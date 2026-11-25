@@ -144,6 +144,7 @@ namespace nanoFramework.WebServer.Skills
                                     OutputSchema = outputSchema,
                                     ContentType = actionAttr.ContentType,
                                     Method = method,
+                                    Owner = skillType,
                                     ParameterType = parameters.Length > 0 ? parameters[0].ParameterType : null
                                 };
 
@@ -326,7 +327,7 @@ namespace nanoFramework.WebServer.Skills
                 }
             }
 
-            object result = action.Method.Invoke(null, methodParams);
+            object result = action.Method.Invoke(action.Method.IsStatic ? null : GetInstance(action.Owner), methodParams);
 
             // For text-based content types, return raw string
             if (action.ContentType == "text/markdown" || action.ContentType == "text/plain")

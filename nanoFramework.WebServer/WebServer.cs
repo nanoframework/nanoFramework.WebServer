@@ -44,6 +44,7 @@ namespace nanoFramework.WebServer
         private bool _cancel = true;
         private Thread _serverThread = null;
         private readonly ArrayList _callbackRoutes;
+        private readonly Hashtable _controllerInstances = new Hashtable();
         private readonly HttpListener _listener;
 
         #endregion
@@ -359,7 +360,8 @@ namespace nanoFramework.WebServer
                             CaseSensitive = false,
                             Method = string.Empty,
                             Authentication = authentication,
-                            Callback = func
+                            Callback = func,
+                            Controller = controller
                         };
 
                         foreach (var attribute in attributes)
@@ -952,7 +954,25 @@ namespace nanoFramework.WebServer
                 ? new WebServerEventArgs(context, routeParameters)
                 : new WebServerEventArgs(context);
 
-            route.Callback.Invoke(null, new object[] { eventArgs });
+            object target = null;
+
+            if (!route.Callback.IsStatic)
+            {
+                Type controller = route.Controller ?? route.Callback.DeclaringType;
+
+                lock (_controllerInstances)
+                {
+                    target = _controllerInstances[controller];
+
+                    if (target == null)
+                    {
+                        target = controller.GetConstructor(new Type[0]).Invoke(null);
+                        _controllerInstances[controller] = target;
+                    }
+                }
+            }
+
+            route.Callback.Invoke(target, new object[] { eventArgs });
         }
 
         private static void HandleContextResponse(HttpListenerContext context)

@@ -96,6 +96,27 @@ namespace SkillsTests
         }
     }
 
+    // Skill class with instance actions
+    [Skill("instance-skill", "Instance Skill", "Skill with instance actions")]
+    public class TestInstanceSkill
+    {
+        private static int _instances;
+        private int _calls;
+
+        public TestInstanceSkill()
+        {
+            _instances++;
+        }
+
+        [SkillAction("Count", "Counts the calls on the instance")]
+        public string Count()
+        {
+            _calls++;
+
+            return $"calls={_calls},instances={_instances}";
+        }
+    }
+
     [TestClass]
     public class SkillRegistryTests
     {
@@ -108,6 +129,7 @@ namespace SkillsTests
                 typeof(TestClimateSkill),
                 typeof(TestLightingSkill),
                 typeof(TestNestedSkill),
+                typeof(TestInstanceSkill),
                 typeof(NotASkillClass)
             });
         }
@@ -333,6 +355,19 @@ namespace SkillsTests
             // Assert
             Assert.IsNotNull(result, "Result should not be null");
             Assert.IsTrue(result.Contains("true"), "Should return true for valid temperature");
+        }
+
+        [TestMethod]
+        public void InvokeAction_InstanceMethod_UsesOneInstance()
+        {
+            // Act
+            string first = SkillRegistry.InvokeAction("instance-skill", "Count", null);
+            string second = SkillRegistry.InvokeAction("instance-skill", "Count", null);
+
+            // Assert
+            Assert.IsTrue(first.Contains("calls=1"), "First call should run on a new instance");
+            Assert.IsTrue(second.Contains("calls=2"), "Second call should run on the same instance");
+            Assert.IsTrue(second.Contains("instances=1"), "Should create only one instance");
         }
 
         [TestMethod]
