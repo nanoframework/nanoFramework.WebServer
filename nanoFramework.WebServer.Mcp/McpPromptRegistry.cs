@@ -61,7 +61,8 @@ namespace nanoFramework.WebServer.Mcp
                                     Name = attribute.Name,
                                     Description = attribute.Description,
                                     Arguments = ComposeArgumentsAsJson(allAttribute),
-                                    Method = method
+                                    Method = method,
+                                    Owner = mcpPrompt
                                 });
                             }
                         }
@@ -175,7 +176,7 @@ namespace nanoFramework.WebServer.Mcp
                     arguments.Values.CopyTo(methodParams, 0);
                 }
 
-                PromptMessage[] result = (PromptMessage[])method.Invoke(null, methodParams);
+                PromptMessage[] result = (PromptMessage[])method.Invoke(method.IsStatic ? null : GetInstance(promptMetadata.Owner), methodParams);
 
                 // serialize the result to JSON using a speedy approach with a StringBuilder
                 StringBuilder sb = new StringBuilder();

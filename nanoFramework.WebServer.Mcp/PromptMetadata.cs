@@ -31,6 +31,8 @@ namespace nanoFramework.WebServer.Mcp
         /// </summary>
         public MethodInfo Method { get; set; }
 
+        internal Type Owner { get; set; }
+
         /// <summary>
         /// Returns a JSON string representation of the prompt metadata.
         /// </summary>

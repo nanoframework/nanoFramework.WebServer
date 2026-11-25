@@ -3,6 +3,7 @@
 // See LICENSE file in the project root for full license information.
 //
 
+using System;
 using System.Reflection;
 
 namespace nanoFramework.WebServer
@@ -16,6 +17,8 @@ namespace nanoFramework.WebServer
         /// The method to call for a specific route
         /// </summary>
         public MethodInfo Callback { get; set; }
+
+        internal Type Controller { get; set; }
 
         /// <summary>
         /// The route ex: api/gpio

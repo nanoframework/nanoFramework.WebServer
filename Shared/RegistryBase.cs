@@ -17,6 +17,29 @@ namespace nanoFramework.WebServer.Skills
     /// </summary>
     public abstract class RegistryBase
     {
+        private static readonly Hashtable _instances = new Hashtable();
+
+        /// <summary>
+        /// Gets the instance used as target for the non-static methods of a type. Created on first use, once per type.
+        /// </summary>
+        /// <param name="type">The type declaring the methods.</param>
+        /// <returns>The instance.</returns>
+        protected static object GetInstance(Type type)
+        {
+            lock (_instances)
+            {
+                object instance = _instances[type];
+
+                if (instance == null)
+                {
+                    instance = type.GetConstructor(new Type[0]).Invoke(null);
+                    _instances[type] = instance;
+                }
+
+                return instance;
+            }
+        }
+
         /// <summary>
         /// Converts a value to the specified primitive type with appropriate type conversion and error handling.
         /// </summary>
