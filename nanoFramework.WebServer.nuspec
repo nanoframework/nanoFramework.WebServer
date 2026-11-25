@@ -22,7 +22,7 @@ If serving files from local storage is a requirement, please use instead the 'na
     <tags>http https webserver net netmf nf nanoframework</tags>
     <dependencies>
       <group targetFramework=".NETnanoFramework1.0">
-        <dependency id="nanoFramework.CoreLibrary" version="2.0.0-preview.67" />
+        <dependency id="nanoFramework.CoreLibrary" version="2.0.0-preview.110" />
         <dependency id="nanoFramework.System.Net.Http.Server" version="2.0.0-preview.27" />
       </group>
     </dependencies>
