@@ -23,7 +23,7 @@ If serving files from local storage is a requirement, please use instead the 'na
     <dependencies>
       <group targetFramework=".NETnanoFramework1.0">
         <dependency id="nanoFramework.CoreLibrary" version="2.0.0-preview.125" />
-        <dependency id="nanoFramework.System.Net.Http.Server" version="2.0.0-preview.34" />
+        <dependency id="nanoFramework.System.Net.Http.Server" version="2.0.0-preview.35" />
       </group>
     </dependencies>
   </metadata>
