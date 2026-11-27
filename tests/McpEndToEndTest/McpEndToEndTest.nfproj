@@ -36,7 +36,7 @@
       <HintPath>..\..\packages\nanoFramework.Runtime.Events.2.0.0-preview.23\lib\netnano1.0\nanoFramework.Runtime.Events.dll</HintPath>
     </Reference>
     <Reference Include="nanoFramework.Runtime.Native, Version=2.0.0.0, Culture=neutral, PublicKeyToken=c07d481e9758c731">
-      <HintPath>..\..\packages\nanoFramework.Runtime.Native.2.0.0-preview.29\lib\netnano1.0\nanoFramework.Runtime.Native.dll</HintPath>
+      <HintPath>..\..\packages\nanoFramework.Runtime.Native.2.0.0-preview.34\lib\netnano1.0\nanoFramework.Runtime.Native.dll</HintPath>
     </Reference>
     <Reference Include="nanoFramework.System.Collections, Version=2.0.0.0, Culture=neutral, PublicKeyToken=c07d481e9758c731">
       <HintPath>..\..\packages\nanoFramework.System.Collections.2.0.0-preview.36\lib\netnano1.0\nanoFramework.System.Collections.dll</HintPath>
